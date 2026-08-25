@@ -1,6 +1,5 @@
 name: Deploy migrations (staging)
 
-# Manual until the first real release: schema pushes should be deliberate.
 on:
   workflow_dispatch:
   push:
@@ -15,10 +14,28 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
+      # There is no staging project yet. Without this the job fails on every
+      # migration commit, and a workflow that is always red teaches people to
+      # ignore red.
+      - id: guard
+        run: |
+          if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SUPABASE_PROJECT_REF is not set — no staging project yet. Skipping."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.guard.outputs.ready == 'true'
+
       - uses: supabase/setup-cli@v1
+        if: steps.guard.outputs.ready == 'true'
         with: { version: latest }
-      - working-directory: packages/db
+
+      - name: Link and push migrations
+        if: steps.guard.outputs.ready == 'true'
+        working-directory: packages/db
         run: |
           supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
           supabase db push
