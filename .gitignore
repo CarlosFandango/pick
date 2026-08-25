@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.turbo/
+.next/
+.expo/
+out/
+coverage/
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# supabase local
+packages/db/supabase/.branches/
+packages/db/supabase/.temp/
+
+# os / editor
+.DS_Store
+*.log
+*.tsbuildinfo
