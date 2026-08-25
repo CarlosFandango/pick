@@ -37,6 +37,8 @@ export type Database = {
           requested_at: string | null
           requires_review: boolean
           scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
           started_at: string | null
@@ -74,6 +76,8 @@ export type Database = {
           requested_at?: string | null
           requires_review?: boolean
           scheduled_for?: string | null
+          session_ended_at?: string | null
+          session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
           started_at?: string | null
@@ -111,6 +115,8 @@ export type Database = {
           requested_at?: string | null
           requires_review?: boolean
           scheduled_for?: string | null
+          session_ended_at?: string | null
+          session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
           started_at?: string | null
@@ -633,6 +639,7 @@ export type Database = {
           occurred_at: string
           payload: Json
           recorded_at: string
+          severity: Database["public"]["Enums"]["flag_severity"] | null
         }
         Insert: {
           audit_id: string
@@ -644,6 +651,7 @@ export type Database = {
           occurred_at: string
           payload?: Json
           recorded_at?: string
+          severity?: Database["public"]["Enums"]["flag_severity"] | null
         }
         Update: {
           audit_id?: string
@@ -655,6 +663,7 @@ export type Database = {
           occurred_at?: string
           payload?: Json
           recorded_at?: string
+          severity?: Database["public"]["Enums"]["flag_severity"] | null
         }
         Relationships: [
           {
@@ -964,6 +973,8 @@ export type Database = {
           requested_at: string | null
           requires_review: boolean
           scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
           started_at: string | null
@@ -1020,6 +1031,8 @@ export type Database = {
           requested_at: string | null
           requires_review: boolean
           scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
           started_at: string | null
@@ -1112,6 +1125,7 @@ export type Database = {
         | "capability"
         | "reach"
       evidence_kind: "photo" | "audio" | "video" | "document"
+      flag_severity: "wrong" | "note" | "fine"
       observation_kind: "note" | "timing" | "count" | "incident"
       org_type: "charity" | "contractor" | "pick"
       payout_execution_method: "manual_csv" | "bank_api" | "stripe_connect"
@@ -1307,6 +1321,7 @@ export const Constants = {
         "reach",
       ],
       evidence_kind: ["photo", "audio", "video", "document"],
+      flag_severity: ["wrong", "note", "fine"],
       observation_kind: ["note", "timing", "count", "incident"],
       org_type: ["charity", "contractor", "pick"],
       payout_execution_method: ["manual_csv", "bank_api", "stripe_connect"],
