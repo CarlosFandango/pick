@@ -1242,6 +1242,26 @@ export type Database = {
         Args: { p_audit_id: string; p_expires_in?: string }
         Returns: number
       }
+      ops_counters: {
+        Args: never
+        Returns: {
+          in_flight_today: number
+          needs_a_human: number
+          offers_awaiting: number
+          released_this_week: number
+        }[]
+      }
+      ops_queue: {
+        Args: never
+        Returns: {
+          kind: Database["public"]["Enums"]["ops_item_kind"]
+          rank: number
+          reference: string
+          since: string
+          summary: string
+          target_id: string
+        }[]
+      }
       prefer_auditor: {
         Args: { p_audit_id: string; p_code: string }
         Returns: {
@@ -1582,6 +1602,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      write_up_due_hours: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "auditor" | "client" | "pick_admin"
@@ -1642,6 +1663,13 @@ export type Database = {
       evidence_kind: "photo" | "audio" | "video" | "document"
       flag_severity: "wrong" | "note" | "fine"
       observation_kind: "note" | "timing" | "count" | "incident"
+      ops_item_kind:
+        | "offer_expiring"
+        | "review_gate"
+        | "no_show"
+        | "complaint"
+        | "vetting"
+        | "stale_write_up"
       org_type: "charity" | "contractor" | "pick"
       payout_execution_method: "manual_csv" | "bank_api" | "stripe_connect"
       payout_line_status: "pending" | "paid" | "failed" | "held"
@@ -1840,6 +1868,14 @@ export const Constants = {
       evidence_kind: ["photo", "audio", "video", "document"],
       flag_severity: ["wrong", "note", "fine"],
       observation_kind: ["note", "timing", "count", "incident"],
+      ops_item_kind: [
+        "offer_expiring",
+        "review_gate",
+        "no_show",
+        "complaint",
+        "vetting",
+        "stale_write_up",
+      ],
       org_type: ["charity", "contractor", "pick"],
       payout_execution_method: ["manual_csv", "bank_api", "stripe_connect"],
       payout_line_status: ["pending", "paid", "failed", "held"],

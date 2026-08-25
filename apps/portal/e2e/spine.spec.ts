@@ -139,3 +139,45 @@ test.describe('S3.6 the complaint fork', () => {
     await expect(page.getByText(/Raised\./)).toBeVisible();
   });
 });
+
+test.describe('S4.1 ops home', () => {
+  test('is a queue with the action inline, not a dashboard', async ({ page }) => {
+    await signIn(page, 'admin');
+    await page.goto('/admin');
+
+    // Four counters are the entire summary.
+    await expect(page.getByText('Needs a human', { exact: true })).toBeVisible();
+    await expect(page.getByText('In flight today')).toBeVisible();
+    await expect(page.getByText('Offers awaiting accept')).toBeVisible();
+    await expect(page.getByText('Released this week')).toBeVisible();
+
+    await expect(page.getByRole('heading', { name: 'Needs a human — worst first' })).toBeVisible();
+  });
+
+  test('keeps a client out of the cockpit', async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/admin');
+    await expect(page).not.toHaveURL(/\/admin$/);
+  });
+
+  test('keeps an auditor out of the cockpit', async ({ page }) => {
+    await signIn(page, 'auditor');
+    await page.goto('/admin');
+    await expect(page).not.toHaveURL(/\/admin$/);
+  });
+
+  test('shows a booked audit whose window is nearly here as needing a human', async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/book');
+    await page.getByPlaceholder('SE15 4QL').fill('N16 8AA');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(5));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(8));
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+    await expect(page).toHaveURL(/\/audits\?booked=/);
+
+    await signIn(page, 'admin');
+    await page.goto('/admin');
+    // Not yet urgent — the window is five days out, not two.
+    await expect(page.getByRole('heading', { name: /Needs a human/ })).toBeVisible();
+  });
+});
