@@ -87,8 +87,22 @@ jobs:
       # UX tests are the only ones that prove a screen works. A unit test
       # proves a rule and an integration test proves a policy; neither notices
       # a form that never submits or a redirect that loops.
-      - name: Write local env from the running stack
-        run: ./scripts/local-env.sh
+      - name: Write portal env from the running stack
+        run: |
+          set -x
+          cd packages/db
+          supabase status -o env > /tmp/sb.env || { echo "status failed"; supabase status || true; exit 1; }
+          echo "--- keys the CLI reported ---"
+          cut -d= -f1 /tmp/sb.env
+          cd "$GITHUB_WORKSPACE"
+          # shellcheck disable=SC1091
+          set -a; . /tmp/sb.env; set +a
+          ANON="${ANON_KEY:-${SUPABASE_ANON_KEY:-${PUBLISHABLE_KEY:-}}}"
+          SERVICE="${SERVICE_ROLE_KEY:-${SUPABASE_SERVICE_ROLE_KEY:-${SECRET_KEY:-}}}"
+          test -n "$ANON" || { echo "no anon key found"; exit 1; }
+          printf 'NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321\nNEXT_PUBLIC_SUPABASE_ANON_KEY=%s\nSUPABASE_SERVICE_ROLE_KEY=%s\n' \
+            "$ANON" "$SERVICE" > apps/portal/.env.local
+          echo "wrote apps/portal/.env.local"
 
       - name: Install Playwright browser
         run: pnpm --filter @picksel/portal exec playwright install chromium --with-deps
