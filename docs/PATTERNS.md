@@ -102,6 +102,29 @@ database job on a clean stack with the latest CLI.
 *Both are the same lesson: **a permission model must be stated and exercised as
 the role that actually uses it.** Two shapes, one week apart.*
 
+### Tests that assert absolute counts against a shared database
+**Symptom:** integration tests pass alone and fail after a UX run —
+`expected 2 to be 1`, or "the first complaint" turning out to be someone
+else's.
+**Why it hid:** the RLS suite runs each test in a rolled-back transaction, so
+it *looks* isolated. It is not isolated from rows that were already there: the
+Playwright suite books real audits, spends real credits and raises real
+complaints against the same local database. Anything asserting a total, or
+"the first row", is really asserting "nobody has used this app".
+**Caught now by:** asserting membership of a record the test created, never a
+count or a position. Three tests needed this fix before it was recognised as
+one pattern rather than three coincidences.
+
+### UX tests that consume a finite fixture
+**Symptom:** the Playwright suite passes, then fails a few runs later on what
+looks like a broken booking screen.
+**Why it hid:** each booking spends a credit and the seeded charity starts
+with four. The failure surfaces far from its cause — an exhausted fixture
+looks exactly like a broken form.
+**Caught now by:** a global setup that tops the ledger up to a floor before
+the run. It appends rather than sets, because the ledger is append-only and
+there is no row to overwrite.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.

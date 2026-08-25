@@ -33,6 +33,40 @@ reason. Deferred is a real answer and should stay populated.
 | Credit ledger | Built | `credit_transaction` + balance view | no purchase flow yet |
 | Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
 
+## Screens (design manifest)
+
+| ID | Screen | Status |
+|---|---|---|
+| S1.1 | Book an audit | Built |
+| S1.2 | Assignment (six eligibility sets) | Built |
+| S1.3 | Job offer | Built |
+| S1.4 | Prep | Built |
+| S1.5b | Field session — moment stepper | Built |
+| S1.6 | Write-up | Built |
+| S1.7 | Review queue | Built |
+| S1.8 | Client report | Built |
+| S1.9 | Client dashboard | Built |
+| S2.1 | Offers list | Built |
+| S2.2 | Accept + conflict | Built (conflict declaration deferred) |
+| S2.3 | Field flag sheet | Built |
+| S2.4 | Write-up returned | Built |
+| S2.5 | My audits | Built |
+| S2.6 | Earnings | Built |
+| S2.7 | No-show flow | Built |
+| S3.1 | Booking deepened (A/V, lead time) | Built |
+| S3.2 | Auditor override picker | Built |
+| S3.3 | Audit list + detail | Built |
+| S3.4 | Report header — coded auditor | Built (naming is a flag, default off) |
+| S3.5 | Credits ledger | Built |
+| S3.6 | Complaint fork | Built |
+| S4.1 | Ops home | Built |
+| S4.2 | Assignment console | Built |
+| S4.3+ | Remaining ops screens (auditors, clients, payouts, complaints admin) | Not started |
+
+Screens are wired as components and routes with tests at every level; several
+are not yet joined up to navigation in the field app, which has no router
+screens beyond the shell.
+
 ## Applications
 
 | Capability | Status | Lives in | Notes |

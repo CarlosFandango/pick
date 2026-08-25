@@ -1092,6 +1092,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      assignment_console: {
+        Args: { p_audit_id: string }
+        Returns: {
+          auditor_id: string
+          eligible: boolean
+          offer_state: string
+          reasons: string[]
+          warnings: Database["public"]["Enums"]["eligibility_flag"][]
+        }[]
+      }
       auditor_code_for: {
         Args: { p_auditor_id: string; p_organisation_id: string }
         Returns: string

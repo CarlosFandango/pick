@@ -181,3 +181,37 @@ test.describe('S4.1 ops home', () => {
     await expect(page.getByRole('heading', { name: /Needs a human/ })).toBeVisible();
   });
 });
+
+test.describe('S4.2 assignment console', () => {
+  test('shows its work — who is eligible and who was set aside', async ({ page }) => {
+    // Book something so there is an audit to assign.
+    await signIn(page, 'client');
+    await page.goto('/book');
+    await page.getByPlaceholder('SE15 4QL').fill('SW1A 1AA');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(10));
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+    await expect(page).toHaveURL(/\/audits\?booked=/);
+
+    const auditHref = await page
+      .getByRole('link')
+      .filter({ hasText: /PS-\d+/ })
+      .first()
+      .getAttribute('href');
+    const auditId = auditHref?.split('/').pop();
+
+    await signIn(page, 'admin');
+    await page.goto(`/admin/assignment/${auditId}`);
+
+    await expect(page.getByRole('heading', { name: /Eligible pool/ })).toBeVisible();
+    await expect(page.getByText(/eligible of \d+ active/)).toBeVisible();
+    // An operator asking why an audit is stuck gets an answer, not a shorter list.
+    await expect(page.getByText('SET ASIDE').first()).toBeVisible();
+  });
+
+  test('keeps a client out of the assignment console', async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/admin/assignment/00000000-0000-7000-8000-000000000001');
+    await expect(page).not.toHaveURL(/\/admin\//);
+  });
+});
