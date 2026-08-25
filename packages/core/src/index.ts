@@ -1,3 +1,4 @@
+export * from './complaints';
 export * from './credits';
 export * from './earnings';
 export * from './entities';

@@ -103,3 +103,39 @@ test.describe("S3.3 / S3.5 the client's world", () => {
     await expect(page.getByText('Credits purchased').first()).toBeVisible();
   });
 });
+
+test.describe('S3.6 the complaint fork', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/complaint');
+  });
+
+  test('separates a problem with the audit from a problem with a fundraiser', async ({ page }) => {
+    // Each route appears twice on purpose: once explained, once selectable.
+    await expect(page.getByText('Something in the audit is wrong')).toHaveCount(2);
+    await expect(page.getByText('Something a fundraiser did is wrong')).toHaveCount(2);
+  });
+
+  test('says PICK is not the complaints body for fundraisers', async ({ page }) => {
+    // Burying a regulatory matter in a quality queue is the failure mode.
+    await expect(page.getByText(/not the complaints body for your fundraisers/)).toBeVisible();
+    await expect(page.getByText(/regulator/)).toBeVisible();
+  });
+
+  test('asks which audit only when the complaint is about one', async ({ page }) => {
+    await expect(page.getByLabel('Which audit?')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Something a fundraiser did is wrong' }).click();
+    await expect(page.getByLabel('Which audit?')).toBeHidden();
+  });
+
+  test('raises a concern about a fundraiser', async ({ page }) => {
+    await page.getByRole('button', { name: 'Something a fundraiser did is wrong' }).click();
+    await page
+      .getByLabel('What happened?')
+      .fill('Fundraiser followed a passer-by down the street.');
+    await page.getByRole('button', { name: 'Raise it' }).click();
+
+    await expect(page.getByText(/Raised\./)).toBeVisible();
+  });
+});
