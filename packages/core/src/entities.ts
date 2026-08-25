@@ -30,6 +30,27 @@ export const complianceCategory = z.enum(COMPLIANCE_CATEGORIES);
  */
 export const checkOutcome = z.enum(['pass', 'fail', 'note']);
 export const observationKind = z.enum(['note', 'timing', 'count', 'incident']);
+
+/** The four methodologies. Each implies a different checklist variant. */
+export const auditType = z.enum(['street', 'door_to_door', 'private_site', 'lottery']);
+
+/** What the fundraisers take on the shift — sets the checklist variant. */
+export const shiftPaymentMethod = z.enum(['direct_debit', 'contactless']);
+
+export const AUDIT_TYPE_LABELS: Record<z.infer<typeof auditType>, string> = {
+  street: 'Street',
+  door_to_door: 'Door-to-door',
+  private_site: 'Private site',
+  lottery: 'Lottery',
+};
+
+export const SHIFT_PAYMENT_LABELS: Record<z.infer<typeof shiftPaymentMethod>, string> = {
+  direct_debit: 'Direct debit',
+  contactless: 'Contactless / one-off',
+};
+
+/** The window a client may book. Never a single date — see BUILD-GUIDE.md. */
+export const MINIMUM_WINDOW_DAYS = 3;
 export const evidenceKind = z.enum(['photo', 'audio', 'video', 'document']);
 export const payoutExecutionMethod = z.enum(['manual_csv', 'bank_api', 'stripe_connect']);
 

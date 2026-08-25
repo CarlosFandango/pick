@@ -33,9 +33,14 @@ describe('audit visibility', () => {
     });
   });
 
-  it('shows an admin everything', async () => {
+  it('shows an admin every charity\'s audits, not just one', async () => {
     await withDatabase(async (db) => {
-      expect(count(await db.as(ids.admin).query('select id from audit'))).toBe(2);
+      const rows = await db.as(ids.admin).query<{ id: string }>('select id from audit');
+      const seen = new Set(rows.map((r) => r.id));
+      // Asserted by membership, not by count: a developer who booked something
+      // locally should not fail the suite.
+      expect(seen.has(ids.auditA)).toBe(true);
+      expect(seen.has(ids.auditB)).toBe(true);
     });
   });
 

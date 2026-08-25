@@ -12,6 +12,7 @@
  * Keep it that way: the moment it imports React or CSS, one app loses it.
  */
 
+export * from './brand';
 export * from './css';
 export * from './primitives';
 export * from './theme';

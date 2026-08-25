@@ -16,7 +16,13 @@ export const space = {
   xxl: 48,
 } as const;
 
-export const radius = {
+/**
+ * Generic radius scale, kept for the field app's own components.
+ *
+ * The web uses the brand's rule instead — 100px pill or 4-5px tile, nothing
+ * between — via `radius` from `./brand`. Where they disagree, the brand wins.
+ */
+export const radiusScale = {
   none: 0,
   sm: 4,
   md: 8,
@@ -57,7 +63,7 @@ export const touchTarget = {
 } as const;
 
 export type Space = keyof typeof space;
-export type Radius = keyof typeof radius;
+export type Radius = keyof typeof radiusScale;
 export type FontSize = keyof typeof fontSize;
 export type FontWeight = keyof typeof fontWeight;
 /** The values, not the keys. React Native's TextStyle needs the literal union. */

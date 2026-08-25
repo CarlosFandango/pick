@@ -123,6 +123,8 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
+  design: {}
+
   packages/api:
     dependencies:
       '@picksel/core':
@@ -174,6 +176,10 @@ importers:
         version: 3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.50.0)(yaml@2.9.0)
 
   packages/tokens:
+    dependencies:
+      '@picksel/design-tokens':
+        specifier: workspace:*
+        version: link:../../design
     devDependencies:
       typescript:
         specifier: ^5.9.2

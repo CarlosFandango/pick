@@ -1,0 +1,13 @@
+{
+  "name": "@picksel/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The committed design drop. tokens.ts is the only styling source in the product.",
+  "main": "./tokens/tokens.ts",
+  "types": "./tokens/tokens.ts",
+  "exports": {
+    ".": "./tokens/tokens.ts",
+    "./tokens.css": "./tokens/colors.css"
+  }
+}

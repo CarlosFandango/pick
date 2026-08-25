@@ -23,7 +23,12 @@ jwt_expiry = 3600
 enable_signup = false
 
 [auth.email]
-enable_signup = false
+# Counter-intuitive but load-bearing: the CLI derives the email PROVIDER flag
+# from this key, so setting it false returns `email_provider_disabled` on
+# /token and nobody can sign in at all — not just sign up.
+# Self-registration is blocked by `enable_signup = false` under [auth] above;
+# accounts are created by invitation (a charity onboarded, an auditor approved).
+enable_signup = true
 enable_confirmations = false
 
 # Log collection (vector + logflare). Off locally: vector needs the Docker

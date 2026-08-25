@@ -20,7 +20,8 @@ export function Button({ variant = 'primary', style, ...props }: ButtonProps) {
         minHeight: touchTarget.minimum,
         paddingInline: space.md,
         paddingBlock: space.sm,
-        borderRadius: radius.md,
+        // The brand allows a 100px pill or a 4-5px tile and nothing between.
+        borderRadius: radius.pill,
         fontSize: fontSize.md,
         background: `var(--colour-${variant === 'secondary' ? 'surface-raised' : variant})`,
         color: `var(--colour-${variant === 'secondary' ? 'text' : 'text-inverse'})`,

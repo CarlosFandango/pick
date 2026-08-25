@@ -12,7 +12,7 @@ export function Card({ title, children }: CardProps) {
       style={{
         background: 'var(--colour-surface)',
         border: '1px solid var(--colour-border)',
-        borderRadius: radius.lg,
+        borderRadius: radius.tile,
         padding: space.lg,
       }}
     >

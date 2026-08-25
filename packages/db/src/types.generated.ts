@@ -12,6 +12,7 @@ export type Database = {
       audit: {
         Row: {
           address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
           auditor_fee_pence: number | null
           auditor_id: string | null
           campaign_name: string | null
@@ -36,6 +37,7 @@ export type Database = {
           requested_at: string | null
           requires_review: boolean
           scheduled_for: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
@@ -47,6 +49,7 @@ export type Database = {
         }
         Insert: {
           address_line?: string | null
+          audit_type?: Database["public"]["Enums"]["audit_type"]
           auditor_fee_pence?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
@@ -71,6 +74,7 @@ export type Database = {
           requested_at?: string | null
           requires_review?: boolean
           scheduled_for?: string | null
+          shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
@@ -82,6 +86,7 @@ export type Database = {
         }
         Update: {
           address_line?: string | null
+          audit_type?: Database["public"]["Enums"]["audit_type"]
           auditor_fee_pence?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
@@ -106,6 +111,7 @@ export type Database = {
           requested_at?: string | null
           requires_review?: boolean
           scheduled_for?: string | null
+          shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
@@ -831,6 +837,61 @@ export type Database = {
       }
     }
     Functions: {
+      book_audit: {
+        Args: {
+          p_audit_type: Database["public"]["Enums"]["audit_type"]
+          p_campaign_name?: string
+          p_organisation_id: string
+          p_postcode: string
+          p_shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          p_site_name?: string
+          p_window_end_on: string
+          p_window_start_on: string
+        }
+        Returns: {
+          address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_fee_pence: number | null
+          auditor_id: string | null
+          campaign_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          check_set_version: number
+          client_organisation_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
+          postcode: string
+          postcode_area: string | null
+          postcode_outward: string | null
+          price_pence: number
+          reference: string
+          released_at: string | null
+          released_by: string | null
+          requested_at: string | null
+          requires_review: boolean
+          scheduled_for: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          site_name: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["audit_status"]
+          submitted_at: string | null
+          updated_at: string
+          window_end_on: string | null
+          window_minutes: number | null
+          window_start_on: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       uuid_generate_v7: { Args: never; Returns: string }
     }
     Enums: {
@@ -861,6 +922,7 @@ export type Database = {
         | "released"
         | "cancelled"
         | "no_team_present"
+      audit_type: "street" | "door_to_door" | "private_site" | "lottery"
       auditor_approval_status: "pending" | "approved" | "suspended" | "rejected"
       check_outcome:
         | "pass"
@@ -899,6 +961,7 @@ export type Database = {
         | "failed"
         | "cancelled"
       residency_zone: "uk" | "eea" | "other"
+      shift_payment_method: "direct_debit" | "contactless"
       user_status: "invited" | "active" | "suspended"
     }
     CompositeTypes: {
@@ -1057,6 +1120,7 @@ export const Constants = {
         "cancelled",
         "no_team_present",
       ],
+      audit_type: ["street", "door_to_door", "private_site", "lottery"],
       auditor_approval_status: ["pending", "approved", "suspended", "rejected"],
       check_outcome: ["pass", "fail", "not_applicable", "not_observed", "note"],
       compliance_category: [
@@ -1093,6 +1157,7 @@ export const Constants = {
         "cancelled",
       ],
       residency_zone: ["uk", "eea", "other"],
+      shift_payment_method: ["direct_debit", "contactless"],
       user_status: ["invited", "active", "suspended"],
     },
   },

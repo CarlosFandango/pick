@@ -66,6 +66,33 @@ Predictability beats local elegance. Four ways to fetch data cost more than one
 slightly imperfect way, because every reader has to learn all four and decide
 which applies. When in doubt, copy the nearest existing example.
 
+## Make change cheap
+
+Functionality and design will iterate hard and often. The measure of this
+codebase is not how good today's screen is — it is what tomorrow's change costs.
+
+- **One place per fact.** A colour, a status name, a price, a rule: one
+  definition, everywhere else references it. Two copies means every change is a
+  search, and a search you can fail.
+- **Design tokens over values, roles over tokens.** A component naming `#0B5D5C`
+  survives one rebrand badly; one naming `danger` survives any number.
+- **Push rules into the database where they are invariants**, into `core` where
+  they are decisions, and into screens never. A rule in a screen has to be
+  rediscovered in the next screen.
+- **Prefer deleting to configuring.** An unused option is a permanent question.
+  If a variant is parked (S1.5c), park it — do not build a switch for it.
+- **Keep the seam, skip the abstraction.** `execution_method` is a column, not a
+  strategy pattern. When the second rail arrives it is a function, not a
+  refactor.
+- **Test the rule, not the render.** Tests pinned to markup make redesign
+  expensive, which is exactly when you most need the tests. Test what the rule
+  guarantees; let the layout move.
+- **Screen IDs are stable, screens are not.** Build S1.1 knowing it will be
+  rebuilt. Route, data contract and domain rules stay; the layout is disposable.
+
+When a change feels expensive, that is information: say so, and say what shape
+would have made it cheap.
+
 ## Flag over-engineering
 
 If you are about to write something in this list, stop and say so before writing:

@@ -1,4 +1,4 @@
-import { fontSize, radius, space } from './primitives';
+import { fontSize, radiusScale, space } from './primitives';
 import type { Theme } from './theme';
 import { fontStack } from './typography';
 
@@ -22,7 +22,7 @@ export function themeToCssVariables(theme: Theme): Record<string, string> {
   for (const [name, value] of Object.entries(space)) {
     vars[`--space-${name}`] = px(value);
   }
-  for (const [name, value] of Object.entries(radius)) {
+  for (const [name, value] of Object.entries(radiusScale)) {
     vars[`--radius-${name}`] = px(value);
   }
   for (const [name, value] of Object.entries(fontSize)) {
