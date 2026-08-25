@@ -164,6 +164,7 @@ export type Database = {
           offered_at: string
           outcome: Database["public"]["Enums"]["assignment_outcome"]
           responded_at: string | null
+          travel_uplift_pence: number
           updated_at: string
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -178,6 +179,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
+          travel_uplift_pence?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -192,6 +194,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
+          travel_uplift_pence?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -836,6 +839,39 @@ export type Database = {
           },
         ]
       }
+      prep_progress: {
+        Row: {
+          auditor_id: string
+          check_definition_id: string
+          learnt_at: string
+        }
+        Insert: {
+          auditor_id: string
+          check_definition_id: string
+          learnt_at?: string
+        }
+        Update: {
+          auditor_id?: string
+          check_definition_id?: string
+          learnt_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prep_progress_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "prep_progress_check_definition_id_fkey"
+            columns: ["check_definition_id"]
+            isOneToOne: false
+            referencedRelation: "check_definition"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profile: {
         Row: {
           created_at: string
@@ -899,6 +935,53 @@ export type Database = {
       }
     }
     Functions: {
+      accept_offer: {
+        Args: { p_offer_id: string }
+        Returns: {
+          address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_fee_pence: number | null
+          auditor_id: string | null
+          campaign_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          check_set_version: number
+          client_organisation_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
+          postcode: string
+          postcode_area: string | null
+          postcode_outward: string | null
+          price_pence: number
+          reference: string
+          released_at: string | null
+          released_by: string | null
+          requested_at: string | null
+          requires_review: boolean
+          scheduled_for: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          site_name: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["audit_status"]
+          submitted_at: string | null
+          updated_at: string
+          window_end_on: string | null
+          window_minutes: number | null
+          window_start_on: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      base_audit_fee_pence: { Args: never; Returns: number }
       book_audit: {
         Args: {
           p_audit_type: Database["public"]["Enums"]["audit_type"]
@@ -954,6 +1037,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      decline_offer: {
+        Args: { p_offer_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      default_travel_uplift_pence: { Args: never; Returns: number }
       eligible_auditors: {
         Args: { p_audit_id: string }
         Returns: {
