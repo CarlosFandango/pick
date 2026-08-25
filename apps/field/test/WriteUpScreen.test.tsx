@@ -12,14 +12,14 @@ const checks: WriteUpCheck[] = [
 
 const noop = () => undefined;
 
-function view(
-  over: Partial<Parameters<typeof WriteUpScreen>[0]> = {},
-  answers: [string, Answer][] = [],
-) {
-  const writeUp = buildWriteUp({ checks, answers: new Map(answers), ...(over as never) });
+type ScreenProps = Parameters<typeof WriteUpScreen>[0];
+
+/** A write-up screen with sensible defaults, so each test states only its point. */
+function view(over: Partial<ScreenProps> = {}, answers: [string, Answer][] = []) {
+  const writeUp = over.writeUp ?? buildWriteUp({ checks, answers: new Map(answers) });
+
   return (
     <WriteUpScreen
-      writeUp={writeUp}
       title="Write-up · SE15 street"
       savedAt={new Date(2026, 2, 3, 14, 32)}
       openMoment="pitch"
@@ -28,6 +28,7 @@ function view(
       onNote={noop}
       onSubmit={noop}
       {...over}
+      writeUp={writeUp}
     />
   );
 }
