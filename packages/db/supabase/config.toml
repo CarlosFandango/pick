@@ -1,0 +1,37 @@
+project_id = "picksel"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000", "picksel://"]
+jwt_expiry = 3600
+enable_signup = false
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+
+# Log collection (vector + logflare). Off locally: vector needs the Docker
+# socket, which colima does not expose at the path the CLI mounts. Nothing in
+# PICKsel reads these logs; hosted projects have analytics regardless.
+[analytics]
+enabled = false
+
+[storage]
+enabled = true
+file_size_limit = "200MiB"
