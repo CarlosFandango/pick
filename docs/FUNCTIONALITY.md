@@ -40,8 +40,8 @@ reason. Deferred is a real answer and should stay populated.
 | Portal shell + session refresh | Partial | `apps/portal` | middleware + `requireRole()`; no screens |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
 | Field app shell | Partial | `apps/field` | expo-router, one screen |
-| Local SQLite schema + migrator | Partial | `field/src/db` | `synced_at is null` **is** the outbox; migrator untested |
-| Sync push | Partial | `field/src/sync/outbox.ts` | logic written, **no tests** — batching, failure isolation and payload parsing are unverified |
+| Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox; 9 tests incl. resume-from-partial |
+| Sync push | Built | `field/src/sync/outbox.ts` | 10 tests: batching, failure isolation, payload parsing, idempotence |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
 | Shared web components | Partial | `packages/ui` | Button, Card — token-driven placeholders |
 | Design tokens + themes | Built | `packages/tokens` | light/dark, WCAG AA contrast |
@@ -54,9 +54,8 @@ reason. Deferred is a real answer and should stay populated.
 
 | Gap | Where | Why it matters |
 |---|---|---|
-| No tests for sync | `field/src/sync/outbox.ts` | Batching, per-table failure isolation and JSON payload parsing are real logic. Needs a `SQLiteDatabase` seam or an in-memory double. |
-| No tests for the SQLite migrator | `field/src/db/client.ts` | `user_version` stepping is exactly the code that silently corrupts a device. |
-| No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — lower priority than the two above. |
+| No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
+| No end-to-end RLS tests | `packages/db` | Policies are verified by hand against a running stack, not in CI. A `pgTAP` suite or a seeded-JWT integration test would catch a policy regression. |
 
 ## Not built yet
 

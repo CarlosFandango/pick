@@ -1,7 +1,7 @@
 import type { Database, Insert } from '@picksel/api';
 import { pushBatch } from '@picksel/api';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { SQLiteDatabase } from 'expo-sqlite';
+import type { LocalDatabase } from '../db/types';
 
 /** Tables the device pushes upward. Nothing here is ever pulled back down. */
 const PUSH_TABLES = ['check_result', 'observation_log', 'evidence_attachment'] as const;
@@ -25,7 +25,7 @@ export interface SyncOutcome {
  * photo upload should still get their checks in.
  */
 export async function flushOutbox(
-  local: SQLiteDatabase,
+  local: LocalDatabase,
   remote: SupabaseClient<Database>,
 ): Promise<SyncOutcome> {
   const pushed: Record<PushTable, number> = {
@@ -47,7 +47,7 @@ export async function flushOutbox(
 }
 
 async function flushTable(
-  local: SQLiteDatabase,
+  local: LocalDatabase,
   remote: SupabaseClient<Database>,
   table: PushTable,
 ): Promise<number> {

@@ -27,6 +27,8 @@ like before you open it.
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
+| Test app logic that touches a platform | depend on a narrow interface, pass a double | mocking `expo-sqlite`, booting a simulator |
+| Keep logic testable | pure module beside the platform binding | logic inside the file that imports the SDK |
 | Change the schema | a new migration, then `pnpm db:types` | editing a pushed migration, `db execute`, an unexported Studio change |
 | Write DDL | explicit statements, one object each | a `DO` block building SQL with `format()`/`execute` |
 | Repeat DDL across tables | write it out per table | loop over a table-name array |
@@ -98,6 +100,15 @@ Rewritten as nine plain statements. *Rejected:* the loop — it was shorter, but
 you could not grep for `check_result_append_only`, `db diff` could not reason
 about it, and a failure pointed at a generated string instead of a line. Three
 repeated `create trigger` statements are cheaper to live with than one clever one.
+
+### 2026-08-25 — Narrow interfaces over module mocks in the field app
+`LocalDatabase` declares the five expo-sqlite calls the app makes;
+`SQLiteDatabase` satisfies it structurally, so nothing changed at the call site
+and the sync and migration logic became testable with an in-memory double.
+Migration stepping moved to its own module because importing `client.ts` drags
+in expo-sqlite and the whole React Native runtime, which Vitest cannot parse.
+*Rejected:* mocking `expo-sqlite` — it would test the mock, and the Flow-syntax
+parse failure would still be there.
 
 ### 2026-08-25 — System font stack, split per platform
 `fontStack` gives each family a `web` CSS list plus single `ios`/`android` names,
