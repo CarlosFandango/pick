@@ -15,9 +15,13 @@
     "diff": "supabase db diff -f",
     "types": "supabase gen types typescript --local --schema public > src/types.generated.ts",
     "types:staging": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF_STAGING\" --schema public > src/types.generated.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:rls": "vitest run"
   },
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "@types/pg": "^8.15.5",
+    "pg": "^8.16.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

@@ -25,6 +25,7 @@ like before you open it.
 | Represent money | integer pence, `_pence` suffix | float, decimal string, `Money` class |
 | Derive a value from a column | a stored generated column | parsing in application code |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
+| Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
 | Test app logic that touches a platform | depend on a narrow interface, pass a double | mocking `expo-sqlite`, booting a simulator |
@@ -100,6 +101,21 @@ Rewritten as nine plain statements. *Rejected:* the loop — it was shorter, but
 you could not grep for `check_result_append_only`, `db diff` could not reason
 about it, and a failure pointed at a generated string instead of a line. Three
 repeated `create trigger` statements are cheaper to live with than one clever one.
+
+### 2026-08-26 — RLS tested by impersonating the role, in a rolled-back transaction
+`set local role authenticated` plus the `request.jwt.claims` GUC that
+`auth.uid()` reads, inside a transaction that always rolls back. Exercises the
+real policy expressions with no HTTP, no JWT signing and no shared state.
+
+Written after a missing `grant usage on schema app` left every policy raising
+"permission denied for schema app" for every signed-in user — invisible because
+postgres and service_role bypass RLS and anon matches no policy, so all three
+skip the expression entirely. *Rejected:* pgTAP (a second test vocabulary to
+maintain) and signing JWTs against PostgREST (slower, and it tests HTTP rather
+than the policies).
+
+**Only test policies as `authenticated`.** A check that passes as any other role
+proves nothing.
 
 ### 2026-08-25 — Narrow interfaces over module mocks in the field app
 `LocalDatabase` declares the five expo-sqlite calls the app makes;

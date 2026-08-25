@@ -48,11 +48,20 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-not-a-real-key
           SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-not-a-real-key
 
-  migrations:
-    name: migrations apply cleanly
+  database:
+    name: migrations + RLS policies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
 
       - uses: supabase/setup-cli@v1
         with:
@@ -61,3 +70,11 @@ jobs:
       - name: Start local Supabase and apply migrations + seed
         working-directory: packages/db
         run: supabase db start
+
+      # Policies are only exercised by a real signed-in session: postgres and
+      # service_role bypass RLS, and anon matches no policy at all. A missing
+      # GRANT that broke every logged-in user once slipped through all three.
+      - name: RLS policies
+        run: pnpm test:rls
+        env:
+          SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres

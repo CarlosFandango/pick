@@ -23,7 +23,7 @@ reason. Deferred is a real answer and should stay populated.
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
 | Schema: 12 tables, 15 enums, 1 view | Built | `packages/db/supabase/migrations` | verified on PG17 |
-| RLS on every table | Built | `20260825090700_rls.sql` | 12/12 enabled, verified |
+| RLS on every table | Built | `20260825090700_rls.sql` | 12/12 enabled; 25 tests impersonating real roles, run in CI |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category absent from field app entirely |
@@ -55,7 +55,6 @@ reason. Deferred is a real answer and should stay populated.
 | Gap | Where | Why it matters |
 |---|---|---|
 | No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
-| No end-to-end RLS tests | `packages/db` | Policies are verified by hand against a running stack, not in CI. A `pgTAP` suite or a seeded-JWT integration test would catch a policy regression. |
 
 ## Not built yet
 

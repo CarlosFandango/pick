@@ -160,7 +160,13 @@ One project per environment, **London (eu-west-2)**. One auth system
 | `pick_admin` | Everything |
 
 RLS enforces this in the database. Route gating in the portal is convenience, not
-security — the database is the boundary. Where a rule genuinely crosses tenant
+security — the database is the boundary.
+
+Policies are tested by impersonating `authenticated` (`pnpm test:rls`, run in
+CI). Never conclude a policy works from a check made as `postgres`,
+`service_role` or `anon`: the first two bypass RLS and the third matches no
+policy, so none of them evaluates the expression. A missing GRANT once broke
+every signed-in user while passing all three. Where a rule genuinely crosses tenant
 lines (inviting a user, recording a credit purchase, matching an audit, building
 a payout run) use `createAdminClient()` in a server action, so the rule lives in
 testable code rather than in a policy.
