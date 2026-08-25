@@ -93,6 +93,26 @@ export const AUDIT_PIPELINE = [
 
 export type AuditPipelineStage = (typeof AUDIT_PIPELINE)[number];
 
+/**
+ * Narrow a status read from the database.
+ *
+ * The Postgres enum still carries `scheduled` and `submitted` — values this
+ * schema invented before the design drop existed. Postgres cannot drop an enum
+ * value, so a CHECK constraint forbids writing them instead, and the generated
+ * types cannot know that.
+ *
+ * This is where the guarantee is stated in TypeScript. It throws rather than
+ * defaulting: seeing one of those values would mean the CHECK constraint had
+ * been dropped, which is worth finding out about loudly.
+ */
+export function parseAuditStatus(value: string): AuditStatus {
+  const parsed = auditStatus.safeParse(value);
+  if (parsed.success) return parsed.data;
+  throw new Error(
+    `Unexpected audit status "${value}". The status_in_pipeline check should make this impossible.`,
+  );
+}
+
 export const checkDefinition = z.object({
   id: uuid,
   code: z.string(),

@@ -14,7 +14,7 @@ export function Chrome({
   credits,
   children,
 }: {
-  active: 'book' | 'audits' | 'reports';
+  active: 'book' | 'audits' | 'reports' | 'credits';
   organisationName: string;
   credits: number;
   children: ReactNode;
@@ -23,6 +23,7 @@ export function Chrome({
     { key: 'book', label: 'Book', href: '/book' },
     { key: 'audits', label: 'Audits', href: '/audits' },
     { key: 'reports', label: 'Reports', href: '/reports' },
+    { key: 'credits', label: 'Credits', href: '/credits' },
   ] as const;
 
   return (

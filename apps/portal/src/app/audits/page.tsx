@@ -1,5 +1,6 @@
-import { AUDIT_TYPE_LABELS } from '@picksel/core';
+import { AUDIT_TYPE_LABELS, CLIENT_STATUS, parseAuditStatus } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
+import Link from 'next/link';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -67,9 +68,12 @@ export default async function AuditsPage({
         {audits?.length ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {audits.map((audit) => (
-              <div
+              <Link
                 key={audit.id}
+                href={`/audits/${audit.id}`}
                 style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
                   background: color.paper,
                   border: hairline,
                   borderRadius: radius.tile,
@@ -88,9 +92,9 @@ export default async function AuditsPage({
                   {audit.window_start_on} → {audit.window_end_on}
                 </span>
                 <span style={{ ...metaLabel, marginLeft: 'auto', color: color.bodyBrown }}>
-                  {audit.status.replace(/_/g, ' ')}
+                  {CLIENT_STATUS[parseAuditStatus(audit.status)].label}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

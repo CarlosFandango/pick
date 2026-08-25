@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { postcode, postcodeArea } from '../src/entities';
+import { auditStatus, parseAuditStatus, postcode, postcodeArea } from '../src/entities';
 import { isUuidV7, newId } from '../src/ids';
 import { AUDIT_MOMENTS, momentOrder } from '../src/moments';
 
@@ -50,5 +50,25 @@ describe('moments', () => {
     expect(new Set(AUDIT_MOMENTS).size).toBe(AUDIT_MOMENTS.length);
     expect(AUDIT_MOMENTS.at(0)).toBe('approach');
     expect(AUDIT_MOMENTS.at(-1)).toBe('close');
+  });
+});
+
+describe('parseAuditStatus', () => {
+  it('accepts every status the design defines', () => {
+    for (const status of auditStatus.options) {
+      expect(parseAuditStatus(status)).toBe(status);
+    }
+  });
+
+  it('rejects the values the schema invented before the design existed', () => {
+    // Postgres cannot drop an enum value, so a CHECK constraint forbids
+    // writing these. Seeing one would mean that constraint had been dropped.
+    for (const legacy of ['scheduled', 'submitted']) {
+      expect(() => parseAuditStatus(legacy)).toThrow(/status_in_pipeline/);
+    }
+  });
+
+  it('rejects anything else loudly rather than defaulting', () => {
+    expect(() => parseAuditStatus('banana')).toThrow();
   });
 });

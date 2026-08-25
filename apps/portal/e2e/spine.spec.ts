@@ -60,3 +60,46 @@ test.describe('the spine, end to end', () => {
     await expect(page).toHaveURL(/\/admin\/review\//);
   });
 });
+
+test.describe("S3.3 / S3.5 the client's world", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'client');
+  });
+
+  test('an audit shows where it has got to', async ({ page }) => {
+    await page.goto('/book');
+    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(9));
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+
+    await page
+      .getByText(/PS-\d+/)
+      .last()
+      .click();
+
+    await expect(page.getByLabel('Audit progress')).toBeVisible();
+    // Booked is where it is; released is where it is going.
+    await expect(page.getByRole('listitem').filter({ hasText: 'BOOKED' })).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
+    await expect(page.getByText('NO REPORT YET')).toBeVisible();
+  });
+
+  test('the credits ledger adds up to the balance on screen', async ({ page }) => {
+    await page.goto('/credits');
+
+    const balance = await creditBalance(page);
+    // The newest line's running balance is the current balance — the ledger
+    // is auditable by the person reading it.
+    const newest = page.getByLabel(/^Balance after /).first();
+    await expect(newest).toHaveText(String(balance));
+  });
+
+  test('shows what each credit movement was for', async ({ page }) => {
+    await page.goto('/credits');
+    await expect(page.getByText('Audit booked').first()).toBeVisible();
+    await expect(page.getByText('Credits purchased').first()).toBeVisible();
+  });
+});
