@@ -29,6 +29,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Cheap and first: a leaked service-role key is not something to discover
+      # after the build passes.
+      - name: Secret exposure
+        run: pnpm check:secrets
+
       - name: Lint
         run: pnpm lint
 
