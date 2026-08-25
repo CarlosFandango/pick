@@ -1,5 +1,6 @@
 import { fontSize, radius, space } from './primitives';
 import type { Theme } from './theme';
+import { fontStack } from './typography';
 
 /** Web only: numeric token to a CSS length. React Native takes the raw number. */
 export function px(value: number): string {
@@ -26,6 +27,9 @@ export function themeToCssVariables(theme: Theme): Record<string, string> {
   }
   for (const [name, value] of Object.entries(fontSize)) {
     vars[`--font-size-${name}`] = px(value);
+  }
+  for (const [name, stack] of Object.entries(fontStack)) {
+    vars[`--font-${name}`] = stack.web;
   }
 
   return vars;

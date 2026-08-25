@@ -60,3 +60,5 @@ export type Space = keyof typeof space;
 export type Radius = keyof typeof radius;
 export type FontSize = keyof typeof fontSize;
 export type FontWeight = keyof typeof fontWeight;
+/** The values, not the keys. React Native's TextStyle needs the literal union. */
+export type FontWeightValue = (typeof fontWeight)[FontWeight];

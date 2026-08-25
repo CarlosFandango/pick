@@ -44,7 +44,8 @@ reason. Deferred is a real answer and should stay populated.
 | Sync push | Partial | `field/src/sync/outbox.ts` | logic written, **no tests** — batching, failure isolation and payload parsing are unverified |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
 | Shared web components | Partial | `packages/ui` | Button, Card — token-driven placeholders |
-| Design tokens + themes | Built | `packages/tokens` | light/dark, 21 tests inc. WCAG AA contrast |
+| Design tokens + themes | Built | `packages/tokens` | light/dark, WCAG AA contrast |
+| Typography scale + fonts | Built | `packages/tokens/src/typography.ts` | 5 semantic roles; web and native verified identical by test |
 | Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | `Theme` type makes a missing role a compile error |
 | Portal theming | Built | `portal/src/app/layout.tsx` | CSS custom properties generated from tokens |
 | Field theming | Built | `field/src/theme.ts` | same tokens as RN styles, follows system scheme |

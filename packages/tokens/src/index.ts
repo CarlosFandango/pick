@@ -15,3 +15,4 @@
 export * from './css';
 export * from './primitives';
 export * from './theme';
+export * from './typography';

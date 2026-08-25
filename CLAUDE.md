@@ -126,8 +126,18 @@ through two codebases.
 
 Rules that keep it working:
 
-- Components reference **roles** (`danger`, `surface`), never raw hex or numbers.
-  A literal `#0B5FFF` or `padding: 12` in a component is a bug.
+- Components reference **roles** (`danger`, `surface`, `title`, `body`), never raw
+  hex or numbers. A literal `#0B5FFF`, `padding: 12` or `fontSize: 20` in a
+  component is a bug.
+- Text uses the semantic scale — `webTextStyle('title')` / `text('title')` — not
+  a size. Neither app picks a number, so neither can drift from the other.
+- Fonts are the platform system stack, split per platform because React Native
+  takes one family name and CSS takes a list. Same typeface where the platform
+  has one. A bundled webfont would render identically everywhere but costs font
+  files, `expo-font` loading, FOUT and a licence; revisit only when brand
+  requires a specific face.
+- The portal resets `h1..h6`/`p` margins and sizes. Browser defaults would
+  silently override the shared scale and put the two apps out of step.
 - A new brand is a new object satisfying `Theme`. The type makes a missing role a
   compile error; `theme.test.ts` checks contrast so a rebrand cannot ship
   unreadable text.

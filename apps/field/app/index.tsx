@@ -1,6 +1,6 @@
-import { fontSize, fontWeight, space } from '@picksel/tokens';
+import { space } from '@picksel/tokens';
 import { Text, View } from 'react-native';
-import { useTheme } from '@/theme';
+import { text, useTheme } from '@/theme';
 
 export default function Index() {
   const { colors } = useTheme();
@@ -15,12 +15,8 @@ export default function Index() {
         backgroundColor: colors.background,
       }}
     >
-      <Text style={{ fontSize: fontSize.lg, fontWeight: fontWeight.semibold, color: colors.text }}>
-        PICKsel Field
-      </Text>
-      <Text style={{ fontSize: fontSize.md, color: colors.textMuted }}>
-        Scaffold. No features yet.
-      </Text>
+      <Text style={{ ...text('title'), color: colors.text }}>PICKsel</Text>
+      <Text style={{ ...text('body'), color: colors.textMuted }}>Scaffold. No features yet.</Text>
     </View>
   );
 }

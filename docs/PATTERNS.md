@@ -32,6 +32,8 @@ like before you open it.
 | Repeat DDL across tables | write it out per table | loop over a table-name array |
 | Share code between apps | `packages/core` | `packages/ui` (web only — RN cannot render it) |
 | Colour, spacing, type size | a role or scale from `@picksel/tokens` | a hex literal, a magic number |
+| Set text size or weight | `webTextStyle(role)` / `text(role)` | `fontSize:` in a component |
+| Set a font family | `fontStack`, via the text role | naming a font in a component |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
 | Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
 | Style a field component | the same token objects as RN styles | a parallel RN colour constant |
@@ -96,6 +98,15 @@ Rewritten as nine plain statements. *Rejected:* the loop — it was shorter, but
 you could not grep for `check_result_append_only`, `db diff` could not reason
 about it, and a failure pointed at a generated string instead of a line. Three
 repeated `create trigger` statements are cheaper to live with than one clever one.
+
+### 2026-08-25 — System font stack, split per platform
+`fontStack` gives each family a `web` CSS list plus single `ios`/`android` names,
+because React Native silently falls back to the default face if handed a
+comma-separated stack. Text is set through semantic roles (`title`, `body`,
+`code`), so neither app names a size. *Rejected:* bundling Inter — identical
+rendering everywhere, at the cost of font files in the binary, `expo-font`
+loading, a flash of unstyled text on the web and a licence to track. Revisit when
+brand needs a specific face.
 
 ### 2026-08-25 — Shared design tokens, platform-specific components
 `packages/tokens` holds colour roles, spacing, type scale and touch targets with
