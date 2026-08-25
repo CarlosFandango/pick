@@ -29,6 +29,21 @@ Three things this licenses, and one it does not:
   "engine", or an interface with one implementation. Openness comes from the
   *data* being complete, not from the *code* being indirect.
 
+## The design is a source of truth, not a suggestion
+
+`design/` holds the committed design drop: **[design/BUILD-GUIDE.md](design/BUILD-GUIDE.md)**
+(domain rules, visual rules, copy register), **[design/manifest.md](design/manifest.md)**
+(stable screen IDs S1.1–S3.6 → routes) and `design/tokens/tokens.ts`.
+
+- **Screen IDs are the shared vocabulary.** Reference them in commits, branches
+  and conversation — "update S2.3", not "the flag thing".
+- **`design/tokens/tokens.ts` is the only styling source.** No other colours or
+  fonts, anywhere. `@picksel/tokens` re-exports it as semantic roles; components
+  use the roles.
+- The domain rules in BUILD-GUIDE.md are non-negotiable and were agreed with the
+  business. Where they disagree with something invented here, **they win** — and
+  the invented thing gets migrated, not mapped around.
+
 ## Two documents that must not go stale
 
 - **[docs/FUNCTIONALITY.md](docs/FUNCTIONALITY.md)** — what is built, partial,

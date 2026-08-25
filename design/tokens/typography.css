@@ -1,0 +1,13 @@
+:root{
+--font-sans:'Archivo',sans-serif;/* one family, all roles */
+--font-mono:'IBM Plex Mono',monospace;/* evidence: kickers, labels, metadata, captions, data */
+/* display: Archivo 800, tracking -0.03em, lh .92-1.0 */
+--display-weight:800;--display-tracking:-0.03em;--display-leading:0.98;--size-hero:clamp(72px,8vw,96px);--size-display:56px;
+/* headings: Archivo 700, tracking -0.02em */
+--heading-weight:700;--heading-tracking:-0.02em;--size-h2:27px;--size-h3:16px;
+/* body: Archivo 400 */
+--size-body:15px;--body-leading:1.6;
+/* mono meta: always caps, letterspaced .08-.2em, weight 500 */
+--size-meta:11px;--meta-tracking:0.14em;--kicker-tracking:0.2em;
+--wordmark-tracking:0.1em;/* PICK wordmark: Archivo 800 caps */
+}

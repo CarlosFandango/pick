@@ -1,0 +1,19 @@
+:root{
+/* base */
+--teal:#0B5D5C;--navy:#062134;--ink:#1C1A15;--bone:#F4EFE6;--oat:#E5DFD0;--paper:#FBF8F1;--white:#FFFFFF;
+--blue:#3F86E8;/* companion blue — links/UI on navy, Recruitment's on-navy colour */
+--body-brown:#4D483D;--muted:#625C4C;--muted-strong:#4F4A3D;
+--teal-ink:#04201F;--link:#0B6A68;
+/* division accents (fills) */
+--div-recruitment:#062134;--div-consulting:#0E9B99;--div-auditing:#F2A900;--div-creative:#EC6A5E;--div-technology:#8E4FA8;
+/* deep pairs — accents used AS TEXT on bone/white (AA any size) */
+--div-consulting-text:#0A6B69;--div-auditing-text:#8A6100;--div-creative-text:#A4382C;--div-technology-text:#7A3F92;--div-recruitment-text:#062134;
+/* ink placed ON a full-strength accent fill */
+--div-consulting-ink:#04201F;--div-auditing-ink:#4A3400;--div-creative-ink:#4A1712;--div-technology-ink:#FFFFFF;--div-recruitment-ink:#F4EFE6;
+/* on-navy variants */
+--div-recruitment-onnavy:#3F86E8;--div-technology-onnavy:#B888CE;
+/* semantic */
+--surface-page:var(--bone);--surface-card:var(--paper);--surface-raised:var(--white);--surface-dark:var(--navy);--surface-brand:var(--teal);
+--text-heading:var(--ink);--text-body:var(--body-brown);--text-muted:var(--muted);--text-on-dark:#F4EFE6;--text-on-dark-muted:#C6D4E2;
+--border:var(--oat);--accent:var(--teal);
+}
