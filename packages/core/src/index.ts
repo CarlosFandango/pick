@@ -2,6 +2,8 @@ export * from './entities';
 export * from './ids';
 export * from './moments';
 export * from './prep';
+export * from './reporting';
+export * from './review';
 export * from './scoring';
 export * from './session';
 export * from './writeup';

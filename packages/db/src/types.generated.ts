@@ -1083,6 +1083,108 @@ export type Database = {
         Args: { p_audit_id: string; p_expires_in?: string }
         Returns: number
       }
+      release_audit: {
+        Args: { p_audit_id: string }
+        Returns: {
+          address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_fee_pence: number | null
+          auditor_id: string | null
+          campaign_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          check_set_version: number
+          client_organisation_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
+          postcode: string
+          postcode_area: string | null
+          postcode_outward: string | null
+          price_pence: number
+          reference: string
+          released_at: string | null
+          released_by: string | null
+          requested_at: string | null
+          requires_review: boolean
+          returned_at: string | null
+          returned_moments: Database["public"]["Enums"]["audit_moment"][]
+          review_note: string | null
+          scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          site_name: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["audit_status"]
+          submitted_at: string | null
+          updated_at: string
+          window_end_on: string | null
+          window_minutes: number | null
+          window_start_on: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      report_no_team_present: {
+        Args: { p_audit_id: string; p_note?: string }
+        Returns: {
+          address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_fee_pence: number | null
+          auditor_id: string | null
+          campaign_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          check_set_version: number
+          client_organisation_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
+          postcode: string
+          postcode_area: string | null
+          postcode_outward: string | null
+          price_pence: number
+          reference: string
+          released_at: string | null
+          released_by: string | null
+          requested_at: string | null
+          requires_review: boolean
+          returned_at: string | null
+          returned_moments: Database["public"]["Enums"]["audit_moment"][]
+          review_note: string | null
+          scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          site_name: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["audit_status"]
+          submitted_at: string | null
+          updated_at: string
+          window_end_on: string | null
+          window_minutes: number | null
+          window_start_on: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       return_write_up: {
         Args: {
           p_audit_id: string
@@ -1138,6 +1240,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      review_gate_audits: { Args: never; Returns: number }
+      review_gate_reason: { Args: { p_audit_id: string }; Returns: string }
       submit_write_up: {
         Args: { p_audit_id: string; p_results: Json }
         Returns: {
@@ -1190,6 +1294,57 @@ export type Database = {
         }
       }
       uuid_generate_v7: { Args: never; Returns: string }
+      void_audit: {
+        Args: { p_audit_id: string; p_reason: string }
+        Returns: {
+          address_line: string | null
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_fee_pence: number | null
+          auditor_id: string | null
+          campaign_name: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          check_set_version: number
+          client_organisation_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
+          postcode: string
+          postcode_area: string | null
+          postcode_outward: string | null
+          price_pence: number
+          reference: string
+          released_at: string | null
+          released_by: string | null
+          requested_at: string | null
+          requires_review: boolean
+          returned_at: string | null
+          returned_moments: Database["public"]["Enums"]["audit_moment"][]
+          review_note: string | null
+          scheduled_for: string | null
+          session_ended_at: string | null
+          session_started_at: string | null
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          site_name: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["audit_status"]
+          submitted_at: string | null
+          updated_at: string
+          window_end_on: string | null
+          window_minutes: number | null
+          window_start_on: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "auditor" | "client" | "pick_admin"
