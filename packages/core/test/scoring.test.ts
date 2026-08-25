@@ -73,28 +73,32 @@ describe('scoreAudit', () => {
     expect(score.overall).toEqual({ earned: 3, possible: 4, percentage: 75 });
   });
 
-  it('excludes not_applicable and not_observed from the denominator', () => {
+  it('keeps a NOTE out of the denominator', () => {
     const scored = def({ weight: 2 });
-    const skipped = def({ weight: 5 });
-    const unseen = def({ weight: 5 });
+    const noted = def({ weight: 5 });
 
     const score = scoreAudit(
-      [scored, skipped, unseen],
-      [
-        result(scored, { outcome: 'pass' }),
-        result(skipped, { outcome: 'not_applicable' }),
-        result(unseen, { outcome: 'not_observed' }),
-      ],
+      [scored, noted],
+      [result(scored, { outcome: 'pass' }), result(noted, { outcome: 'note' })],
     );
 
+    // An auditor putting something on the record must not lower the score by
+    // saying it. Observations and verdicts are separate layers.
     expect(score.overall).toEqual({ earned: 2, possible: 2, percentage: 100 });
-    expect(score.notApplicable).toBe(1);
-    expect(score.notObserved).toBe(1);
+    expect(score.notes).toBe(1);
+  });
+
+  it('never turns a NOTE into a fail', () => {
+    const d = def({ weight: 3, is_critical: true });
+    const score = scoreAudit([d], [result(d, { outcome: 'note' })]);
+
+    expect(score.criticalFailures).toEqual([]);
+    expect(score.overall.earned).toBe(0);
   });
 
   it('reports no percentage rather than zero when nothing was scorable', () => {
     const d = def();
-    const score = scoreAudit([d], [result(d, { outcome: 'not_observed' })]);
+    const score = scoreAudit([d], [result(d, { outcome: 'note' })]);
 
     expect(score.overall.percentage).toBeNull();
   });

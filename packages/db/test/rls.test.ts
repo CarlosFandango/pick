@@ -214,6 +214,35 @@ describe('organisations and profiles', () => {
   });
 });
 
+describe('every table is protected', () => {
+  // A new table without RLS is invisible in review and catastrophic in
+  // production: it is readable by anyone with the anon key. Assert coverage
+  // rather than remembering.
+  it('has RLS enabled on every table in public', async () => {
+    await withDatabase(async (db) => {
+      const unprotected = await db.arrange<{ tablename: string }>(
+        "select tablename from pg_tables where schemaname = 'public' and not rowsecurity",
+      );
+      expect(unprotected.map((t) => t.tablename)).toEqual([]);
+    });
+  });
+
+  it('has at least one policy on every table', async () => {
+    await withDatabase(async (db) => {
+      const naked = await db.arrange<{ tablename: string }>(
+        `select t.tablename from pg_tables t
+         where t.schemaname = 'public'
+           and not exists (
+             select 1 from pg_policies p
+             where p.schemaname = 'public' and p.tablename = t.tablename
+           )`,
+      );
+      // RLS with no policy denies everything — safe, but always a mistake.
+      expect(naked.map((t) => t.tablename)).toEqual([]);
+    });
+  });
+});
+
 describe('table privileges are declared by the schema, not inherited', () => {
   // These passed locally and failed in CI purely because a newer Supabase CLI
   // bootstraps different default privileges. Assert what we depend on.

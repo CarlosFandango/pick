@@ -19,22 +19,43 @@ export const residencyZone = z.enum(['uk', 'eea', 'other']);
 export const orgType = z.enum(['charity', 'contractor', 'pick']);
 export const auditMoment = z.enum(AUDIT_MOMENTS);
 export const complianceCategory = z.enum(COMPLIANCE_CATEGORIES);
-export const checkOutcome = z.enum(['pass', 'fail', 'not_applicable', 'not_observed']);
+/**
+ * PASS | FAIL | NOTE, per design/BUILD-GUIDE.md. Never "OBS".
+ *
+ * NOTE is an observation the auditor wants on the record without calling it a
+ * breach — the benefit-of-the-doubt position. It does not score.
+ *
+ * `not_applicable` and `not_observed` remain in the database type because
+ * Postgres cannot drop an enum value; nothing writes them.
+ */
+export const checkOutcome = z.enum(['pass', 'fail', 'note']);
 export const observationKind = z.enum(['note', 'timing', 'count', 'incident']);
 export const evidenceKind = z.enum(['photo', 'audio', 'video', 'document']);
 export const payoutExecutionMethod = z.enum(['manual_csv', 'bank_api', 'stripe_connect']);
 
+/** booked → assigned → in_progress → in_review → released, per the design. */
 export const auditStatus = z.enum([
   'draft',
-  'requested',
-  'matched',
-  'scheduled',
+  'booked',
+  'assigned',
   'in_progress',
-  'submitted',
-  'under_review',
-  'completed',
+  'in_review',
+  'released',
+  // Not a failure: the auditor is paid in full and the credit is returned.
+  'no_team_present',
   'cancelled',
 ]);
+
+/** The order the pipeline rail renders in. Excludes the branches. */
+export const AUDIT_PIPELINE = [
+  'booked',
+  'assigned',
+  'in_progress',
+  'in_review',
+  'released',
+] as const;
+
+export type AuditPipelineStage = (typeof AUDIT_PIPELINE)[number];
 
 export const checkDefinition = z.object({
   id: uuid,

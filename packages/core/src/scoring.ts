@@ -26,8 +26,8 @@ export interface AuditScore {
   categories: CategoryScore[];
   /** Codes of failed critical checks. A charity needs these before the total. */
   criticalFailures: string[];
-  notObserved: number;
-  notApplicable: number;
+  /** Recorded but unscored — see the NOTE verdict. */
+  notes: number;
 }
 
 /**
@@ -71,8 +71,8 @@ function tally(earned: number, possible: number): Tally {
 /**
  * Score an audit against the catalogue version it was run under.
  *
- * `not_applicable` and `not_observed` leave the denominator alone — an auditor
- * who could not see the tablet must not drag the score down for it.
+ * A NOTE leaves the denominator alone — an auditor who wants something on the
+ * record must not drag the score down by saying it.
  */
 export function scoreAudit(
   definitions: readonly CheckDefinition[],
@@ -86,8 +86,7 @@ export function scoreAudit(
 
   let earned = 0;
   let possible = 0;
-  let notObserved = 0;
-  let notApplicable = 0;
+  let notes = 0;
   const criticalFailures: string[] = [];
 
   for (const result of latestResults(results)) {
@@ -95,12 +94,11 @@ export function scoreAudit(
     // A result for a check outside this catalogue version is not scorable.
     if (!definition) continue;
 
-    if (result.outcome === 'not_applicable') {
-      notApplicable += 1;
-      continue;
-    }
-    if (result.outcome === 'not_observed') {
-      notObserved += 1;
+    // NOTE records something worth saying without calling it a breach. It is
+    // deliberately outside the score: observations and verdicts are separate
+    // layers, and a note must never quietly become a fail.
+    if (result.outcome === 'note') {
+      notes += 1;
       continue;
     }
 
@@ -129,7 +127,6 @@ export function scoreAudit(
     overall: tally(earned, possible),
     categories,
     criticalFailures,
-    notObserved,
-    notApplicable,
+    notes,
   };
 }

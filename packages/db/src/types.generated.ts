@@ -24,19 +24,26 @@ export type Database = {
           created_by: string | null
           id: string
           matched_at: string | null
+          no_team_present_at: string | null
+          pitch_detail: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
           price_pence: number
           reference: string
+          released_at: string | null
+          released_by: string | null
           requested_at: string | null
+          requires_review: boolean
           scheduled_for: string | null
           site_name: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
           updated_at: string
+          window_end_on: string | null
           window_minutes: number | null
+          window_start_on: string | null
         }
         Insert: {
           address_line?: string | null
@@ -52,19 +59,26 @@ export type Database = {
           created_by?: string | null
           id?: string
           matched_at?: string | null
+          no_team_present_at?: string | null
+          pitch_detail?: string | null
           postcode: string
           postcode_area?: string | null
           postcode_outward?: string | null
           price_pence?: number
           reference?: string
+          released_at?: string | null
+          released_by?: string | null
           requested_at?: string | null
+          requires_review?: boolean
           scheduled_for?: string | null
           site_name?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
           updated_at?: string
+          window_end_on?: string | null
           window_minutes?: number | null
+          window_start_on?: string | null
         }
         Update: {
           address_line?: string | null
@@ -80,19 +94,26 @@ export type Database = {
           created_by?: string | null
           id?: string
           matched_at?: string | null
+          no_team_present_at?: string | null
+          pitch_detail?: string | null
           postcode?: string
           postcode_area?: string | null
           postcode_outward?: string | null
           price_pence?: number
           reference?: string
+          released_at?: string | null
+          released_by?: string | null
           requested_at?: string | null
+          requires_review?: boolean
           scheduled_for?: string | null
           site_name?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
           updated_at?: string
+          window_end_on?: string | null
           window_minutes?: number | null
+          window_start_on?: string | null
         }
         Relationships: [
           {
@@ -114,6 +135,108 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_released_by_fkey"
+            columns: ["released_by"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_offer: {
+        Row: {
+          audit_id: string
+          auditor_id: string
+          created_at: string
+          decline_reason: string | null
+          expires_at: string | null
+          id: string
+          match_reason: string | null
+          offered_at: string
+          outcome: Database["public"]["Enums"]["assignment_outcome"]
+          responded_at: string | null
+          updated_at: string
+          warnings: Database["public"]["Enums"]["eligibility_flag"][]
+        }
+        Insert: {
+          audit_id: string
+          auditor_id: string
+          created_at?: string
+          decline_reason?: string | null
+          expires_at?: string | null
+          id?: string
+          match_reason?: string | null
+          offered_at?: string
+          outcome?: Database["public"]["Enums"]["assignment_outcome"]
+          responded_at?: string | null
+          updated_at?: string
+          warnings?: Database["public"]["Enums"]["eligibility_flag"][]
+        }
+        Update: {
+          audit_id?: string
+          auditor_id?: string
+          created_at?: string
+          decline_reason?: string | null
+          expires_at?: string | null
+          id?: string
+          match_reason?: string | null
+          offered_at?: string
+          outcome?: Database["public"]["Enums"]["assignment_outcome"]
+          responded_at?: string | null
+          updated_at?: string
+          warnings?: Database["public"]["Enums"]["eligibility_flag"][]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_offer_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_offer_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      audit_pay_item: {
+        Row: {
+          amount_pence: number
+          audit_id: string
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+        }
+        Insert: {
+          amount_pence: number
+          audit_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+        }
+        Update: {
+          amount_pence?: number
+          audit_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_pay_item_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audit"
             referencedColumns: ["id"]
           },
         ]
@@ -712,6 +835,12 @@ export type Database = {
     }
     Enums: {
       app_role: "auditor" | "client" | "pick_admin"
+      assignment_outcome:
+        | "offered"
+        | "accepted"
+        | "declined"
+        | "expired"
+        | "withdrawn"
       audit_moment:
         | "approach"
         | "walk_up"
@@ -723,16 +852,22 @@ export type Database = {
         | "close"
       audit_status:
         | "draft"
-        | "requested"
-        | "matched"
+        | "booked"
+        | "assigned"
         | "scheduled"
         | "in_progress"
         | "submitted"
-        | "under_review"
-        | "completed"
+        | "in_review"
+        | "released"
         | "cancelled"
+        | "no_team_present"
       auditor_approval_status: "pending" | "approved" | "suspended" | "rejected"
-      check_outcome: "pass" | "fail" | "not_applicable" | "not_observed"
+      check_outcome:
+        | "pass"
+        | "fail"
+        | "not_applicable"
+        | "not_observed"
+        | "note"
       compliance_category:
         | "identification"
         | "solicitation_statement"
@@ -745,6 +880,12 @@ export type Database = {
         | "safeguarding"
         | "record_keeping"
       credit_reason: "purchase" | "booking" | "refund" | "adjustment" | "expiry"
+      eligibility_flag:
+        | "conflict"
+        | "familiarity"
+        | "exposure"
+        | "capability"
+        | "reach"
       evidence_kind: "photo" | "audio" | "video" | "document"
       observation_kind: "note" | "timing" | "count" | "incident"
       org_type: "charity" | "contractor" | "pick"
@@ -887,6 +1028,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["auditor", "client", "pick_admin"],
+      assignment_outcome: [
+        "offered",
+        "accepted",
+        "declined",
+        "expired",
+        "withdrawn",
+      ],
       audit_moment: [
         "approach",
         "walk_up",
@@ -899,17 +1047,18 @@ export const Constants = {
       ],
       audit_status: [
         "draft",
-        "requested",
-        "matched",
+        "booked",
+        "assigned",
         "scheduled",
         "in_progress",
         "submitted",
-        "under_review",
-        "completed",
+        "in_review",
+        "released",
         "cancelled",
+        "no_team_present",
       ],
       auditor_approval_status: ["pending", "approved", "suspended", "rejected"],
-      check_outcome: ["pass", "fail", "not_applicable", "not_observed"],
+      check_outcome: ["pass", "fail", "not_applicable", "not_observed", "note"],
       compliance_category: [
         "identification",
         "solicitation_statement",
@@ -923,6 +1072,13 @@ export const Constants = {
         "record_keeping",
       ],
       credit_reason: ["purchase", "booking", "refund", "adjustment", "expiry"],
+      eligibility_flag: [
+        "conflict",
+        "familiarity",
+        "exposure",
+        "capability",
+        "reach",
+      ],
       evidence_kind: ["photo", "audio", "video", "document"],
       observation_kind: ["note", "timing", "count", "incident"],
       org_type: ["charity", "contractor", "pick"],
