@@ -21,15 +21,31 @@ the work happens on doorsteps and high streets, not at a desk.
 
 ```bash
 pnpm install
-cp .env.example .env
-
 pnpm db:start     # local Supabase — needs Docker
+pnpm env:local    # writes .env, apps/portal/.env.local, apps/field/.env
 pnpm db:types     # generate Database types from the local schema
-
 pnpm dev
 ```
 
-Then `pnpm typecheck && pnpm lint && pnpm test` — the same three CI runs.
+`pnpm env:local` reads the keys straight from the running stack. They change
+every time the stack is recreated, so generate them rather than copying by hand;
+`.env.example` documents the shape, not the values.
+
+Verify with `pnpm lint && pnpm typecheck && pnpm test && pnpm build` — the same
+four things CI runs. `build` is not optional: bundlers resolve modules
+differently from `tsc`, so it catches what typechecking cannot.
+
+| Service | URL |
+|---|---|
+| Portal | http://127.0.0.1:3000 |
+| Supabase API | http://127.0.0.1:54321 |
+| Supabase Studio | http://127.0.0.1:54323 |
+| Postgres | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
+| Mailpit | http://127.0.0.1:54324 |
+
+The field app runs with `pnpm --filter @picksel/field dev`. In a simulator
+`127.0.0.1` reaches your machine; on a physical device set
+`EXPO_PUBLIC_SUPABASE_URL` to your LAN address.
 
 ## Environments
 

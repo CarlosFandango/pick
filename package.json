@@ -17,7 +17,8 @@
     "db:types": "pnpm --filter @picksel/db types",
     "db:start": "pnpm --filter @picksel/db start",
     "db:reset": "pnpm --filter @picksel/db reset",
-    "db:diff": "pnpm --filter @picksel/db diff"
+    "db:diff": "pnpm --filter @picksel/db diff",
+    "env:local": "./scripts/local-env.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
