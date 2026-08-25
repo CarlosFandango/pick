@@ -16,6 +16,7 @@
     "format": "biome format --write .",
     "test": "turbo run test",
     "test:rls": "pnpm --filter @picksel/db test:rls",
+    "test:e2e": "pnpm --filter @picksel/portal test:e2e",
     "db:types": "pnpm --filter @picksel/db types",
     "db:start": "pnpm --filter @picksel/db start",
     "db:reset": "pnpm --filter @picksel/db reset",

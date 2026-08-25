@@ -33,7 +33,7 @@ describe('audit visibility', () => {
     });
   });
 
-  it('shows an admin every charity\'s audits, not just one', async () => {
+  it("shows an admin every charity's audits, not just one", async () => {
     await withDatabase(async (db) => {
       const rows = await db.as(ids.admin).query<{ id: string }>('select id from audit');
       const seen = new Set(rows.map((r) => r.id));
