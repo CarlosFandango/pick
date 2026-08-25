@@ -52,17 +52,24 @@ pnpm --filter @picksel/field dev
 In a simulator `127.0.0.1` reaches your machine. On a physical device it does
 not — set `EXPO_PUBLIC_SUPABASE_URL` to your LAN address (`http://192.168.x.x:54321`).
 
-**iOS simulator.** Expo needs `xcrun simctl`, which only exists when the active
-developer directory is full Xcode rather than the Command Line Tools. Check with
-`xcode-select -p`; if it prints `/Library/Developer/CommandLineTools`, either:
+**iOS simulator.** Expo needs `xcrun simctl`, which exists only when the active
+developer directory is full Xcode rather than the Command Line Tools — and
+`/Library/Developer/CommandLineTools` is a common default (`xcode-select -p`
+shows yours).
+
+The `dev` script handles it: it sets `DEVELOPER_DIR` to the standard Xcode
+location unless you have already set it, so no `sudo` is needed. If your Xcode
+lives elsewhere, export `DEVELOPER_DIR` yourself and the script defers to it.
+
+To fix it machine-wide instead, run this in a real terminal — it needs a TTY for
+the password, so it will not work from an editor-embedded shell:
 
 ```bash
-export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer   # per shell, no sudo
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer   # permanent
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
-Without it Metro still runs and Expo Go on a physical device still works — only
-the simulator is unavailable.
+Either way Metro runs and Expo Go on a physical device works; only the simulator
+depends on this.
 
 **Android** needs the SDK and `ANDROID_HOME`; not set up yet.
 
