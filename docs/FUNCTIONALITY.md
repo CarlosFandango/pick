@@ -40,14 +40,22 @@ reason. Deferred is a real answer and should stay populated.
 | Portal shell + session refresh | Partial | `apps/portal` | middleware + `requireRole()`; no screens |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
 | Field app shell | Partial | `apps/field` | expo-router, one screen |
-| Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox |
-| Sync push | Built | `field/src/sync/outbox.ts` | idempotent, per-table failure isolation |
+| Local SQLite schema + migrator | Partial | `field/src/db` | `synced_at is null` **is** the outbox; migrator untested |
+| Sync push | Partial | `field/src/sync/outbox.ts` | logic written, **no tests** — batching, failure isolation and payload parsing are unverified |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
 | Shared web components | Partial | `packages/ui` | Button, Card — token-driven placeholders |
 | Design tokens + themes | Built | `packages/tokens` | light/dark, 21 tests inc. WCAG AA contrast |
 | Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | `Theme` type makes a missing role a compile error |
 | Portal theming | Built | `portal/src/app/layout.tsx` | CSS custom properties generated from tokens |
 | Field theming | Built | `field/src/theme.ts` | same tokens as RN styles, follows system scheme |
+
+## Known gaps in what exists
+
+| Gap | Where | Why it matters |
+|---|---|---|
+| No tests for sync | `field/src/sync/outbox.ts` | Batching, per-table failure isolation and JSON payload parsing are real logic. Needs a `SQLiteDatabase` seam or an in-memory double. |
+| No tests for the SQLite migrator | `field/src/db/client.ts` | `user_version` stepping is exactly the code that silently corrupts a device. |
+| No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — lower priority than the two above. |
 
 ## Not built yet
 
