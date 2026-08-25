@@ -247,6 +247,68 @@ export type Database = {
           },
         ]
       }
+      auditor_capability: {
+        Row: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_id: string
+        }
+        Insert: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          auditor_id: string
+        }
+        Update: {
+          audit_type?: Database["public"]["Enums"]["audit_type"]
+          auditor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditor_capability_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      auditor_conflict: {
+        Row: {
+          auditor_id: string
+          declared_at: string
+          id: string
+          organisation_id: string
+          reason: string
+        }
+        Insert: {
+          auditor_id: string
+          declared_at?: string
+          id?: string
+          organisation_id: string
+          reason: string
+        }
+        Update: {
+          auditor_id?: string
+          declared_at?: string
+          id?: string
+          organisation_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditor_conflict_auditor_id_fkey"
+            columns: ["auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "auditor_conflict_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auditor_coverage: {
         Row: {
           auditor_id: string
@@ -891,6 +953,19 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      eligible_auditors: {
+        Args: { p_audit_id: string }
+        Returns: {
+          auditor_id: string
+          match_reason: string
+          warnings: Database["public"]["Enums"]["eligibility_flag"][]
+        }[]
+      }
+      exposure_window_days: { Args: never; Returns: number }
+      offer_audit: {
+        Args: { p_audit_id: string; p_expires_in?: string }
+        Returns: number
       }
       uuid_generate_v7: { Args: never; Returns: string }
     }

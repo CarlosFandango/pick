@@ -106,6 +106,16 @@ where not exists (
   where auditor_id = '00000000-0000-7000-8000-0000000000d2' and postcode_area = v.area
 );
 
+-- The dev auditor is signed off for every methodology, so a locally booked
+-- audit has somebody to offer it to.
+insert into public.auditor_capability (auditor_id, audit_type)
+select '00000000-0000-7000-8000-0000000000d2', t
+from (values ('street'::public.audit_type), ('door_to_door'), ('private_site'), ('lottery')) as v(t)
+where not exists (
+  select 1 from public.auditor_capability
+  where auditor_id = '00000000-0000-7000-8000-0000000000d2' and audit_type = v.t
+);
+
 -- Four credits, matching the mockup's header.
 insert into public.credit_transaction (organisation_id, delta, reason, unit_price_pence, note)
 select '00000000-0000-7000-8000-0000000000c1', 4, 'purchase', 17500, 'Local development seed'
