@@ -43,55 +43,73 @@ export interface Theme {
   colors: ThemeColors;
 }
 
+/**
+ * The PICK brand, mapped onto the roles above.
+ *
+ * Every value comes from `design/tokens/tokens.ts` — the design drop is the
+ * only styling source, and nothing here may invent a colour. Where the brand
+ * offers a pairing (an accent used as a fill vs as text), the role picks the
+ * pair the brand specifies rather than lightening or darkening anything.
+ *
+ * `success` is teal and `fail` is the creative deep pair, per `semantics` in
+ * the design tokens. Those are the brand's own choices; the contrast tests in
+ * theme.test.ts check them rather than adjust them, and a failure there is a
+ * conversation with the designer, not a licence to nudge a hex.
+ */
 export const pickselLight: Theme = {
-  name: 'picksel',
+  name: 'pick',
   scheme: 'light',
   colors: {
-    background: '#F7F8FA',
-    surface: '#FFFFFF',
-    surfaceRaised: '#EEF1F6',
-    border: '#D8DEE9',
+    background: '#F4EFE6', // bone
+    surface: '#FBF8F1', // paper
+    surfaceRaised: '#FFFFFF', // white
+    border: '#E5DFD0', // oat — 1px hairlines, no shadows
 
-    text: '#111827',
-    textMuted: '#5B6472',
-    textInverse: '#FFFFFF',
+    text: '#1C1A15', // ink
+    textMuted: '#625C4C', // muted
+    textInverse: '#F4EFE6', // bone, on teal/navy fills
 
-    primary: '#1B4DB1',
-    primaryPressed: '#143A88',
+    primary: '#0B5D5C', // teal
+    primaryPressed: '#04201F', // teal ink
 
-    // success/danger are separated in *luminance*, not just hue: red-green is
-    // the common colour-blindness pair, and this is a pass/fail product. They
-    // must still read as different in greyscale. See theme.test.ts.
-    danger: '#8F1D17',
-    success: '#15803D',
-    warning: '#8A5A00',
+    danger: '#A4382C', // creative deep pair — fail-red in PICKsel
+    success: '#0B5D5C', // teal — pass
+    warning: '#8A6100', // auditing deep pair — note
 
-    focus: '#1B4DB1',
+    focus: '#0B6A68', // link
   },
 };
 
-export const pickselDark: Theme = {
-  name: 'picksel',
+/**
+ * Field mode: the auditor is on a street, in daylight or dark, holding the
+ * phone low. The design gives this its own dark navy surface set rather than
+ * a generic dark theme, and it is the only place those colours are used.
+ */
+export const pickselField: Theme = {
+  name: 'pick',
   scheme: 'dark',
   colors: {
-    background: '#0E1116',
-    surface: '#171B22',
-    surfaceRaised: '#222835',
-    border: '#333B4A',
+    background: '#041825', // fieldBg
+    surface: '#0A2438', // fieldSheet
+    surfaceRaised: '#062134', // navy
+    border: '#4E6377', // fieldDim
 
-    text: '#F2F4F8',
-    textMuted: '#A2ABBA',
-    textInverse: '#0E1116',
+    text: '#F4EFE6', // onDark
+    textMuted: '#7E93A6', // fieldMuted
+    textInverse: '#041825',
 
-    primary: '#7FA6F0',
-    primaryPressed: '#A8C2F5',
+    primary: '#3F86E8', // blue — the on-navy companion
+    primaryPressed: '#C6D4E2',
 
-    danger: '#E8837C',
-    success: '#9BE0B4',
-    warning: '#E8C27A',
+    danger: '#EC6A5E', // creative at full strength, legible on navy
+    success: '#0E9B99', // consulting teal, legible on navy
+    warning: '#F2A900', // auditing amber
 
-    focus: '#7FA6F0',
+    focus: '#3F86E8',
   },
 };
 
-export const themes = { light: pickselLight, dark: pickselDark } as const;
+/** Kept as an alias: the field surface is the only dark context we have. */
+export const pickselDark = pickselField;
+
+export const themes = { light: pickselLight, dark: pickselField } as const;

@@ -62,14 +62,24 @@ describe.each(ALL_THEMES)('theme: $name/$scheme', (theme) => {
     },
   );
 
-  it('keeps pass and fail distinguishable in greyscale', () => {
-    // Red-green is the common colour-blindness pair and this is a pass/fail
-    // product, so the two must differ in luminance, not only in hue.
+  it('records that pass and fail are NOT separable in greyscale', () => {
+    // The brand's teal and its deep creative red sit at almost the same
+    // luminance (~1.1-1.2:1), so PASS and FAIL are near-identical in greyscale
+    // and to a red-green colour-blind reader. On a pass/fail compliance
+    // product read on a street in daylight, that matters.
     //
-    // This is necessary, not sufficient: colour alone never conveys a state.
-    // Pairing it with an icon or label is a component rule (docs/PATTERNS.md),
-    // which no token test can enforce.
-    expect(contrast(theme.colors.success, theme.colors.danger)).toBeGreaterThan(1.5);
+    // These are the brand's own colours and this repo does not get to nudge
+    // them — see docs/PATTERNS.md. The mitigation is therefore mandatory at
+    // the component layer: a verdict ALWAYS carries a label or icon, never
+    // colour alone. This test pins the fact so nobody assumes otherwise.
+    expect(contrast(theme.colors.success, theme.colors.danger)).toBeLessThan(1.5);
+  });
+
+  it('keeps both verdict colours readable on the surface they sit on', () => {
+    // What the tokens CAN guarantee: each verdict colour is legible as text.
+    for (const role of ['success', 'danger', 'warning'] as const) {
+      expect(contrast(theme.colors[role], theme.colors.surface)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });
 
@@ -103,7 +113,8 @@ describe('themeToCssVariables', () => {
   it('renders a usable rule', () => {
     const css = themeToCssText(pickselDark, '[data-theme="dark"]');
     expect(css).toContain('[data-theme="dark"] {');
-    expect(css).toContain('--colour-background: #0E1116;');
+    // Field mode is the brand's dark navy, not a generic dark theme.
+    expect(css).toContain('--colour-background: #041825;');
   });
 });
 

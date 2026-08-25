@@ -1,7 +1,18 @@
-:root{
-/* radius rule: 100px pill or 4-5px tile — nothing between */
---radius-pill:100px;--radius-tile:4px;--radius-card:5px;
---space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:22px;--space-6:34px;--space-7:44px;--space-8:64px;
---rule:1px solid var(--border);--division-rule:5px;/* colour enters tiles as a 5px top rule */
---card-pad:22px;--section-pad:44px;
+:root {
+  /* radius rule: 100px pill or 4-5px tile — nothing between */
+  --radius-pill: 100px;
+  --radius-tile: 4px;
+  --radius-card: 5px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 34px;
+  --space-7: 44px;
+  --space-8: 64px;
+  --rule: 1px solid var(--border);
+  --division-rule: 5px; /* colour enters tiles as a 5px top rule */
+  --card-pad: 22px;
+  --section-pad: 44px;
 }
