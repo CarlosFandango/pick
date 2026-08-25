@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { creditBalance, signIn } from './support';
+import { creditBalance, inDays, signIn } from './support';
 
 /**
  * The golden path, walked as three people.
@@ -17,8 +17,8 @@ test.describe('the spine, end to end', () => {
     const before = await creditBalance(page);
 
     await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
-    await page.locator('input[name="windowStartOn"]').fill('2026-04-01');
-    await page.locator('input[name="windowEndOn"]').fill('2026-04-04');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(10));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
 
     await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);

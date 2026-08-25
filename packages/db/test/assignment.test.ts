@@ -220,3 +220,65 @@ describe('offer_audit', () => {
     });
   });
 });
+
+describe('A/V requirement (S3.1)', () => {
+  const AV_AUDIT = '00000000-0000-7000-8000-0000000a0007';
+
+  async function arrangeAvAudit(db: Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>) {
+    await db.arrange(
+      `insert into audit (id, client_organisation_id, status, audit_type, postcode,
+                          window_start_on, window_end_on, requires_av)
+       values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, true)`,
+      [AV_AUDIT, ids.charityA],
+    );
+    await db.arrange(
+      "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+      [ids.auditor],
+    );
+    await db.arrange(
+      "insert into auditor_capability (auditor_id, audit_type) values ($1, 'street') on conflict do nothing",
+      [ids.auditor],
+    );
+  }
+
+  it('excludes an auditor with no A/V capability', async () => {
+    await withDatabase(async (db) => {
+      await arrangeAvAudit(db);
+      const rows = await db
+        .as(ids.admin)
+        .query<{ auditor_id: string }>('select * from eligible_auditors($1)', [AV_AUDIT]);
+      // The client was told the pool would be smaller. This is that.
+      expect(rows.map((r) => r.auditor_id)).not.toContain(ids.auditor);
+    });
+  });
+
+  it('includes them once they are A/V equipped, and says so in the reason', async () => {
+    await withDatabase(async (db) => {
+      await arrangeAvAudit(db);
+      await db.arrange('update auditor_profile set av_capable = true where user_id = $1', [
+        ids.auditor,
+      ]);
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ auditor_id: string; match_reason: string }>(
+          'select * from eligible_auditors($1)',
+          [AV_AUDIT],
+        );
+      const match = rows.find((r) => r.auditor_id === ids.auditor);
+      expect(match?.match_reason).toMatch(/A\/V equipped/);
+    });
+  });
+
+  it('does not require A/V when the client did not ask for it', async () => {
+    await withDatabase(async (db) => {
+      await arrangeAvAudit(db);
+      await db.arrange('update audit set requires_av = false where id = $1', [AV_AUDIT]);
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ auditor_id: string }>('select * from eligible_auditors($1)', [AV_AUDIT]);
+      expect(rows.map((r) => r.auditor_id)).toContain(ids.auditor);
+    });
+  });
+});

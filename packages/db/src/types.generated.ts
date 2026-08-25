@@ -35,6 +35,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -77,6 +78,7 @@ export type Database = {
           released_at?: string | null
           released_by?: string | null
           requested_at?: string | null
+          requires_av?: boolean
           requires_review?: boolean
           returned_at?: string | null
           returned_moments?: Database["public"]["Enums"]["audit_moment"][]
@@ -119,6 +121,7 @@ export type Database = {
           released_at?: string | null
           released_by?: string | null
           requested_at?: string | null
+          requires_av?: boolean
           requires_review?: boolean
           returned_at?: string | null
           returned_moments?: Database["public"]["Enums"]["audit_moment"][]
@@ -361,6 +364,7 @@ export type Database = {
           approval_status: Database["public"]["Enums"]["auditor_approval_status"]
           approved_at: string | null
           approved_by: string | null
+          av_capable: boolean
           base_postcode: string | null
           created_at: string
           dbs_checked_on: string | null
@@ -373,6 +377,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["auditor_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          av_capable?: boolean
           base_postcode?: string | null
           created_at?: string
           dbs_checked_on?: string | null
@@ -385,6 +390,7 @@ export type Database = {
           approval_status?: Database["public"]["Enums"]["auditor_approval_status"]
           approved_at?: string | null
           approved_by?: string | null
+          av_capable?: boolean
           base_postcode?: string | null
           created_at?: string
           dbs_checked_on?: string | null
@@ -980,6 +986,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -1005,66 +1012,131 @@ export type Database = {
         }
       }
       base_audit_fee_pence: { Args: never; Returns: number }
-      book_audit: {
-        Args: {
-          p_audit_type: Database["public"]["Enums"]["audit_type"]
-          p_campaign_name?: string
-          p_organisation_id: string
-          p_postcode: string
-          p_shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
-          p_site_name?: string
-          p_window_end_on: string
-          p_window_start_on: string
-        }
-        Returns: {
-          address_line: string | null
-          audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
-          auditor_id: string | null
-          campaign_name: string | null
-          cancellation_reason: string | null
-          cancelled_at: string | null
-          check_set_version: number
-          client_organisation_id: string
-          completed_at: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          matched_at: string | null
-          no_team_present_at: string | null
-          pitch_detail: string | null
-          postcode: string
-          postcode_area: string | null
-          postcode_outward: string | null
-          price_pence: number
-          reference: string
-          released_at: string | null
-          released_by: string | null
-          requested_at: string | null
-          requires_review: boolean
-          returned_at: string | null
-          returned_moments: Database["public"]["Enums"]["audit_moment"][]
-          review_note: string | null
-          scheduled_for: string | null
-          session_ended_at: string | null
-          session_started_at: string | null
-          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
-          site_name: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["audit_status"]
-          submitted_at: string | null
-          updated_at: string
-          window_end_on: string | null
-          window_minutes: number | null
-          window_start_on: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "audit"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      book_audit:
+        | {
+            Args: {
+              p_audit_type: Database["public"]["Enums"]["audit_type"]
+              p_campaign_name?: string
+              p_organisation_id: string
+              p_postcode: string
+              p_shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+              p_site_name?: string
+              p_window_end_on: string
+              p_window_start_on: string
+            }
+            Returns: {
+              address_line: string | null
+              audit_type: Database["public"]["Enums"]["audit_type"]
+              auditor_fee_pence: number | null
+              auditor_id: string | null
+              campaign_name: string | null
+              cancellation_reason: string | null
+              cancelled_at: string | null
+              check_set_version: number
+              client_organisation_id: string
+              completed_at: string | null
+              created_at: string
+              created_by: string | null
+              id: string
+              matched_at: string | null
+              no_team_present_at: string | null
+              pitch_detail: string | null
+              postcode: string
+              postcode_area: string | null
+              postcode_outward: string | null
+              price_pence: number
+              reference: string
+              released_at: string | null
+              released_by: string | null
+              requested_at: string | null
+              requires_av: boolean
+              requires_review: boolean
+              returned_at: string | null
+              returned_moments: Database["public"]["Enums"]["audit_moment"][]
+              review_note: string | null
+              scheduled_for: string | null
+              session_ended_at: string | null
+              session_started_at: string | null
+              shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+              site_name: string | null
+              started_at: string | null
+              status: Database["public"]["Enums"]["audit_status"]
+              submitted_at: string | null
+              updated_at: string
+              window_end_on: string | null
+              window_minutes: number | null
+              window_start_on: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "audit"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              p_audit_type: Database["public"]["Enums"]["audit_type"]
+              p_campaign_name?: string
+              p_organisation_id: string
+              p_postcode: string
+              p_requires_av?: boolean
+              p_shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+              p_site_name?: string
+              p_window_end_on: string
+              p_window_start_on: string
+            }
+            Returns: {
+              address_line: string | null
+              audit_type: Database["public"]["Enums"]["audit_type"]
+              auditor_fee_pence: number | null
+              auditor_id: string | null
+              campaign_name: string | null
+              cancellation_reason: string | null
+              cancelled_at: string | null
+              check_set_version: number
+              client_organisation_id: string
+              completed_at: string | null
+              created_at: string
+              created_by: string | null
+              id: string
+              matched_at: string | null
+              no_team_present_at: string | null
+              pitch_detail: string | null
+              postcode: string
+              postcode_area: string | null
+              postcode_outward: string | null
+              price_pence: number
+              reference: string
+              released_at: string | null
+              released_by: string | null
+              requested_at: string | null
+              requires_av: boolean
+              requires_review: boolean
+              returned_at: string | null
+              returned_moments: Database["public"]["Enums"]["audit_moment"][]
+              review_note: string | null
+              scheduled_for: string | null
+              session_ended_at: string | null
+              session_started_at: string | null
+              shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+              site_name: string | null
+              started_at: string | null
+              status: Database["public"]["Enums"]["audit_status"]
+              submitted_at: string | null
+              updated_at: string
+              window_end_on: string | null
+              window_minutes: number | null
+              window_start_on: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "audit"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      booking_lead_days: { Args: never; Returns: number }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined
@@ -1110,6 +1182,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -1161,6 +1234,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -1216,6 +1290,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -1269,6 +1344,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]
@@ -1321,6 +1397,7 @@ export type Database = {
           released_at: string | null
           released_by: string | null
           requested_at: string | null
+          requires_av: boolean
           requires_review: boolean
           returned_at: string | null
           returned_moments: Database["public"]["Enums"]["audit_moment"][]

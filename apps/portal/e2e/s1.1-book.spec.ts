@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { creditBalance, signIn } from './support';
+import { creditBalance, inDays, signIn } from './support';
 
 /** S1.1 — Book an audit. */
 test.describe('S1.1 book an audit', () => {
@@ -52,8 +52,8 @@ test.describe('S1.1 book an audit', () => {
     const before = await creditBalance(page);
 
     await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
-    await page.locator('input[name="windowStartOn"]').fill('2026-03-03');
-    await page.locator('input[name="windowEndOn"]').fill('2026-03-04');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(8));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
 
     // Scoped to the form: Next's route announcer is also role="alert".
@@ -65,8 +65,8 @@ test.describe('S1.1 book an audit', () => {
     const before = await creditBalance(page);
 
     await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
-    await page.locator('input[name="windowStartOn"]').fill('2026-03-03');
-    await page.locator('input[name="windowEndOn"]').fill('2026-03-05');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(9));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
 
     await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);
@@ -76,8 +76,8 @@ test.describe('S1.1 book an audit', () => {
 
   test('rejects a postcode the schema does not recognise', async ({ page }) => {
     await page.getByPlaceholder('SE15 4QL').fill('NOT A POSTCODE');
-    await page.locator('input[name="windowStartOn"]').fill('2026-03-03');
-    await page.locator('input[name="windowEndOn"]').fill('2026-03-05');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(9));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
 
     await expect(page.locator('form').getByRole('alert')).toBeVisible();
@@ -95,5 +95,51 @@ test.describe('access', () => {
     await page.goto('/book');
     // requireRole sends them home; RLS would empty the page regardless.
     await expect(page).not.toHaveURL(/\/book/);
+  });
+});
+
+test.describe('S3.1 booking deepened', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/book');
+  });
+
+  test('offers A/V and warns that it narrows the pool', async ({ page }) => {
+    const toggle = page.getByRole('checkbox', { name: /Require A\/V where lawful/ });
+    await expect(toggle).toBeVisible();
+    await expect(toggle).not.toBeChecked();
+    await expect(page.getByText(/smaller pool and possibly a later date/)).toBeVisible();
+  });
+
+  test('books with A/V required', async ({ page }) => {
+    await page.getByRole('checkbox', { name: /Require A\/V where lawful/ }).check();
+    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(9));
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+
+    await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);
+  });
+
+  test('will not submit a window that starts too soon', async ({ page }) => {
+    // A window opening tomorrow is effectively a date, which defeats the
+    // audit. The `min` attribute stops the browser submitting it at all, so
+    // the assertion is that nothing happens — the server-side rule is covered
+    // by the integration tests, which is where it actually has to hold.
+    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await page.locator('input[name="windowStartOn"]').fill(inDays(1));
+    await page.locator('input[name="windowEndOn"]').fill(inDays(4));
+    await page.getByRole('button', { name: 'Confirm booking' }).click();
+
+    await expect(page).toHaveURL(/\/book/);
+    const valid = await page
+      .locator('input[name="windowStartOn"]')
+      .evaluate((el: HTMLInputElement) => el.checkValidity());
+    expect(valid).toBe(false);
+  });
+
+  test('will not let a date before the lead time be picked at all', async ({ page }) => {
+    const min = await page.locator('input[name="windowStartOn"]').getAttribute('min');
+    expect(min).toBe(inDays(5));
   });
 });

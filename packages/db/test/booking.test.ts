@@ -1,20 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { ids, withDatabase } from './rls';
 
+/** Days from today, so the lead-time rule is exercised rather than dodged. */
+const inDays = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+
 const book = (over: Record<string, unknown> = {}) => ({
   org: ids.charityA,
   type: 'street',
   method: 'direct_debit',
   postcode: 'SE15 4QL',
-  from: '2026-03-03',
-  to: '2026-03-05',
+  from: inDays(7),
+  to: inDays(9),
+  av: false,
   ...over,
 });
 
 function call(b: ReturnType<typeof book>) {
   return {
-    sql: 'select * from book_audit($1, $2, $3, $4, $5, $6)',
-    params: [b.org, b.type, b.method, b.postcode, b.from, b.to],
+    sql: 'select * from book_audit($1, $2, $3, $4, $5, $6, null, null, $7)',
+    params: [b.org, b.type, b.method, b.postcode, b.from, b.to, b.av],
   };
 }
 
@@ -53,7 +61,7 @@ describe('book_audit (S1.1)', () => {
     await withDatabase(async (db) => {
       // The client picks a window, never the shift date — a team that knows
       // the date is not being observed doing what it normally does.
-      const { sql, params } = call(book({ to: '2026-03-04' }));
+      const { sql, params } = call(book({ from: inDays(7), to: inDays(8) }));
       const message = await db.as(ids.clientA).expectRefused(sql, params);
       expect(message).toMatch(/at least three days/i);
     });
@@ -61,7 +69,7 @@ describe('book_audit (S1.1)', () => {
 
   it('accepts a window of exactly three days', async () => {
     await withDatabase(async (db) => {
-      const { sql, params } = call(book({ from: '2026-03-03', to: '2026-03-05' }));
+      const { sql, params } = call(book({ from: inDays(7), to: inDays(9) }));
       await expect(db.as(ids.clientA).query(sql, params)).resolves.toBeDefined();
     });
   });
@@ -129,6 +137,24 @@ describe('book_audit (S1.1)', () => {
       const { sql, params } = call(book({ postcode: 'se154ql' }));
       const [audit] = await db.as(ids.clientA).query<{ postcode_area: string }>(sql, params);
       expect(audit?.postcode_area).toBe('SE');
+    });
+  });
+
+  it('refuses a window starting sooner than the lead time', async () => {
+    await withDatabase(async (db) => {
+      // Matching an auditor too close to the shift narrows the window enough
+      // to give the date away.
+      const { sql, params } = call(book({ from: inDays(1), to: inDays(4) }));
+      const message = await db.as(ids.clientA).expectRefused(sql, params);
+      expect(message).toMatch(/at least 5 days from today/i);
+    });
+  });
+
+  it('records an A/V requirement on the audit', async () => {
+    await withDatabase(async (db) => {
+      const { sql, params } = call(book({ av: true }));
+      const [audit] = await db.as(ids.clientA).query<{ requires_av: boolean }>(sql, params);
+      expect(audit?.requires_av).toBe(true);
     });
   });
 

@@ -1,6 +1,12 @@
 'use client';
 
-import { AUDIT_TYPE_LABELS, MINIMUM_WINDOW_DAYS, SHIFT_PAYMENT_LABELS } from '@picksel/core';
+import {
+  AUDIT_TYPE_LABELS,
+  BOOKING_LEAD_DAYS,
+  earliestWindowStart,
+  MINIMUM_WINDOW_DAYS,
+  SHIFT_PAYMENT_LABELS,
+} from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
@@ -68,6 +74,7 @@ const inputStyle = {
 export function BookingForm({ credits }: { credits: number }) {
   const [state, action, pending] = useActionState<BookingState, FormData>(bookAudit, {});
   const [auditType, setAuditType] = useState<AuditTypeKey>('street');
+  const earliest = earliestWindowStart(new Date());
   const [payment, setPayment] = useState<PaymentKey>('direct_debit');
 
   const noCredits = credits < 1;
@@ -122,8 +129,35 @@ export function BookingForm({ credits }: { credits: number }) {
         </div>
       </div>
 
+      <div>
+        <div style={{ ...metaLabel, marginBottom: 8 }}>3 — Video / audio evidence</div>
+        <label
+          style={{
+            background: color.paper,
+            border: hairline,
+            borderRadius: radius.tile,
+            padding: '14px 16px',
+            display: 'flex',
+            gap: 14,
+            alignItems: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <input type="checkbox" name="requiresAv" style={{ width: 18, height: 18 }} />
+          <span>
+            <span style={{ display: 'block', fontWeight: 700, fontSize: 13.5 }}>
+              Require A/V where lawful
+            </span>
+            <span style={{ display: 'block', fontSize: 12, color: color.muted, marginTop: 2 }}>
+              Only auditors with A/V capability are eligible — expect a smaller pool and possibly a
+              later date.
+            </span>
+          </span>
+        </label>
+      </div>
+
       <div style={{ display: 'flex', gap: 24 }}>
-        <Field label="3 — Postcode of activity">
+        <Field label="4 — Postcode of activity">
           <input
             name="postcode"
             required
@@ -133,16 +167,17 @@ export function BookingForm({ credits }: { credits: number }) {
           />
         </Field>
         <div style={{ flex: 1.4 }}>
-          <div style={{ ...metaLabel, marginBottom: 8 }}>4 — Date window</div>
+          <div style={{ ...metaLabel, marginBottom: 8 }}>5 — Date window</div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input type="date" name="windowStartOn" required style={inputStyle} />
+            <input type="date" name="windowStartOn" required min={earliest} style={inputStyle} />
             <span style={{ color: color.muted }} aria-hidden>
               →
             </span>
-            <input type="date" name="windowEndOn" required style={inputStyle} />
+            <input type="date" name="windowEndOn" required min={earliest} style={inputStyle} />
           </div>
           <div style={{ fontSize: 11.5, color: color.muted, marginTop: 6 }}>
-            At least {MINIMUM_WINDOW_DAYS} days. The exact shift date is not yours to pick.
+            At least {MINIMUM_WINDOW_DAYS} days, starting {BOOKING_LEAD_DAYS}+ days from today — so
+            an auditor can be matched without revealing the shift date.
           </div>
         </div>
       </div>

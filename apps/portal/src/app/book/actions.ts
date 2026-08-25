@@ -14,6 +14,7 @@ const bookingForm = z.object({
   windowStartOn: z.string().date(),
   windowEndOn: z.string().date(),
   siteName: z.string().trim().max(200).optional(),
+  requiresAv: z.coerce.boolean().default(false),
 });
 
 export interface BookingState {
@@ -39,6 +40,7 @@ export async function bookAudit(_previous: BookingState, form: FormData): Promis
     windowStartOn: form.get('windowStartOn'),
     windowEndOn: form.get('windowEndOn'),
     siteName: form.get('siteName') || undefined,
+    requiresAv: form.get('requiresAv') === 'on',
   });
 
   if (!parsed.success) {
@@ -54,6 +56,7 @@ export async function bookAudit(_previous: BookingState, form: FormData): Promis
     p_window_start_on: parsed.data.windowStartOn,
     p_window_end_on: parsed.data.windowEndOn,
     p_site_name: parsed.data.siteName,
+    p_requires_av: parsed.data.requiresAv,
   });
 
   // The database is the authority on these rules, so its message is the one

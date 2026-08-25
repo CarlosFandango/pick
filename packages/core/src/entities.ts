@@ -51,6 +51,21 @@ export const SHIFT_PAYMENT_LABELS: Record<z.infer<typeof shiftPaymentMethod>, st
 
 /** The window a client may book. Never a single date — see BUILD-GUIDE.md. */
 export const MINIMUM_WINDOW_DAYS = 3;
+
+/**
+ * How far ahead a window must start.
+ *
+ * Long enough that assigning an auditor cannot reveal which day the team is
+ * being watched: a window opening tomorrow is effectively a date.
+ */
+export const BOOKING_LEAD_DAYS = 5;
+
+/** The earliest window start a client may choose, as a yyyy-mm-dd string. */
+export function earliestWindowStart(today: Date): string {
+  const earliest = new Date(today);
+  earliest.setDate(earliest.getDate() + BOOKING_LEAD_DAYS);
+  return earliest.toISOString().slice(0, 10);
+}
 export const evidenceKind = z.enum(['photo', 'audio', 'video', 'document']);
 export const payoutExecutionMethod = z.enum(['manual_csv', 'bank_api', 'stripe_connect']);
 

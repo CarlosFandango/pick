@@ -16,6 +16,13 @@ export async function signIn(page: Page, who: keyof typeof accounts) {
   await expect(page).not.toHaveURL(/sign-in/);
 }
 
+/** A yyyy-mm-dd date n days from today, so the lead-time rule is respected. */
+export function inDays(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
 /** The credit count in the chrome, which the design keeps permanently visible. */
 export async function creditBalance(page: Page): Promise<number> {
   const text = await page.getByText(/CREDITS\s+\d+/).innerText();
