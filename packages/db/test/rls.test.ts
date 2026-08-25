@@ -39,9 +39,13 @@ describe('audit visibility', () => {
     });
   });
 
-  it('shows anon nothing', async () => {
+  it('refuses anon outright', async () => {
     await withDatabase(async (db) => {
-      expect(count(await db.as(null).query('select id from audit'))).toBe(0);
+      // anon holds no table privileges at all, so this fails at the GRANT
+      // level rather than returning an empty list. Louder, and it does not
+      // depend on every future table remembering to add a policy.
+      const message = await db.as(null).expectRefused('select id from audit');
+      expect(message).toMatch(/permission denied/i);
     });
   });
 
@@ -210,6 +214,47 @@ describe('organisations and profiles', () => {
   });
 });
 
+describe('table privileges are declared by the schema, not inherited', () => {
+  // These passed locally and failed in CI purely because a newer Supabase CLI
+  // bootstraps different default privileges. Assert what we depend on.
+  it.each(['audit', 'check_definition', 'organisation', 'user_profile'])(
+    'lets authenticated read %s',
+    async (table) => {
+      await withDatabase(async (db) => {
+        const [row] = await db.arrange<{ ok: boolean }>(
+          'select has_table_privilege($1, $2, $3) as ok',
+          ['authenticated', `public.${table}`, 'select'],
+        );
+        expect(row?.ok).toBe(true);
+      });
+    },
+  );
+
+  it.each(['observation_log', 'check_result', 'credit_transaction'])(
+    'withholds UPDATE and DELETE on %s even after the blanket grant',
+    async (table) => {
+      await withDatabase(async (db) => {
+        const [row] = await db.arrange<{ upd: boolean; del: boolean }>(
+          `select has_table_privilege($1, $2, 'update') as upd,
+                  has_table_privilege($1, $2, 'delete') as del`,
+          ['authenticated', `public.${table}`],
+        );
+        expect(row?.upd).toBe(false);
+        expect(row?.del).toBe(false);
+      });
+    },
+  );
+
+  it('grants anon nothing', async () => {
+    await withDatabase(async (db) => {
+      const [row] = await db.arrange<{ ok: boolean }>(
+        "select has_table_privilege('anon', 'public.audit', 'select') as ok",
+      );
+      expect(row?.ok).toBe(false);
+    });
+  });
+});
+
 describe('the check catalogue', () => {
   it('is readable by any signed-in user', async () => {
     await withDatabase(async (db) => {
@@ -221,7 +266,8 @@ describe('the check catalogue', () => {
 
   it('is not readable by anon', async () => {
     await withDatabase(async (db) => {
-      expect(count(await db.as(null).query('select id from check_definition'))).toBe(0);
+      const message = await db.as(null).expectRefused('select id from check_definition');
+      expect(message).toMatch(/permission denied/i);
     });
   });
 });
