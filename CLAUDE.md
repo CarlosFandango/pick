@@ -256,6 +256,16 @@ travel time can come when demand shows the coarse version failing.
 - **Tests**: Vitest. Domain tests live in `packages/core/test`.
 - **SQL**: lower case keywords, one migration per concern, never edit a migration
   that has been pushed to staging.
+- **Migrations are the only way the schema changes.** Never `db execute` a blob,
+  never change something in Studio and leave it, never hand-run SQL against a
+  hosted project. If it is not in `packages/db/supabase/migrations`, it does not
+  exist — the next `db reset` will prove it.
+  Each migration is a file of **explicit, readable statements**: one concern per
+  file, one object per statement. No `DO` blocks assembling DDL with `format()`
+  and `execute`, and no loops over table names. Dynamic SQL cannot be grepped,
+  cannot be diffed, and reports failures against a generated string rather than
+  the line you wrote. Repeating three near-identical `create trigger` statements
+  is the correct trade.
 - **Env**: `NEXT_PUBLIC_*` / `EXPO_PUBLIC_*` are shipped to the client — safe
   values only. Everything else is server-only. `SUPABASE_SERVICE_ROLE_KEY` must
   never be imported from `apps/field`. See `.env.example`.

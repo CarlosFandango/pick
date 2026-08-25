@@ -27,7 +27,9 @@ like before you open it.
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
-| Change the schema | a new migration, then `pnpm db:types` | editing a pushed migration |
+| Change the schema | a new migration, then `pnpm db:types` | editing a pushed migration, `db execute`, an unexported Studio change |
+| Write DDL | explicit statements, one object each | a `DO` block building SQL with `format()`/`execute` |
+| Repeat DDL across tables | write it out per table | loop over a table-name array |
 | Share code between apps | `packages/core` | `packages/ui` (web only — RN cannot render it) |
 | Colour, spacing, type size | a role or scale from `@picksel/tokens` | a hex literal, a magic number |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
@@ -73,6 +75,14 @@ One coherent change per commit, green on its own, revertable in isolation.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-25 — Explicit DDL over dynamic SQL in migrations
+`20260825090600_append_only.sql` originally looped over a table-name array in a
+`DO` block, calling `format()` and `execute` to build the REVOKEs and triggers.
+Rewritten as nine plain statements. *Rejected:* the loop — it was shorter, but
+you could not grep for `check_result_append_only`, `db diff` could not reason
+about it, and a failure pointed at a generated string instead of a line. Three
+repeated `create trigger` statements are cheaper to live with than one clever one.
 
 ### 2026-08-25 — Shared design tokens, platform-specific components
 `packages/tokens` holds colour roles, spacing, type scale and touch targets with
