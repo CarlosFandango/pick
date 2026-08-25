@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { CheckDefinition } from '../src/entities.js';
-import { latestResults, type ScorableResult, scoreAudit } from '../src/scoring.js';
+import type { CheckDefinition } from '../src/entities';
+import { latestResults, type ScorableResult, scoreAudit } from '../src/scoring';
 
 let seq = 0;
 const id = (n: number) => `00000000-0000-7000-8000-${String(n).padStart(12, '0')}`;

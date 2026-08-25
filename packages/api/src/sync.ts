@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Insert } from './types.js';
+import type { Database, Insert } from './types';
 
 /** The three append-only tables the field app pushes into. */
 export type AppendOnlyTable = 'observation_log' | 'check_result' | 'evidence_attachment';

@@ -1,2 +1,2 @@
-export * from './sync.js';
-export * from './types.js';
+export * from './sync';
+export * from './types';

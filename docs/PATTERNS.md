@@ -76,6 +76,19 @@ One coherent change per commit, green on its own, revertable in isolation.
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
 
+### 2026-08-25 — One React version, pinned to React Native's requirement
+`pnpm.overrides` pins react/react-dom to 19.1.0 workspace-wide. Expo 54 needs
+exactly that; the portal was resolving 19.2.8, and two Reacts in one tree made
+hooks read null internals at prerender. *Rejected:* letting each app resolve its
+own — it typechecked perfectly and failed only at build.
+
+### 2026-08-25 — Extensionless relative imports in workspace packages
+`tsc` resolves `./primitives.js` to `primitives.ts`; webpack does not. These
+packages ship TypeScript source to bundlers (Next, Metro, Vitest), so
+extensionless is the correct form under `moduleResolution: bundler`.
+*Rejected:* webpack `extensionAlias` config — one more thing to configure in
+each app, to keep an extension none of the consumers want.
+
 ### 2026-08-25 — Explicit DDL over dynamic SQL in migrations
 `20260825090600_append_only.sql` originally looped over a table-name array in a
 `DO` block, calling `format()` and `execute` to build the REVOKEs and triggers.

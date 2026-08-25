@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './types.js';
+import type { Database } from './types';
 
 export interface CookieStore {
   getAll(): { name: string; value: string }[];

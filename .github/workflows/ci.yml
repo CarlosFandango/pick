@@ -15,7 +15,7 @@ env:
 
 jobs:
   verify:
-    name: typecheck / lint / test
+    name: lint / typecheck / test / build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +37,16 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      # typecheck does not catch everything: bundlers resolve modules
+      # differently from tsc, and duplicate transitive React only shows up at
+      # prerender. Both have bitten this repo already.
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-not-a-real-key
+          SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-not-a-real-key
 
   migrations:
     name: migrations apply cleanly

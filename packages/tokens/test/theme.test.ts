@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { themeToCssText, themeToCssVariables } from '../src/css.js';
-import { space, touchTarget } from '../src/primitives.js';
-import { pickselDark, pickselLight, type Theme, type ThemeColors, themes } from '../src/theme.js';
+import { themeToCssText, themeToCssVariables } from '../src/css';
+import { space, touchTarget } from '../src/primitives';
+import { pickselDark, pickselLight, type Theme, type ThemeColors, themes } from '../src/theme';
 
 const ALL_THEMES: Theme[] = [pickselLight, pickselDark];
 

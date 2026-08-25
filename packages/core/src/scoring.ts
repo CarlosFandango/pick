@@ -1,5 +1,5 @@
-import type { CheckDefinition, CheckOutcome } from './entities.js';
-import { COMPLIANCE_CATEGORIES, type ComplianceCategory } from './moments.js';
+import type { CheckDefinition, CheckOutcome } from './entities';
+import { COMPLIANCE_CATEGORIES, type ComplianceCategory } from './moments';
 
 /** The subset of a CheckResult row that scoring needs. */
 export interface ScorableResult {

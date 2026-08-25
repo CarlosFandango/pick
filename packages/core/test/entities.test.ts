@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { postcode, postcodeArea } from '../src/entities.js';
-import { isUuidV7, newId } from '../src/ids.js';
-import { AUDIT_MOMENTS, momentOrder } from '../src/moments.js';
+import { postcode, postcodeArea } from '../src/entities';
+import { isUuidV7, newId } from '../src/ids';
+import { AUDIT_MOMENTS, momentOrder } from '../src/moments';
 
 describe('newId', () => {
   it('mints a valid UUIDv7', () => {

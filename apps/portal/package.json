@@ -15,8 +15,8 @@
     "@picksel/tokens": "workspace:*",
     "@picksel/ui": "workspace:*",
     "next": "^15.5.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

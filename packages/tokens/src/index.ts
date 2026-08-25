@@ -12,6 +12,6 @@
  * Keep it that way: the moment it imports React or CSS, one app loses it.
  */
 
-export * from './css.js';
-export * from './primitives.js';
-export * from './theme.js';
+export * from './css';
+export * from './primitives';
+export * from './theme';

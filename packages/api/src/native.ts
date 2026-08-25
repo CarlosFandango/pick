@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './types.js';
+import type { Database } from './types';
 
 export interface NativeStorage {
   getItem(key: string): Promise<string | null>;

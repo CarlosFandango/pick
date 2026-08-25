@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AUDIT_MOMENTS, COMPLIANCE_CATEGORIES } from './moments.js';
+import { AUDIT_MOMENTS, COMPLIANCE_CATEGORIES } from './moments';
 
 export const uuid = z.string().uuid();
 

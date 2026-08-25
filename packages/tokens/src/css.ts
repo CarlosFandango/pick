@@ -1,5 +1,5 @@
-import { fontSize, radius, space } from './primitives.js';
-import type { Theme } from './theme.js';
+import { fontSize, radius, space } from './primitives';
+import type { Theme } from './theme';
 
 /** Web only: numeric token to a CSS length. React Native takes the raw number. */
 export function px(value: number): string {
