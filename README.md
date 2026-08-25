@@ -43,9 +43,28 @@ differently from `tsc`, so it catches what typechecking cannot.
 | Postgres | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
 | Mailpit | http://127.0.0.1:54324 |
 
-The field app runs with `pnpm --filter @picksel/field dev`. In a simulator
-`127.0.0.1` reaches your machine; on a physical device set
-`EXPO_PUBLIC_SUPABASE_URL` to your LAN address.
+### Running the field app
+
+```bash
+pnpm --filter @picksel/field dev
+```
+
+In a simulator `127.0.0.1` reaches your machine. On a physical device it does
+not — set `EXPO_PUBLIC_SUPABASE_URL` to your LAN address (`http://192.168.x.x:54321`).
+
+**iOS simulator.** Expo needs `xcrun simctl`, which only exists when the active
+developer directory is full Xcode rather than the Command Line Tools. Check with
+`xcode-select -p`; if it prints `/Library/Developer/CommandLineTools`, either:
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer   # per shell, no sudo
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer   # permanent
+```
+
+Without it Metro still runs and Expo Go on a physical device still works — only
+the simulator is unavailable.
+
+**Android** needs the SDK and `ANDROID_HOME`; not set up yet.
 
 ## Environments
 
