@@ -76,6 +76,40 @@ One coherent change per commit, green on its own, revertable in isolation.
   of them is broken.
 - Subject line says *what*; the body says *why*. The diff already says how.
 
+## Pitfalls that have already bitten
+
+Recorded because each was expensive to find, and each will happen again unless
+something checks for it. Format: symptom, why it hid, what catches it now.
+
+### A privilege that exists but cannot be used
+**Symptom:** `permission denied for schema app` on every RLS-protected table,
+for every signed-in user — the whole API dead.
+**Why it hid:** EXECUTE on a function is inert without USAGE on its schema, and
+nothing warns you. Every check I ran used a role that never evaluates a policy:
+`postgres` and `service_role` bypass RLS, `anon` matches no policy at all. A
+`curl` returning `[]` looked like proof RLS worked; it was proof nothing ran.
+**Caught now by:** `pnpm test:rls`, which impersonates `authenticated`.
+
+### A schema that inherits privileges it never declares
+**Symptom:** identical migrations, `permission denied for table
+check_definition` in CI, green locally.
+**Why it hid:** a Supabase stack bootstraps `alter default privileges ... grant
+all on tables`, so the schema worked without ever granting anything. A newer CLI
+in CI bootstraps differently. Anything you did not declare can change under you.
+**Caught now by:** grant assertions in the RLS suite, and CI running the whole
+database job on a clean stack with the latest CLI.
+
+*Both are the same lesson: **a permission model must be stated and exercised as
+the role that actually uses it.** Two shapes, one week apart.*
+
+### Green typecheck, broken build
+**Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
+then on `Cannot read properties of null (reading 'useRef')`.
+**Why it hid:** `tsc` resolves `./x.js` to `x.ts` and bundlers do not; and two
+copies of React in one tree only misbehave at prerender. Neither is visible to
+lint, typecheck or unit tests.
+**Caught now by:** `pnpm build` in CI.
+
 ## Decision log
 
 Newest first. Record the alternative that was rejected — that is the part that
