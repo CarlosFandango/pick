@@ -12,6 +12,12 @@ import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
+const cell = {
+  padding: '12px 16px',
+  borderTop: hairline,
+  borderBottom: hairline,
+} as const;
+
 /**
  * S3.5 — credits and invoices.
  *
@@ -78,69 +84,97 @@ export default async function CreditsPage() {
         {lines.length === 0 ? (
           <p style={{ fontSize: 13, color: color.muted }}>No credit movements yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {lines.map((line) => (
-              <div
-                key={line.id}
-                style={{
-                  background: color.paper,
-                  border: hairline,
-                  borderRadius: radius.tile,
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 16,
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ ...metaLabel, width: 92, flex: 'none' }}>
-                  {line.occurredAt.toLocaleDateString('en-GB')}
-                </span>
-                <span style={{ flex: 1 }}>
-                  {CREDIT_REASON_LABELS[line.reason]}
-                  {line.auditReference ? (
-                    <span style={{ fontFamily: mono, color: color.muted }}>
-                      {' '}
-                      {line.auditReference}
-                    </span>
-                  ) : null}
-                  {line.note ? (
-                    <span style={{ display: 'block', fontSize: 12, color: color.muted }}>
-                      {line.note}
-                    </span>
-                  ) : null}
-                </span>
-                <span
-                  style={{
-                    fontFamily: mono,
-                    fontSize: 12,
-                    color: color.muted,
-                    width: 60,
-                    textAlign: 'right',
-                  }}
-                >
-                  {valueLabel(line)}
-                </span>
-                <span
-                  style={{
-                    fontFamily: mono,
-                    fontWeight: 700,
-                    width: 44,
-                    textAlign: 'right',
-                    color: line.delta > 0 ? color.teal : color.bodyBrown,
-                  }}
-                >
-                  {deltaLabel(line.delta)}
-                </span>
-                <span
-                  aria-label={`Balance after ${line.balanceAfter}`}
-                  style={{ fontFamily: mono, width: 44, textAlign: 'right', color: color.ink }}
-                >
-                  {line.balanceAfter}
-                </span>
-              </div>
-            ))}
-          </div>
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'separate',
+              borderSpacing: '0 8px',
+              fontSize: 13,
+              textAlign: 'left',
+            }}
+          >
+            <caption style={{ ...metaLabel, textAlign: 'left', paddingBottom: 8 }}>
+              Every credit movement, newest first
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" style={metaLabel}>
+                  Date
+                </th>
+                <th scope="col" style={metaLabel}>
+                  Movement
+                </th>
+                <th scope="col" style={{ ...metaLabel, textAlign: 'right' }}>
+                  Value
+                </th>
+                <th scope="col" style={{ ...metaLabel, textAlign: 'right' }}>
+                  Credits
+                </th>
+                <th scope="col" style={{ ...metaLabel, textAlign: 'right' }}>
+                  Balance
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((line) => (
+                <tr key={line.id} style={{ background: color.paper }}>
+                  <td
+                    style={{
+                      ...cell,
+                      borderLeft: hairline,
+                      borderTopLeftRadius: radius.tile,
+                      borderBottomLeftRadius: radius.tile,
+                      fontFamily: mono,
+                      color: color.muted,
+                    }}
+                  >
+                    {line.occurredAt.toLocaleDateString('en-GB')}
+                  </td>
+                  <td style={cell}>
+                    {CREDIT_REASON_LABELS[line.reason]}
+                    {line.auditReference ? (
+                      <span style={{ fontFamily: mono, color: color.muted }}>
+                        {' '}
+                        {line.auditReference}
+                      </span>
+                    ) : null}
+                    {line.note ? (
+                      <span style={{ display: 'block', fontSize: 12, color: color.muted }}>
+                        {line.note}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td style={{ ...cell, textAlign: 'right', fontFamily: mono, color: color.muted }}>
+                    {valueLabel(line)}
+                  </td>
+                  <td
+                    style={{
+                      ...cell,
+                      textAlign: 'right',
+                      fontFamily: mono,
+                      fontWeight: 700,
+                      color: line.delta > 0 ? color.teal : color.bodyBrown,
+                    }}
+                  >
+                    {deltaLabel(line.delta)}
+                  </td>
+                  <td
+                    aria-label={`Balance after ${line.balanceAfter}`}
+                    style={{
+                      ...cell,
+                      textAlign: 'right',
+                      fontFamily: mono,
+                      borderRight: hairline,
+                      borderTopRightRadius: radius.tile,
+                      borderBottomRightRadius: radius.tile,
+                    }}
+                  >
+                    {line.balanceAfter}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </Chrome>

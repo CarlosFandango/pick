@@ -10,7 +10,7 @@ import { creditBalance, inDays, signIn } from './support';
  */
 
 test.describe('the spine, end to end', () => {
-  test('a client books, PICK releases, the client reads the report', async ({ page, request }) => {
+  test('a client books, PICK releases, the client reads the report', async ({ page }) => {
     // 1. Client books.
     await signIn(page, 'client');
     await page.goto('/book');
@@ -93,7 +93,7 @@ test.describe("S3.3 / S3.5 the client's world", () => {
     const balance = await creditBalance(page);
     // The newest line's running balance is the current balance — the ledger
     // is auditable by the person reading it.
-    const newest = page.getByLabel(/^Balance after /).first();
+    const newest = page.getByRole('cell', { name: /^Balance after / }).first();
     await expect(newest).toHaveText(String(balance));
   });
 
