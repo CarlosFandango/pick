@@ -14,14 +14,23 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
-      # There is no staging project yet. Without this the job fails on every
-      # migration commit, and a workflow that is always red teaches people to
-      # ignore red.
+      # Skip loudly rather than fail, when the deploy is not wired up yet: a
+      # workflow that is always red teaches people to ignore red.
+      #
+      # All three are checked, not just the ref. With only the ref set the job
+      # gets as far as `supabase link` and dies on a missing token — a genuine
+      # red build reporting an auth error, for a repository that is simply not
+      # configured yet. Naming the missing secret is the whole point.
       - id: guard
         run: |
-          if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+          missing=""
+          [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]  && missing="$missing SUPABASE_PROJECT_REF"
+          [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ]  && missing="$missing SUPABASE_DB_PASSWORD"
+
+          if [ -n "$missing" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::SUPABASE_PROJECT_REF is not set — no staging project yet. Skipping."
+            echo "::notice::Staging deploy not configured. Missing secrets:$missing. Skipping."
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
