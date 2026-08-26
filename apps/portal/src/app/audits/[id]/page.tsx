@@ -8,6 +8,7 @@ import {
 import { color, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { PipelineRail } from '@/components/PipelineRail';
 import { requireSession } from '@/lib/auth';
@@ -60,6 +61,8 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
           gap: 20,
         }}
       >
+        <BackLink href="/audits" label="All audits" />
+
         <div>
           <div style={metaLabel}>{audit.reference}</div>
           <h1

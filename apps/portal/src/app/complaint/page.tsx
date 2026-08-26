@@ -1,5 +1,6 @@
 import { COMPLAINT_ROUTES } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
+import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -43,6 +44,9 @@ export default async function ComplaintPage() {
       credits={balance?.balance ?? 0}
     >
       <div style={{ padding: '26px 32px', maxWidth: 720 }}>
+        <div style={{ marginBottom: 16 }}>
+          <BackLink href="/audits" label="All audits" />
+        </div>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
           Raise a concern
         </h1>

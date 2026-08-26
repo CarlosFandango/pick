@@ -14,9 +14,10 @@ export function Chrome({
   credits,
   children,
 }: {
-  active: 'book' | 'audits' | 'reports' | 'credits';
-  organisationName: string;
-  credits: number;
+  active?: 'book' | 'audits' | 'reports' | 'credits';
+  /** Absent where there is no session to read it from — see `not-found.tsx`. */
+  organisationName?: string;
+  credits?: number;
   children: ReactNode;
 }) {
   const tabs = [
@@ -57,17 +58,21 @@ export function Chrome({
           ))}
         </nav>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span
-            style={{
-              fontFamily: mono,
-              fontSize: 10.5,
-              letterSpacing: '0.1em',
-              color: color.bodyBrown,
-            }}
-          >
-            CREDITS <b style={{ color: color.ink }}>{credits}</b>
-          </span>
-          <span style={{ fontSize: 12.5, color: color.muted }}>{organisationName}</span>
+          {credits === undefined ? null : (
+            <span
+              style={{
+                fontFamily: mono,
+                fontSize: 10.5,
+                letterSpacing: '0.1em',
+                color: color.bodyBrown,
+              }}
+            >
+              CREDITS <b style={{ color: color.ink }}>{credits}</b>
+            </span>
+          )}
+          {organisationName ? (
+            <span style={{ fontSize: 12.5, color: color.muted }}>{organisationName}</span>
+          ) : null}
         </div>
       </header>
       {children}

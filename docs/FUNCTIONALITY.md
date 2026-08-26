@@ -72,6 +72,8 @@ screens beyond the shell.
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
 | Portal shell + session refresh | Partial | `apps/portal` | middleware + `requireRole()`; no screens |
+| Back navigation on detail pages | Built | `portal/src/components/BackLink.tsx` | a link to a named place, never `router.back()` |
+| Not-found page | Built | `portal/src/app/not-found.tsx` | session-free; copy does not confirm a record exists |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
 | Field app shell | Partial | `apps/field` | expo-router, one screen |
 | Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox; 9 tests incl. resume-from-partial |

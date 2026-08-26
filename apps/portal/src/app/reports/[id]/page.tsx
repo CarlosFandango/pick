@@ -12,6 +12,7 @@ import {
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
+import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { requireSession } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -101,6 +102,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       credits={balance?.balance ?? 0}
     >
       <div style={{ padding: '26px 32px', maxWidth: 820 }}>
+        <div style={{ marginBottom: 16 }}>
+          <BackLink href={`/audits/${audit.id}`} label="Back to the audit" />
+        </div>
         <div style={metaLabel}>
           {audit.reference} · {audit.postcode} · {AUDIT_TYPE_LABELS[audit.audit_type]}
         </div>
