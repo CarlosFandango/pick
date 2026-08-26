@@ -145,6 +145,18 @@ brand colour as text / surface / hairline / fill and fails if a new token
 arrives unclassified. Fills are asserted to *fail* as text, so the pairing is a
 test rather than a paragraph in the build guide.
 
+### A stale dev server that reads as a broken app
+**Symptom:** the Playwright suite dies after two minutes on `Timed out waiting
+120000ms from config.webServer`, having run nothing. Twice.
+**Why it hid:** the config reused an existing server on port 3000, and a
+long-running `pnpm dev` goes stale — after a `db:reset` or a rename it keeps
+serving routes it compiled earlier and answers 404 on `/sign-in`. Playwright's
+readiness check then never passes, but the error names the *web server config*,
+not the stale process, so the obvious reading is that the app is broken. Both
+times the fix was `kill` on a PID, after minutes of looking at the wrong thing.
+**Caught now by:** the suite runs its own server on its own port (3100) and
+never reuses one. One cold start per run, and the collision cannot happen.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.
