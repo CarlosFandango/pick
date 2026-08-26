@@ -8,6 +8,7 @@ import {
   valueLabel,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
+import { BuyCredits } from '@/components/BuyCredits';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -81,6 +82,8 @@ export default async function CreditsPage() {
             {balance}
           </div>
         </div>
+
+        <BuyCredits />
 
         {lines.length === 0 ? (
           <p style={{ fontSize: 13, color: color.muted }}>No credit movements yet.</p>

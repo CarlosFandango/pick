@@ -2,9 +2,17 @@ import { AUDIT_TYPE_LABELS, CLIENT_STATUS, parseAuditStatus } from '@picksel/cor
 import { color, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { Chrome } from '@/components/Chrome';
+import { StatusPill } from '@/components/StatusPill';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
+
+/** One table cell: the list is real tabular data, so it is a real table. */
+const cell = {
+  padding: '11px 14px 11px 0',
+  borderBottom: hairline,
+  verticalAlign: 'middle',
+} as const;
 
 /**
  * S1.9 in outline — enough to land on after booking. The full dashboard with
@@ -66,37 +74,60 @@ export default async function AuditsPage({
         ) : null}
 
         {audits?.length ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {audits.map((audit) => (
-              <Link
-                key={audit.id}
-                href={`/audits/${audit.id}`}
-                style={{
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  background: color.paper,
-                  border: hairline,
-                  borderRadius: radius.tile,
-                  padding: '14px 18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 18,
-                }}
-              >
-                <span style={{ fontFamily: mono, fontSize: 12 }}>{audit.reference}</span>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>
-                  {AUDIT_TYPE_LABELS[audit.audit_type]}
-                </span>
-                <span style={{ fontSize: 13, color: color.muted }}>{audit.postcode}</span>
-                <span style={{ fontSize: 12.5, color: color.muted }}>
-                  {audit.window_start_on} → {audit.window_end_on}
-                </span>
-                <span style={{ ...metaLabel, marginLeft: 'auto', color: color.bodyBrown }}>
-                  {CLIENT_STATUS[parseAuditStatus(audit.status)].label}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <caption style={{ ...metaLabel, textAlign: 'left', paddingBottom: 8 }}>
+              Your {audits.length === 1 ? 'audit' : `${audits.length} most recent audits`}
+            </caption>
+            <thead>
+              <tr>
+                {['Reference', 'Type', 'Location', 'Window', 'Status'].map((heading) => (
+                  <th
+                    key={heading}
+                    scope="col"
+                    style={{
+                      ...metaLabel,
+                      textAlign: 'left',
+                      padding: '0 14px 8px 0',
+                      borderBottom: hairline,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {heading}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {audits.map((audit) => (
+                <tr key={audit.id}>
+                  <td style={cell}>
+                    <Link
+                      href={`/audits/${audit.id}`}
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: color.link,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {audit.reference}
+                    </Link>
+                  </td>
+                  <td style={{ ...cell, fontWeight: 600 }}>
+                    {AUDIT_TYPE_LABELS[audit.audit_type]}
+                  </td>
+                  <td style={{ ...cell, fontFamily: mono, fontSize: 12 }}>{audit.postcode}</td>
+                  <td style={{ ...cell, color: color.bodyBrown, whiteSpace: 'nowrap' }}>
+                    {audit.window_start_on} → {audit.window_end_on}
+                  </td>
+                  <td style={cell}>
+                    <StatusPill chip={CLIENT_STATUS[parseAuditStatus(audit.status)]} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p style={{ fontSize: 13, color: color.muted }}>No audits booked yet.</p>
         )}

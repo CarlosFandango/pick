@@ -104,22 +104,10 @@ test.describe('S3.1 booking deepened', () => {
     await page.goto('/book');
   });
 
-  test('offers A/V and warns that it narrows the pool', async ({ page }) => {
-    const toggle = page.getByRole('checkbox', { name: /Require A\/V where lawful/ });
-    await expect(toggle).toBeVisible();
-    await expect(toggle).not.toBeChecked();
-    await expect(page.getByText(/smaller pool and possibly a later date/)).toBeVisible();
-  });
-
-  test('books with A/V required', async ({ page }) => {
-    await page.getByRole('checkbox', { name: /Require A\/V where lawful/ }).check();
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
-    await page.locator('input[name="windowStartOn"]').fill(inDays(7));
-    await page.locator('input[name="windowEndOn"]').fill(inDays(9));
-    await page.getByRole('button', { name: 'Confirm booking' }).click();
-
-    await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);
-  });
+  // The A/V toggle used to be asserted here. It is now behind the
+  // `avEvidence` flag, which is off because nothing fulfils it — see
+  // booking-clarity.spec.ts, which asserts it is absent, and
+  // packages/core/test/features.test.ts, which keeps the flag deliberate.
 
   test('will not submit a window that starts too soon', async ({ page }) => {
     // A window opening tomorrow is effectively a date, which defeats the

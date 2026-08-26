@@ -2,6 +2,7 @@ export * from './complaints';
 export * from './credits';
 export * from './earnings';
 export * from './entities';
+export * from './features';
 export * from './ids';
 export * from './moments';
 export * from './money';

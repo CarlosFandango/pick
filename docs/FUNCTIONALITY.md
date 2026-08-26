@@ -30,7 +30,8 @@ reason. Deferred is a real answer and should stay populated.
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
-| Credit ledger | Built | `credit_transaction` + balance view | no purchase flow yet |
+| Credit ledger | Built | `credit_transaction` + balance view | no purchase flow; `BuyCredits` says how to order |
+| Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
 | Currency-generic money | Built | `core/money.ts` | `formatMoney(minorUnits, currency)`; DB columns still `_pence` |
 | Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
 

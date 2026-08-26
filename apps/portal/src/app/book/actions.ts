@@ -1,6 +1,6 @@
 'use server';
 
-import { auditType, postcode, shiftPaymentMethod } from '@picksel/core';
+import { auditType, isEnabled, postcode, shiftPaymentMethod } from '@picksel/core';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -40,7 +40,10 @@ export async function bookAudit(_previous: BookingState, form: FormData): Promis
     windowStartOn: form.get('windowStartOn'),
     windowEndOn: form.get('windowEndOn'),
     siteName: form.get('siteName') || undefined,
-    requiresAv: form.get('requiresAv') === 'on',
+    // Hiding the control is presentation; this is the rule. A form post is not
+    // a form — anyone can send this field, and an audit flagged for A/V that
+    // nothing can fulfil would sit unmatched with a credit already spent.
+    requiresAv: isEnabled('avEvidence') && form.get('requiresAv') === 'on',
   });
 
   if (!parsed.success) {

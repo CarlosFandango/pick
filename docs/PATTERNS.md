@@ -154,6 +154,33 @@ lint, typecheck or unit tests.
 
 ## Decision log
 
+### 2026-08-26 — Which test layer owns which question
+
+Four layers, and the rule for picking one is *what would have to be true for
+this to fail*:
+
+| Layer | Where | Answers | Cost |
+|---|---|---|---|
+| Domain | `packages/core/test` | a rule, with no I/O | ms |
+| Component | `apps/*/test/*.test.tsx` | what a screen shows and offers | ms |
+| Integration | `packages/db/test` | a policy, a grant, a constraint | seconds |
+| UX | `apps/portal/e2e` | the app works, as a person, signed in | minutes |
+
+The portal had no component layer, so every visual question went to Playwright:
+single worker, real database, dev server. A full run is ~2.7 minutes and one
+spec is ~20 seconds, which made design iteration cost about twenty seconds a
+look. Fourteen component tests covering the same ground run in 1.5.
+
+What makes it possible: **pages fetch, components render.** A page is an async
+Server Component doing queries and passing props; the JSX worth asserting on
+lives in sync components under it. Nothing in the component layer renders a
+page — a page is only true against a real session and real RLS, which is
+exactly what Playwright is for.
+
+Same tooling and setup file as `apps/field`, deliberately. Rejected: Storybook,
+which is a permanent maintenance surface for feedback the component tests and
+the running app already give a solo developer.
+
 ### 2026-08-26 — Currency is data, never baked into the logic
 
 Money stays an integer count of a currency's smallest unit. What changed is

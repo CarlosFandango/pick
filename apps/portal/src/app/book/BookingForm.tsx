@@ -4,11 +4,13 @@ import {
   AUDIT_TYPE_LABELS,
   BOOKING_LEAD_DAYS,
   earliestWindowStart,
+  isEnabled,
   MINIMUM_WINDOW_DAYS,
   SHIFT_PAYMENT_LABELS,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
+import { InfoHint } from '@/components/InfoHint';
 import { hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
 import { type BookingState, bookAudit } from './actions';
 
@@ -51,10 +53,37 @@ function Tile({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/**
+ * A numbered step, with its explanation one click away.
+ *
+ * This is where the product asks a charity to commit a credit, and every
+ * question on it has a reason that is obvious to us and opaque to them. The
+ * hint is offered rather than shouted, so the form stays a form.
+ */
+function Step({
+  number,
+  label,
+  hint,
+  children,
+}: {
+  number: number;
+  label: string;
+  hint: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <div style={{ flex: 1 }}>
-      <div style={{ ...metaLabel, marginBottom: 8 }}>{label}</div>
+    <div>
+      <div style={{ marginBottom: 8 }}>
+        <InfoHint
+          label={
+            <span style={metaLabel}>
+              {number} — {label}
+            </span>
+          }
+        >
+          {hint}
+        </InfoHint>
+      </div>
       {children}
     </div>
   );
@@ -98,8 +127,17 @@ export function BookingForm({ credits }: { credits: number }) {
       <input type="hidden" name="auditType" value={auditType} />
       <input type="hidden" name="shiftPaymentMethod" value={payment} />
 
-      <div>
-        <div style={{ ...metaLabel, marginBottom: 8 }}>1 — Audit type</div>
+      <Step
+        number={1}
+        label="Audit type"
+        hint={
+          <>
+            The kind of fundraising you want observed. Each type is a different methodology with its
+            own checklist and its own regulations, so the audit is only as useful as this answer is
+            accurate. Pick the activity the team will actually be doing on the day.
+          </>
+        }
+      >
         <div style={{ display: 'flex', gap: 10 }}>
           {(Object.keys(AUDIT_TYPE_LABELS) as AuditTypeKey[]).map((key) => (
             <Tile
@@ -110,10 +148,23 @@ export function BookingForm({ credits }: { credits: number }) {
             />
           ))}
         </div>
-      </div>
+      </Step>
 
-      <div>
-        <div style={{ ...metaLabel, marginBottom: 8 }}>2 — Payment method on shift</div>
+      <Step
+        number={2}
+        label="Payment method on shift"
+        hint={
+          <>
+            What your fundraisers will be asking the public to set up — a regular gift by Direct
+            Debit, or a one-off card or contactless donation.
+            <br />
+            <br />
+            It changes what the auditor checks. A Direct Debit sign-up carries obligations a one-off
+            donation does not: the Direct Debit Guarantee, cancellation rights, and how an ongoing
+            commitment is described. Tell us the wrong one and the audit measures the wrong rules.
+          </>
+        }
+      >
         <div style={{ display: 'flex', gap: 10, maxWidth: 420 }}>
           {(Object.keys(SHIFT_PAYMENT_LABELS) as PaymentKey[]).map((key) => (
             <Tile
@@ -124,40 +175,50 @@ export function BookingForm({ credits }: { credits: number }) {
             />
           ))}
         </div>
-        <div style={{ fontSize: 11.5, color: color.muted, marginTop: 6 }}>
-          Sets the checklist variant the auditor uses.
-        </div>
-      </div>
+      </Step>
 
-      <div>
-        <div style={{ ...metaLabel, marginBottom: 8 }}>3 — Video / audio evidence</div>
-        <label
-          style={{
-            background: color.paper,
-            border: hairline,
-            borderRadius: radius.tile,
-            padding: '14px 16px',
-            display: 'flex',
-            gap: 14,
-            alignItems: 'center',
-            cursor: 'pointer',
-          }}
+      {isEnabled('avEvidence') ? (
+        <Step
+          number={3}
+          label="Video / audio evidence"
+          hint={
+            <>
+              Asks for an auditor who can record the interaction, where recording is lawful at that
+              site. Only auditors with A/V capability are then eligible, so expect a smaller pool
+              and possibly a later date.
+            </>
+          }
         >
-          <input type="checkbox" name="requiresAv" style={{ width: 18, height: 18 }} />
-          <span>
-            <span style={{ display: 'block', fontWeight: 700, fontSize: 13.5 }}>
-              Require A/V where lawful
-            </span>
-            <span style={{ display: 'block', fontSize: 12, color: color.muted, marginTop: 2 }}>
-              Only auditors with A/V capability are eligible — expect a smaller pool and possibly a
-              later date.
-            </span>
-          </span>
-        </label>
-      </div>
+          <label
+            style={{
+              background: color.paper,
+              border: hairline,
+              borderRadius: radius.tile,
+              padding: '14px 16px',
+              display: 'flex',
+              gap: 14,
+              alignItems: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <input type="checkbox" name="requiresAv" style={{ width: 18, height: 18 }} />
+            <span style={{ fontWeight: 700, fontSize: 13.5 }}>Require A/V where lawful</span>
+          </label>
+        </Step>
+      ) : null}
 
       <div style={{ display: 'flex', gap: 24 }}>
-        <Field label="4 — Postcode of activity">
+        <Step
+          number={isEnabled('avEvidence') ? 4 : 3}
+          label="Postcode of activity"
+          hint={
+            <>
+              Where the team will be working. Auditors are matched on the outward code's area
+              letters — the SE in SE15 — so a full postcode helps the auditor find the pitch but
+              does not narrow the pool further.
+            </>
+          }
+        >
           <input
             name="postcode"
             required
@@ -165,20 +226,32 @@ export function BookingForm({ credits }: { credits: number }) {
             autoComplete="postal-code"
             style={{ ...inputStyle, fontFamily: mono }}
           />
-        </Field>
+        </Step>
         <div style={{ flex: 1.4 }}>
-          <div style={{ ...metaLabel, marginBottom: 8 }}>5 — Date window</div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <input type="date" name="windowStartOn" required min={earliest} style={inputStyle} />
-            <span style={{ color: color.muted }} aria-hidden>
-              →
-            </span>
-            <input type="date" name="windowEndOn" required min={earliest} style={inputStyle} />
-          </div>
-          <div style={{ fontSize: 11.5, color: color.muted, marginTop: 6 }}>
-            At least {MINIMUM_WINDOW_DAYS} days, starting {BOOKING_LEAD_DAYS}+ days from today — so
-            an auditor can be matched without revealing the shift date.
-          </div>
+          <Step
+            number={isEnabled('avEvidence') ? 5 : 4}
+            label="Date window"
+            hint={
+              <>
+                A range of days the audit could fall on, not a fixed date. A team that knows exactly
+                when it is being watched behaves differently that day, and you would be paying to
+                observe the exception rather than the norm. Neither your fundraisers nor the auditor
+                learns the date until it happens.
+                <br />
+                <br />
+                At least {MINIMUM_WINDOW_DAYS} days long, starting {BOOKING_LEAD_DAYS} or more days
+                from today so there is time to match an auditor.
+              </>
+            }
+          >
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <input type="date" name="windowStartOn" required min={earliest} style={inputStyle} />
+              <span style={{ color: color.muted }} aria-hidden>
+                →
+              </span>
+              <input type="date" name="windowEndOn" required min={earliest} style={inputStyle} />
+            </div>
+          </Step>
         </div>
       </div>
 
@@ -211,7 +284,12 @@ export function BookingForm({ credits }: { credits: number }) {
       >
         <div style={{ fontSize: 13, color: color.bodyBrown }}>
           {noCredits ? (
-            'No credits available. Top up before booking.'
+            <>
+              No credits available.{' '}
+              <a href="/credits" style={{ color: color.link, fontWeight: 600 }}>
+                How to order more
+              </a>
+            </>
           ) : (
             <>
               1 credit will be used · balance after booking{' '}
