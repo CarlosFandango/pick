@@ -59,7 +59,7 @@ insert into audit (id, client_organisation_id, auditor_id, status, postcode) val
   ('${ids.auditA}','${ids.charityA}','${ids.auditor}','assigned','SW1A 1AA'),
   ('${ids.auditB}','${ids.charityB}','${ids.otherAuditor}','assigned','EH12 9DN');
 
-insert into credit_transaction (organisation_id, delta, reason, unit_price_pence) values
+insert into credit_transaction (organisation_id, delta, reason, unit_price_minor_units) values
   ('${ids.charityA}', 10, 'purchase', 17500),
   ('${ids.charityB}', 5, 'purchase', 17500);
 `;

@@ -52,7 +52,7 @@ like before you open it.
 
 - Database: `snake_case`, **singular** table names (`audit`, not `audits`).
 - TypeScript: `camelCase` values, `PascalCase` types, files named after their export.
-- Timestamps: `*_at`. Dates without time: `*_on`. Money: `*_pence`. Flags: `is_*`.
+- Timestamps: `*_at`. Dates without time: `*_on`. Money: `*_minor_units`. Flags: `is_*`.
 - Migrations: `YYYYMMDDHHMMSS_subject.sql`, one concern per file.
 
 ## Layering
@@ -195,11 +195,22 @@ and `other`. A currency assumed in a helper name, a symbol or a divisor is the
 kind of rewrite that surfaces as wrong numbers on an invoice rather than as a
 failing build.
 
-**Still outstanding:** the database columns are `_pence` suffixed
-(`amount_pence`, `unit_price_pence`, `travel_uplift_pence`), which bakes the
-same assumption into about twenty column names. That is one migration plus a
-types regeneration, and it will never be cheaper than it is now, while there is
-no production data.
+The schema followed the same day (`20260826230000_currency_generic_money.sql`):
+every `_pence` column is now `_minor_units`, and the two fee functions with
+`pence` in their names were renamed too. `alter … rename` throughout rather
+than add/backfill/drop, so grants, defaults, check constraints and view
+references followed the objects and no row was rewritten. Function bodies are
+text to Postgres, so the three whose plpgsql named a renamed column had to be
+restated — that is the part a rename does *not* do for you.
+
+**Deliberately not done: a currency column.** There is one currency, and a
+column repeating `'GBP'` on every row is a constant with storage, not a record
+of a decision. The decision worth capturing is "what is this charity billed
+in", and it belongs on `organisation` — next to `residency_zone` — when a
+second currency is actually in prospect. The two permanent ledgers
+(`credit_transaction`, `audit_pay_item`) will want their own copy at that point
+rather than inheriting, because evidence must not change meaning when a
+setting does.
 
 
 Newest first. Record the alternative that was rejected — that is the part that

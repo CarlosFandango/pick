@@ -13,7 +13,7 @@ export type Database = {
         Row: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -31,7 +31,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -57,7 +57,7 @@ export type Database = {
         Insert: {
           address_line?: string | null
           audit_type?: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence?: number | null
+          auditor_fee_minor_units?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
           cancellation_reason?: string | null
@@ -75,7 +75,7 @@ export type Database = {
           postcode_area?: string | null
           postcode_outward?: string | null
           preferred_auditor_id?: string | null
-          price_pence?: number
+          price_minor_units?: number
           reference?: string
           released_at?: string | null
           released_by?: string | null
@@ -101,7 +101,7 @@ export type Database = {
         Update: {
           address_line?: string | null
           audit_type?: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence?: number | null
+          auditor_fee_minor_units?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
           cancellation_reason?: string | null
@@ -119,7 +119,7 @@ export type Database = {
           postcode_area?: string | null
           postcode_outward?: string | null
           preferred_auditor_id?: string | null
-          price_pence?: number
+          price_minor_units?: number
           reference?: string
           released_at?: string | null
           released_by?: string | null
@@ -192,7 +192,7 @@ export type Database = {
           offered_at: string
           outcome: Database["public"]["Enums"]["assignment_outcome"]
           responded_at: string | null
-          travel_uplift_pence: number
+          travel_uplift_minor_units: number
           updated_at: string
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -207,7 +207,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
-          travel_uplift_pence?: number
+          travel_uplift_minor_units?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -222,7 +222,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
-          travel_uplift_pence?: number
+          travel_uplift_minor_units?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -245,7 +245,7 @@ export type Database = {
       }
       audit_pay_item: {
         Row: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string
           created_at: string
           id: string
@@ -253,7 +253,7 @@ export type Database = {
           note: string | null
         }
         Insert: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string
           created_at?: string
           id?: string
@@ -261,7 +261,7 @@ export type Database = {
           note?: string | null
         }
         Update: {
-          amount_pence?: number
+          amount_minor_units?: number
           audit_id?: string
           created_at?: string
           id?: string
@@ -609,7 +609,7 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at: string
-          unit_price_pence: number | null
+          unit_price_minor_units: number | null
         }
         Insert: {
           audit_id?: string | null
@@ -623,7 +623,7 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
-          unit_price_pence?: number | null
+          unit_price_minor_units?: number | null
         }
         Update: {
           audit_id?: string | null
@@ -637,7 +637,7 @@ export type Database = {
           organisation_id?: string
           reason?: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
-          unit_price_pence?: number | null
+          unit_price_minor_units?: number | null
         }
         Relationships: [
           {
@@ -815,7 +815,7 @@ export type Database = {
       }
       payout_line_item: {
         Row: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string | null
           auditor_id: string
           created_at: string
@@ -827,7 +827,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id?: string | null
           auditor_id: string
           created_at?: string
@@ -839,7 +839,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          amount_pence?: number
+          amount_minor_units?: number
           audit_id?: string | null
           auditor_id?: string
           created_at?: string
@@ -889,7 +889,7 @@ export type Database = {
           period_start: string
           reference: string
           status: Database["public"]["Enums"]["payout_run_status"]
-          total_pence: number
+          total_minor_units: number
           updated_at: string
         }
         Insert: {
@@ -906,7 +906,7 @@ export type Database = {
           period_start: string
           reference?: string
           status?: Database["public"]["Enums"]["payout_run_status"]
-          total_pence?: number
+          total_minor_units?: number
           updated_at?: string
         }
         Update: {
@@ -923,7 +923,7 @@ export type Database = {
           period_start?: string
           reference?: string
           status?: Database["public"]["Enums"]["payout_run_status"]
-          total_pence?: number
+          total_minor_units?: number
           updated_at?: string
         }
         Relationships: [
@@ -1044,7 +1044,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1062,7 +1062,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1106,7 +1106,7 @@ export type Database = {
         Args: { p_auditor_id: string; p_organisation_id: string }
         Returns: string
       }
-      base_audit_fee_pence: { Args: never; Returns: number }
+      base_audit_fee_minor_units: { Args: never; Returns: number }
       book_audit:
         | {
             Args: {
@@ -1122,7 +1122,7 @@ export type Database = {
             Returns: {
               address_line: string | null
               audit_type: Database["public"]["Enums"]["audit_type"]
-              auditor_fee_pence: number | null
+              auditor_fee_minor_units: number | null
               auditor_id: string | null
               campaign_name: string | null
               cancellation_reason: string | null
@@ -1140,7 +1140,7 @@ export type Database = {
               postcode_area: string | null
               postcode_outward: string | null
               preferred_auditor_id: string | null
-              price_pence: number
+              price_minor_units: number
               reference: string
               released_at: string | null
               released_by: string | null
@@ -1185,7 +1185,7 @@ export type Database = {
             Returns: {
               address_line: string | null
               audit_type: Database["public"]["Enums"]["audit_type"]
-              auditor_fee_pence: number | null
+              auditor_fee_minor_units: number | null
               auditor_id: string | null
               campaign_name: string | null
               cancellation_reason: string | null
@@ -1203,7 +1203,7 @@ export type Database = {
               postcode_area: string | null
               postcode_outward: string | null
               preferred_auditor_id: string | null
-              price_pence: number
+              price_minor_units: number
               reference: string
               released_at: string | null
               released_by: string | null
@@ -1234,11 +1234,12 @@ export type Database = {
             }
           }
       booking_lead_days: { Args: never; Returns: number }
+      credit_price_minor_units: { Args: never; Returns: number }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined
       }
-      default_travel_uplift_pence: { Args: never; Returns: number }
+      default_travel_uplift_minor_units: { Args: never; Returns: number }
       eligible_auditors: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1277,7 +1278,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1295,7 +1296,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1330,7 +1331,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1348,7 +1349,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1383,7 +1384,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1401,7 +1402,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1440,7 +1441,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1458,7 +1459,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1510,7 +1511,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1528,7 +1529,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1564,7 +1565,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1582,7 +1583,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null

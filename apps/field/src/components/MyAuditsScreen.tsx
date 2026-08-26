@@ -13,7 +13,7 @@ export interface MyAuditRow {
   id: string;
   title: string;
   dateLabel: string;
-  feePence: number | null;
+  feeMinorUnits: number | null;
   status: AuditStatus;
   extra?: string | null;
 }
@@ -69,7 +69,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
                 <Text style={{ ...text('body'), fontSize: 12, color: color.muted, marginTop: 2 }}>
                   {auditSubtitle([
                     audit.dateLabel,
-                    audit.feePence === null ? null : formatMoney(audit.feePence),
+                    audit.feeMinorUnits === null ? null : formatMoney(audit.feeMinorUnits),
                     audit.extra,
                   ])}
                 </Text>

@@ -8,8 +8,8 @@ const line = (over: Partial<EarningLine> = {}): EarningLine => {
     auditId: `a${seq}`,
     title: 'Street · SE15',
     dateLabel: 'Tue 3 Mar',
-    basePence: 10000,
-    travelPence: 1500,
+    baseMinorUnits: 10000,
+    travelMinorUnits: 1500,
     state: 'pending',
     ...over,
   };
@@ -19,28 +19,31 @@ describe('summariseEarnings', () => {
   it('totals what is owed and what has been paid, separately', () => {
     const summary = summariseEarnings([
       line(),
-      line({ travelPence: 2200 }),
-      line({ state: 'paid', travelPence: 0 }),
+      line({ travelMinorUnits: 2200 }),
+      line({ state: 'paid', travelMinorUnits: 0 }),
     ]);
 
-    expect(summary.pendingPence).toBe(23700);
+    expect(summary.pendingMinorUnits).toBe(23700);
     expect(summary.pendingCount).toBe(2);
-    expect(summary.paidPence).toBe(10000);
+    expect(summary.paidMinorUnits).toBe(10000);
   });
 
   it('keeps the travel uplift visible in its own right', () => {
     // An auditor who cannot see what they were paid for travel cannot tell
     // whether a long job was worth taking.
-    const summary = summariseEarnings([line({ travelPence: 1500 }), line({ travelPence: 2200 })]);
-    expect(summary.pendingTravelPence).toBe(3700);
+    const summary = summariseEarnings([
+      line({ travelMinorUnits: 1500 }),
+      line({ travelMinorUnits: 2200 }),
+    ]);
+    expect(summary.pendingTravelMinorUnits).toBe(3700);
   });
 
   it('is zero, not undefined, with nothing to show', () => {
     expect(summariseEarnings([])).toEqual({
-      pendingPence: 0,
+      pendingMinorUnits: 0,
       pendingCount: 0,
-      pendingTravelPence: 0,
-      paidPence: 0,
+      pendingTravelMinorUnits: 0,
+      paidMinorUnits: 0,
     });
   });
 });
@@ -48,15 +51,15 @@ describe('summariseEarnings', () => {
 describe('pendingLine', () => {
   it('names the uplift', () => {
     const summary = summariseEarnings([
-      line({ travelPence: 1500 }),
-      line({ travelPence: 2200 }),
-      line({ travelPence: 0 }),
+      line({ travelMinorUnits: 1500 }),
+      line({ travelMinorUnits: 2200 }),
+      line({ travelMinorUnits: 0 }),
     ]);
     expect(pendingLine(summary)).toBe('3 audits · incl. £37 travel uplift');
   });
 
   it('says nothing about uplift when there was none', () => {
-    expect(pendingLine(summariseEarnings([line({ travelPence: 0 })]))).toBe('1 audit');
+    expect(pendingLine(summariseEarnings([line({ travelMinorUnits: 0 })]))).toBe('1 audit');
   });
 });
 

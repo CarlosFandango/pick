@@ -117,7 +117,7 @@ where not exists (
 );
 
 -- Four credits, matching the mockup's header.
-insert into public.credit_transaction (organisation_id, delta, reason, unit_price_pence, note)
+insert into public.credit_transaction (organisation_id, delta, reason, unit_price_minor_units, note)
 select '00000000-0000-7000-8000-0000000000c1', 4, 'purchase', 17500, 'Local development seed'
 where not exists (
   select 1 from public.credit_transaction

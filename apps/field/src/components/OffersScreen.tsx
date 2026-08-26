@@ -3,7 +3,7 @@ import {
   type OfferListItem,
   type OfferState,
   offerState,
-  offerTotalPence,
+  offerTotalMinorUnits,
   sortOffers,
   timeLeftLabel,
   upliftLabel,
@@ -134,7 +134,7 @@ export function OffersScreen({
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
                     <Text style={{ ...text('display'), fontSize: 20, color: color.ink }}>
-                      {formatMoney(offerTotalPence(offer))}
+                      {formatMoney(offerTotalMinorUnits(offer))}
                     </Text>
                     <Text
                       style={{ ...text('body'), fontSize: 12, color: color.muted, marginLeft: 8 }}

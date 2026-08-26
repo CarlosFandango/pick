@@ -67,12 +67,14 @@ describe('the offer an auditor sees (S1.3)', () => {
       await arrangeOffers(db);
       const [offer] = await db
         .as(ids.auditor)
-        .query<{ travel_uplift_pence: number }>('select travel_uplift_pence from audit_offer');
+        .query<{ travel_uplift_minor_units: number }>(
+          'select travel_uplift_minor_units from audit_offer',
+        );
       const [base] = await db
         .as(ids.auditor)
-        .query<{ base: number }>('select base_audit_fee_pence() as base');
+        .query<{ base: number }>('select base_audit_fee_minor_units() as base');
       expect(Number(base?.base)).toBe(10000);
-      expect(Number(offer?.travel_uplift_pence)).toBeGreaterThanOrEqual(0);
+      expect(Number(offer?.travel_uplift_minor_units)).toBeGreaterThanOrEqual(0);
     });
   });
 });
@@ -103,21 +105,21 @@ describe('accept_offer', () => {
         .as(ids.auditor)
         .query('select * from accept_offer($1)', [await offerIdFor(db, ids.auditor)]);
 
-      const items = await db.arrange<{ kind: string; amount_pence: number }>(
-        'select kind, amount_pence from audit_pay_item where audit_id = $1 order by kind',
+      const items = await db.arrange<{ kind: string; amount_minor_units: number }>(
+        'select kind, amount_minor_units from audit_pay_item where audit_id = $1 order by kind',
         [AUDIT],
       );
       // Recorded at acceptance so it cannot drift from what they were shown.
       expect(items).toEqual([
-        { kind: 'base', amount_pence: 10000 },
-        { kind: 'travel', amount_pence: 1500 },
+        { kind: 'base', amount_minor_units: 10000 },
+        { kind: 'travel', amount_minor_units: 1500 },
       ]);
 
-      const [audit] = await db.arrange<{ auditor_fee_pence: number }>(
-        'select auditor_fee_pence from audit where id = $1',
+      const [audit] = await db.arrange<{ auditor_fee_minor_units: number }>(
+        'select auditor_fee_minor_units from audit where id = $1',
         [AUDIT],
       );
-      expect(Number(audit?.auditor_fee_pence)).toBe(11500);
+      expect(Number(audit?.auditor_fee_minor_units)).toBe(11500);
     });
   });
 

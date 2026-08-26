@@ -34,10 +34,10 @@ export function EarningsScreen({ lines, nextRun }: { lines: EarningLine[]; nextR
           {nextRunLabel(nextRun)}
         </Text>
         <Text
-          accessibilityLabel={`Pending ${formatMoney(summary.pendingPence)}`}
+          accessibilityLabel={`Pending ${formatMoney(summary.pendingMinorUnits)}`}
           style={{ ...text('display'), fontSize: 40, color: color.onDark, marginTop: 4 }}
         >
-          {formatMoney(summary.pendingPence)}
+          {formatMoney(summary.pendingMinorUnits)}
         </Text>
         <Text style={{ ...text('body'), fontSize: 12.5, color: color.onDarkMuted, marginTop: 2 }}>
           {pendingLine(summary)}
@@ -63,8 +63,8 @@ export function EarningsScreen({ lines, nextRun }: { lines: EarningLine[]; nextR
             <View style={{ flex: 1 }}>
               <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>{line.title}</Text>
               <Text style={{ ...text('body'), fontSize: 12, color: color.muted, marginTop: 2 }}>
-                {line.dateLabel} · {formatMoney(line.basePence)} audit
-                {line.travelPence > 0 ? ` + ${formatMoney(line.travelPence)} travel` : ''}
+                {line.dateLabel} · {formatMoney(line.baseMinorUnits)} audit
+                {line.travelMinorUnits > 0 ? ` + ${formatMoney(line.travelMinorUnits)} travel` : ''}
               </Text>
             </View>
             <Text

@@ -39,7 +39,7 @@ export default async function CreditsPage() {
       .single(),
     supabase
       .from('credit_transaction')
-      .select('id, delta, reason, occurred_at, unit_price_pence, note, audit(reference)')
+      .select('id, delta, reason, occurred_at, unit_price_minor_units, note, audit(reference)')
       .order('occurred_at', { ascending: false })
       .limit(200),
   ]);
@@ -50,7 +50,7 @@ export default async function CreditsPage() {
     reason: row.reason,
     occurredAt: new Date(row.occurred_at),
     auditReference: row.audit?.reference ?? null,
-    unitPricePence: row.unit_price_pence,
+    unitPriceMinorUnits: row.unit_price_minor_units,
     note: row.note,
   }));
 

@@ -9,7 +9,7 @@ const audit = (over: Partial<MyAuditRow> = {}): MyAuditRow => {
     id: `a${seq}`,
     title: 'Street · SE15',
     dateLabel: 'Tue 3 Mar',
-    feePence: 11500,
+    feeMinorUnits: 11500,
     status: 'in_review',
     ...over,
   };

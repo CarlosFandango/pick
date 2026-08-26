@@ -61,13 +61,17 @@ describe('deltaLabel', () => {
 
 describe('valueLabel', () => {
   it('prices a purchase', () => {
-    expect(valueLabel(entry({ delta: 4, reason: 'purchase', unitPricePence: 17500 }))).toBe('£700');
+    expect(valueLabel(entry({ delta: 4, reason: 'purchase', unitPriceMinorUnits: 17500 }))).toBe(
+      '£700',
+    );
   });
 
   it('says nothing for a movement with no money attached', () => {
     // A booking spends a credit that was already paid for. Showing £175
     // against it would double-count what the charity spent.
-    expect(valueLabel(entry({ delta: -1, reason: 'booking', unitPricePence: 17500 }))).toBe('');
+    expect(valueLabel(entry({ delta: -1, reason: 'booking', unitPriceMinorUnits: 17500 }))).toBe(
+      '',
+    );
     expect(valueLabel(entry({ delta: 1, reason: 'refund' }))).toBe('');
   });
 });

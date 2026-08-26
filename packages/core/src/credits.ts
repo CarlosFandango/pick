@@ -26,7 +26,7 @@ export interface CreditEntry {
   reason: CreditReason;
   occurredAt: Date;
   auditReference?: string | null;
-  unitPricePence?: number | null;
+  unitPriceMinorUnits?: number | null;
   note?: string | null;
 }
 
@@ -75,6 +75,6 @@ export function deltaLabel(delta: number): string {
 
 /** "£700" for a purchase of 4 at £175. Nothing for a movement with no money. */
 export function valueLabel(entry: CreditEntry): string {
-  if (!entry.unitPricePence || entry.reason !== 'purchase') return '';
-  return formatMoney(entry.unitPricePence * entry.delta);
+  if (!entry.unitPriceMinorUnits || entry.reason !== 'purchase') return '';
+  return formatMoney(entry.unitPriceMinorUnits * entry.delta);
 }

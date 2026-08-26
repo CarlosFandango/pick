@@ -32,7 +32,7 @@ reason. Deferred is a real answer and should stay populated.
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
 | Credit ledger | Built | `credit_transaction` + balance view | no purchase flow; `BuyCredits` says how to order |
 | Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
-| Currency-generic money | Built | `core/money.ts` | `formatMoney(minorUnits, currency)`; DB columns still `_pence` |
+| Currency-generic money | Built | `core/money.ts`, `20260826230000_currency_generic_money.sql` | `formatMoney(minorUnits, currency)`; columns are `_minor_units`. No currency column yet — see PATTERNS |
 | Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
 
 ## Screens (design manifest)

@@ -11,8 +11,8 @@ export interface OfferListItem {
   areaLabel: string;
   windowLabel: string;
   paymentMethodLabel: string;
-  basePence: number;
-  travelPence: number;
+  baseMinorUnits: number;
+  travelMinorUnits: number;
   expiresAt: Date | null;
   outcome: 'offered' | 'accepted' | 'declined' | 'expired' | 'withdrawn';
 }
@@ -46,13 +46,15 @@ export function timeLeftLabel(offer: OfferListItem, now: Date): string {
   return `${Math.max(1, Math.floor(ms / 60_000))}M LEFT`;
 }
 
-export function offerTotalPence(offer: OfferListItem): number {
-  return offer.basePence + offer.travelPence;
+export function offerTotalMinorUnits(offer: OfferListItem): number {
+  return offer.baseMinorUnits + offer.travelMinorUnits;
 }
 
 /** "incl. £15 travel uplift" — the uplift is never hidden inside a total. */
 export function upliftLabel(offer: OfferListItem): string {
-  return offer.travelPence > 0 ? `incl. ${formatMoney(offer.travelPence)} travel uplift` : '';
+  return offer.travelMinorUnits > 0
+    ? `incl. ${formatMoney(offer.travelMinorUnits)} travel uplift`
+    : '';
 }
 
 /** Live offers first, then the ones that filled. Nothing that is simply gone. */

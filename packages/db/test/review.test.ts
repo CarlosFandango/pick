@@ -8,7 +8,7 @@ const AUDIT = '00000000-0000-7000-8000-0000000a0006';
 async function arrangeInReview(db: Db, status = 'in_review') {
   await db.arrange(
     `insert into audit (id, client_organisation_id, auditor_id, status, audit_type, postcode,
-                        window_start_on, window_end_on, auditor_fee_pence)
+                        window_start_on, window_end_on, auditor_fee_minor_units)
      values ($1, $2, $3, $4, 'street', 'SW1A 1AA', current_date, current_date + 3, 11500)`,
     [AUDIT, ids.charityA, ids.auditor, status],
   );
@@ -172,11 +172,11 @@ describe('report_no_team_present', () => {
       expect(audit?.status).toBe('no_team_present');
       expect(await balance(db)).toBe(before + 1);
 
-      const [pay] = await db.arrange<{ amount_pence: number }>(
-        "select amount_pence from audit_pay_item where audit_id = $1 and kind = 'no_show'",
+      const [pay] = await db.arrange<{ amount_minor_units: number }>(
+        "select amount_minor_units from audit_pay_item where audit_id = $1 and kind = 'no_show'",
         [AUDIT],
       );
-      expect(Number(pay?.amount_pence)).toBe(11500);
+      expect(Number(pay?.amount_minor_units)).toBe(11500);
     });
   });
 
