@@ -1,6 +1,7 @@
 import {
   AUDIT_TYPE_LABELS,
   countsLine,
+  latestResults,
   momentOrder,
   momentTag,
   parseCheckOutcome,
@@ -36,25 +37,22 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
     await Promise.all([
       supabase
         .from('check_result')
-        .select('id, outcome, note, occurred_at, check_definition(id, moment, prompt, sort_order)')
-        .eq('audit_id', id)
-        .order('occurred_at', { ascending: false }),
+        .select(
+          'id, check_definition_id, outcome, note, occurred_at, check_definition(id, moment, prompt, sort_order)',
+        )
+        .eq('audit_id', id),
       supabase.rpc('review_gate_reason', { p_audit_id: id }),
       supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
       supabase.from('audit').select('id', { count: 'exact', head: true }).eq('status', 'in_review'),
     ]);
 
-  // check_result is append-only, so the newest row per check is the current
-  // one — the query orders by occurred_at descending and the first wins.
-  type ResultRow = NonNullable<typeof results>[number];
-  const latest = new Map<string, ResultRow>();
-  for (const row of results ?? []) {
-    const definition = row.check_definition;
-    if (!definition || latest.has(definition.id)) continue;
-    latest.set(definition.id, row);
-  }
+  // check_result is append-only, so a correction is another row for the same
+  // check. latestResults owns which one counts, tie-break included.
+  const latest = latestResults(
+    (results ?? []).map((row) => ({ ...row, outcome: parseCheckOutcome(row.outcome) })),
+  );
 
-  const reviewResults: ReviewResult[] = [...latest.values()].flatMap((row) => {
+  const reviewResults: ReviewResult[] = latest.flatMap((row) => {
     const definition = row.check_definition;
     if (!definition) return [];
     const moment = definition.moment;
@@ -64,7 +62,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         moment,
         momentIndex: momentOrder(moment) + 1,
         prompt: definition.prompt,
-        verdict: parseCheckOutcome(row.outcome),
+        verdict: row.outcome,
         note: row.note,
       },
     ];

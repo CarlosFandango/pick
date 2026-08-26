@@ -57,9 +57,14 @@ export interface AuditScore extends OverallScore {
  * carry device-minted UUIDv7s, and that generator is monotonic within a
  * millisecond. Server-minted v7s are not, so do not rely on this for rows the
  * database created.
+ *
+ * Generic in the row type so a caller can hand it rows carrying a joined check
+ * definition and get the same rows back. Screens were re-implementing this as
+ * "order by occurred_at desc, first wins" for exactly that reason, and dropping
+ * the tie-break with it.
  */
-export function latestResults(results: readonly ScorableResult[]): ScorableResult[] {
-  const latest = new Map<string, ScorableResult>();
+export function latestResults<T extends ScorableResult>(results: readonly T[]): T[] {
+  const latest = new Map<string, T>();
 
   for (const result of results) {
     const held = latest.get(result.check_definition_id);

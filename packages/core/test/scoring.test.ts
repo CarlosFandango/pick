@@ -53,6 +53,18 @@ describe('latestResults', () => {
     expect(latestResults([higher, lower])).toEqual([higher]);
   });
 
+  it('hands back the rows it was given, joins and all', () => {
+    // Screens read check_result with its check_definition joined on, and were
+    // re-implementing latest-wins locally because this function used to narrow
+    // its rows to the four fields scoring needs. That re-implementation dropped
+    // the tie-break above.
+    const d = def();
+    const withJoin = { ...result(d, { outcome: 'pass' }), check_definition: { prompt: 'ask' } };
+
+    const [row] = latestResults([withJoin]);
+    expect(row?.check_definition.prompt).toBe('ask');
+  });
+
   it('keeps one row per distinct check', () => {
     const a = def();
     const b = def();

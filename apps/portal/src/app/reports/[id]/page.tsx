@@ -4,6 +4,7 @@ import {
   auditorLabel,
   countsLine,
   DEFAULT_REPORT_SETTINGS,
+  latestResults,
   momentOrder,
   momentTag,
   overallScore,
@@ -44,10 +45,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       ? supabase
           .from('check_result')
           .select(
-            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code)',
+            'id, check_definition_id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code)',
           )
           .eq('audit_id', id)
-          .order('occurred_at', { ascending: false })
       : Promise.resolve({ data: null }),
     supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
     supabase
@@ -57,15 +57,15 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       .maybeSingle(),
   ]);
 
-  type ResultRow = NonNullable<typeof results>[number];
-  const latest = new Map<string, ResultRow>();
-  for (const row of results ?? []) {
-    const definition = row.check_definition;
-    if (!definition || latest.has(definition.id)) continue;
-    latest.set(definition.id, row);
-  }
+  // check_result is append-only, so a correction is another row for the same
+  // check. Which one counts is a domain rule with a tie-break in it — latest
+  // occurred_at, then the larger device-minted id — so it is latestResults'
+  // decision, not this screen's and not the query's ORDER BY.
+  const latest = latestResults(
+    (results ?? []).map((row) => ({ ...row, outcome: parseCheckOutcome(row.outcome) })),
+  );
 
-  const reviewResults: ReviewResult[] = [...latest.values()].flatMap((row) => {
+  const reviewResults: ReviewResult[] = latest.flatMap((row) => {
     const d = row.check_definition;
     if (!d) return [];
     return [
@@ -74,7 +74,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         moment: d.moment,
         momentIndex: momentOrder(d.moment) + 1,
         prompt: d.prompt,
-        verdict: parseCheckOutcome(row.outcome),
+        verdict: row.outcome,
         note: row.note,
       },
     ];
@@ -85,13 +85,8 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   // compliance_category, and the database withholds that column from the API on
   // purpose. Nothing on this page renders a category, so nothing asks for one.
   const score = overallScore(
-    [...latest.values()].flatMap((row) => (row.check_definition ? [row.check_definition] : [])),
-    [...latest.values()].map((row) => ({
-      id: row.id,
-      check_definition_id: row.check_definition?.id ?? '',
-      outcome: parseCheckOutcome(row.outcome),
-      occurred_at: row.occurred_at,
-    })),
+    latest.flatMap((row) => (row.check_definition ? [row.check_definition] : [])),
+    latest,
   );
 
   return (
