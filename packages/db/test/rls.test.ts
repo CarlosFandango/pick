@@ -419,3 +419,86 @@ describe('the auditor roster', () => {
     });
   });
 });
+
+describe('the client roster and credit adjustments', () => {
+  it('is admin-only', async () => {
+    await withDatabase(async (db) => {
+      expect(await db.as(ids.clientA).query('select * from client_roster()')).toHaveLength(0);
+      expect(
+        (await db.as(ids.admin).query('select * from client_roster()')).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  it('reports a balance that is the sum of the ledger, not a stored number', async () => {
+    await withDatabase(async (db) => {
+      const [before] = await db
+        .as(ids.admin)
+        .query<{ balance: number }>(
+          'select balance from client_roster() where organisation_id = $1',
+          [ids.charityA],
+        );
+
+      await db
+        .as(ids.admin)
+        .query('select adjust_credits($1, $2, $3)', [
+          ids.charityA,
+          3,
+          'goodwill after a cancelled shift',
+        ]);
+
+      const [after] = await db
+        .as(ids.admin)
+        .query<{ balance: number }>(
+          'select balance from client_roster() where organisation_id = $1',
+          [ids.charityA],
+        );
+
+      expect(Number(after?.balance)).toBe(Number(before?.balance) + 3);
+    });
+  });
+
+  it('records an adjustment as a new row, never an edit', async () => {
+    // The ledger is evidence. A correction is another row; the balance is the
+    // sum of what is shown and a charity can add it up themselves.
+    await withDatabase(async (db) => {
+      await db
+        .as(ids.admin)
+        .query('select adjust_credits($1, $2, $3)', [ids.charityA, -1, 'duplicate booking voided']);
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ reason: string; note: string; created_by: string }>(
+          "select reason, note, created_by from credit_transaction where organisation_id = $1 and reason = 'adjustment'",
+          [ids.charityA],
+        );
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.note).toBe('duplicate booking voided');
+      expect(rows[0]?.created_by).toBe(ids.admin);
+    });
+  });
+
+  it('refuses an adjustment with no reason, and one of zero', async () => {
+    await withDatabase(async (db) => {
+      const noReason = await db
+        .as(ids.admin)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 5, '  ']);
+      expect(noReason).toMatch(/reason is required/i);
+
+      const noChange = await db
+        .as(ids.admin)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 0, 'nothing']);
+      expect(noChange).toMatch(/records nothing/i);
+    });
+  });
+
+  it('refuses a client adjusting their own balance', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.clientA)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 100, 'please']);
+      expect(message).toMatch(/only PICK admin/i);
+    });
+  });
+});

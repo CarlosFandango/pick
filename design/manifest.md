@@ -54,7 +54,7 @@ the shared vocabulary, so they are allocated here.
 | S4.2 | Assignment console — the algorithm shows its work | Web | /admin/assignment/:id |
 | S4.3 | Auditor roster — vetting, coverage, capability | Web | /admin/auditors |
 | S4.4 | Audit situation report | Web | /admin/audits/:id |
-| S4.5 | Clients — organisations, users, credit adjustments | Web | /admin/clients (not built) |
+| S4.5 | Clients — roster, balances, credit adjustments | Web | /admin/clients |
 | S4.6 | Complaint triage | Web | /admin/complaints/:id (waits for TND-80) |
 | S4.7 | Payout runs | Web | /admin/payouts (waits for TND-81) |
 

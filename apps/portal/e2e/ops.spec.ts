@@ -61,3 +61,33 @@ test.describe('who may reach the ops screens', () => {
     await expect(page).not.toHaveURL(/\/admin\//);
   });
 });
+
+test.describe('S4.5 clients', () => {
+  test('shows what each charity holds and what it has used', async ({ page }) => {
+    await signIn(page, 'admin');
+    await page.goto('/admin/clients');
+
+    await expect(page.getByRole('heading', { name: 'Clients' })).toBeVisible();
+    for (const heading of ['Charity', 'Residency', 'Credits', 'Booked', 'Released']) {
+      await expect(page.getByRole('columnheader', { name: heading })).toBeVisible();
+    }
+  });
+
+  test('will not adjust credits without a reason', async ({ page }) => {
+    // It writes a permanent row on a ledger the charity can read.
+    await signIn(page, 'admin');
+    await page.goto('/admin/clients');
+
+    await page.getByRole('button', { name: 'Adjust credits' }).first().click();
+    await expect(page.getByLabel(/Why/)).toBeVisible();
+
+    const reason = page.getByLabel(/Why/);
+    await expect(reason).toHaveAttribute('required', '');
+  });
+
+  test('keeps a client out of the client roster', async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/admin/clients');
+    await expect(page).not.toHaveURL(/\/admin\//);
+  });
+});

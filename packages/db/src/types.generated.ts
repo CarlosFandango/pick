@@ -1174,6 +1174,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      adjust_credits: {
+        Args: { p_delta: number; p_organisation_id: string; p_reason: string }
+        Returns: {
+          audit_id: string | null
+          created_by: string | null
+          currency: string
+          delta: number
+          external_reference: string | null
+          id: string
+          note: string | null
+          occurred_at: string
+          organisation_id: string
+          reason: Database["public"]["Enums"]["credit_reason"]
+          recorded_at: string
+          unit_price_minor_units: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "credit_transaction"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_auditor: {
         Args: { p_auditor_id: string }
         Returns: {
@@ -1355,6 +1378,20 @@ export type Database = {
             }
           }
       booking_lead_days: { Args: never; Returns: number }
+      client_roster: {
+        Args: never
+        Returns: {
+          audits_booked: number
+          audits_released: number
+          balance: number
+          charity_number: string
+          is_active: boolean
+          members: number
+          name: string
+          organisation_id: string
+          residency_zone: Database["public"]["Enums"]["residency_zone"]
+        }[]
+      }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined

@@ -71,7 +71,7 @@ reason. Deferred is a real answer and should stay populated.
 | S4.2 | Assignment console | Built |
 | S4.3 | Auditor roster — vetting, coverage, capability | Built |
 | S4.4 | Audit situation report | Built |
-| S4.5 | Clients admin | Not started |
+| S4.5 | Clients — roster, balances, credit adjustments | Built |
 | S4.6 | Complaint triage | Not started — waits for TND-80, which changes it into a triage queue |
 | S4.7 | Payout runs | Not started — waits for TND-81; payment and release holds are the screen's structure |
 
