@@ -125,6 +125,21 @@ looks exactly like a broken form.
 the run. It appends rather than sets, because the ledger is append-only and
 there is no row to overwrite.
 
+### A fill token used where its text pair belongs
+**Symptom:** the pipeline rail on `/audits/:id` was unreadable — upcoming steps
+at 1.16:1 against the page, the current step's marker at 1.75:1. Not "slightly
+low": invisible on a dim monitor.
+**Why it hid:** every colour came from `design/tokens/tokens.ts`, so it looked
+correct by the rule that matters most here ("no colour that is not a token").
+But the brand ships accents in pairs — `auditing` is signage, `auditingText` is
+the same accent as type — and a token name does not say which it is. Contrast
+also degrades quietly: nothing errors, nothing logs, and it reads fine on the
+laptop it was built on.
+**Caught now by:** `packages/tokens/test/brand.test.ts`, which classifies every
+brand colour as text / surface / hairline / fill and fails if a new token
+arrives unclassified. Fills are asserted to *fail* as text, so the pairing is a
+test rather than a paragraph in the build guide.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.

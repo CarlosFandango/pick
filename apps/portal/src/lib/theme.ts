@@ -42,3 +42,21 @@ export const pillButton = {
   cursor: 'pointer',
   fontFamily: sans,
 } as const;
+
+/**
+ * Visible to a screen reader, invisible on screen.
+ *
+ * For state a sighted reader gets from shape or colour and an assistive reader
+ * would otherwise lose entirely. Colour never carries state on its own.
+ */
+export const srOnly = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const;
