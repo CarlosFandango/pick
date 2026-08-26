@@ -102,11 +102,63 @@ check_definition` in CI, green locally.
 **Why it hid:** a Supabase stack bootstraps `alter default privileges ... grant
 all on tables`, so the schema worked without ever granting anything. A newer CLI
 in CI bootstraps differently. Anything you did not declare can change under you.
-**Caught now by:** grant assertions in the RLS suite, and CI running the whole
+**Caught now by:** the privilege inventories in `surface.test.ts` — which sweep
+every table and function rather than naming a few — and CI running the whole
 database job on a clean stack with the latest CLI.
 
-*Both are the same lesson: **a permission model must be stated and exercised as
-the role that actually uses it.** Two shapes, one week apart.*
+### A rule in a function, and a door left open beside it
+**Symptom:** none. Everything worked. `book_audit` spent a credit, `accept_offer`
+withdrew the losing offers, `release_audit` refused anything not in review — and
+a client could `insert into audit` for a free audit booked for tomorrow, an
+auditor could `update audit set auditor_fee_pence = 999999, status = 'released'`,
+and an auditor could `update audit_offer set outcome = 'accepted'` and strand
+the audit forever behind the unique index.
+**Why it hid:** the rule was real, tested and enforced — inside the function.
+`authenticated` also held table-level INSERT/UPDATE/DELETE on everything, and
+each policy let the obvious caller through, so beside every checked path was an
+unchecked one that did the same write. Every refusal test we had called the
+*function* with the wrong role; not one went at the table directly. A hole in
+the table path looks exactly like a system that works.
+**Caught now by:** `packages/db/test/refusals.test.ts` — what each role must not
+be able to do, always as a direct table write, never as an RPC call. Write an
+RPC, write the refusal for doing the same thing without it.
+
+### A snapshot grant, undone by a default privilege
+**Symptom:** `anon` held SELECT on `complaint`, `prep_progress`,
+`auditor_conflict` and `auditor_capability`; `authenticated` could execute every
+internal helper including `auditor_code_for`, which exists to make an auditor
+unidentifiable.
+**Why it hid:** `revoke all on all tables in schema public from anon` reads like
+a rule and is a snapshot — it says nothing about the table created two
+migrations later, which picks the platform's default privileges straight back
+up. Postgres grants EXECUTE on a new function to PUBLIC for the same reason.
+The test that should have caught it asserted `anon` had no privilege on
+`public.audit` — one table, by name, and the wrong one.
+**Caught now by:** `packages/db/test/surface.test.ts`, which sweeps every table
+and every function rather than naming one, and `alter default privileges`
+statements that cover objects nobody has created yet. A revoke without a
+matching default-privileges rule is half a revoke.
+
+### A function that was replaced, and wasn't
+**Symptom:** two `book_audit`s. The rebuilt one refused a window starting inside
+the lead time; the original, still granted, did not.
+**Why it hid:** `create or replace function` replaces a function with the *same*
+argument list. 20260826180000 added a ninth parameter, so it created an
+overload and left the eight-argument version installed — and the migration reads
+exactly like a replacement. It was visible the whole time in
+`types.generated.ts`, where `book_audit` was a union of two signatures, and that
+union read as a generator quirk rather than a fact about the schema.
+**Caught now by:** `surface.test.ts` asserting no overloaded function name in
+`public`. A deliberate overload will fail that test, which is the right moment
+to ask whether both signatures should be reachable.
+
+*The same lesson five times: **a permission model must be stated and exercised
+as the role that actually uses it, and a rule is only real where it is
+enforced.** The first two were about a privilege that did not work. The next
+three are about privileges that worked too well — a grant beside every checked
+function, a revoke that only covered what already existed, and a function that
+outlived the one meant to replace it. Every one of them was invisible because a
+hole looks exactly like a system that works.*
 
 ### Tests that assert absolute counts against a shared database
 **Symptom:** integration tests pass alone and fail after a UX run —
@@ -173,52 +225,6 @@ the *outcome* rather than trusting the statement. The form that works is `revoke
 select on <table>`, then `grant select (col, col, …)` by name — after which
 `has_table_privilege(..., 'select')` is false and `has_any_column_privilege` is
 true, so any test written the obvious way needs the second one.
-
-### A rule in a function, and a door left open beside it
-**Symptom:** none. Everything worked. `book_audit` spent a credit, `accept_offer`
-withdrew the losing offers, `release_audit` refused anything not in review — and
-a client could `insert into audit` for a free audit booked for tomorrow, an
-auditor could `update audit set auditor_fee_pence = 999999, status = 'released'`,
-and an auditor could `update audit_offer set outcome = 'accepted'` and strand
-the audit forever behind the unique index.
-**Why it hid:** the rule was real, tested and enforced — inside the function.
-`authenticated` also held table-level INSERT/UPDATE/DELETE on everything, and
-each policy let the obvious caller through, so beside every checked path was an
-unchecked one that did the same write. Every refusal test we had called the
-*function* with the wrong role; not one went at the table directly. A hole in
-the table path looks exactly like a system that works.
-**Caught now by:** `packages/db/test/refusals.test.ts` — what each role must not
-be able to do, always as a direct table write, never as an RPC call. Write an
-RPC, write the refusal for doing the same thing without it.
-
-### A snapshot grant, undone by a default privilege
-**Symptom:** `anon` held SELECT on `complaint`, `prep_progress`,
-`auditor_conflict` and `auditor_capability`; `authenticated` could execute every
-internal helper including `auditor_code_for`, which exists to make an auditor
-unidentifiable.
-**Why it hid:** `revoke all on all tables in schema public from anon` reads like
-a rule and is a snapshot — it says nothing about the table created two
-migrations later, which picks the platform's default privileges straight back
-up. Postgres grants EXECUTE on a new function to PUBLIC for the same reason.
-The test that should have caught it asserted `anon` had no privilege on
-`public.audit` — one table, by name, and the wrong one.
-**Caught now by:** `packages/db/test/surface.test.ts`, which sweeps every table
-and every function rather than naming one, and `alter default privileges`
-statements that cover objects nobody has created yet. A revoke without a
-matching default-privileges rule is half a revoke.
-
-### A function that was replaced, and wasn't
-**Symptom:** two `book_audit`s. The rebuilt one refused a window starting inside
-the lead time; the original, still granted, did not.
-**Why it hid:** `create or replace function` replaces a function with the *same*
-argument list. 20260826180000 added a ninth parameter, so it created an
-overload and left the eight-argument version installed — and the migration reads
-exactly like a replacement. It was visible the whole time in
-`types.generated.ts`, where `book_audit` was a union of two signatures, and that
-union read as a generator quirk rather than a fact about the schema.
-**Caught now by:** `surface.test.ts` asserting no overloaded function name in
-`public`. A deliberate overload will fail that test, which is the right moment
-to ask whether both signatures should be reachable.
 
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
