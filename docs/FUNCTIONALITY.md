@@ -14,7 +14,10 @@ reason. Deferred is a real answer and should stay populated.
 | Turborepo monorepo, pnpm workspaces | Built | root | hoisted node-linker for React Native |
 | CI: lint / typecheck / test | Built | `.github/workflows/ci.yml` | plus a job that applies migrations from scratch |
 | Staging migration deploy | Built | `.github/workflows/deploy-staging.yml` | manual + on migration change; production is promoted by hand |
-| Hosted Supabase project | Partial | London (eu-west-2) | project exists; not yet linked — needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. The workflow skips with a notice until then. |
+| Hosted Supabase: staging | Built | London (eu-west-2), ref in `.env` | linked; all 26 migrations applied, 18 tables live and empty. No seed — `seed.sql` is local-only by design. |
+| Hosted Supabase: production | Planned | London (eu-west-2) | project exists, nothing pushed. Promoted by hand, and not needed until there is something to protect. |
+| CI deploy to staging | Partial | `.github/workflows/deploy-staging.yml` | still skips with a notice: needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. Pushing from a laptop is not a pipeline. |
+| RLS verified against hosted | Not started | — | `pnpm test:rls` has only ever run locally and in CI. Both grant pitfalls came from bootstrap differences, so a hosted run is the point — see TND-86. |
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
