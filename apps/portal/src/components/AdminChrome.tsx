@@ -41,6 +41,7 @@ export function AdminChrome({
             { href: '/admin/audits', label: 'Audits' },
             { href: '/admin/auditors', label: 'Auditors' },
             { href: '/admin/clients', label: 'Clients' },
+            { href: '/admin/payouts', label: 'Payouts' },
             { href: '/admin/risks', label: 'Risks' },
             { href: '/admin/gates', label: 'Gates' },
           ].map((tab) => (

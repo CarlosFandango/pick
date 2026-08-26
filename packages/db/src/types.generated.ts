@@ -1518,6 +1518,32 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_payout_run: {
+        Args: { p_run_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assignment_console: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1620,6 +1646,32 @@ export type Database = {
         }
       }
       booking_lead_days: { Args: never; Returns: number }
+      build_payout_run: {
+        Args: { p_period_end: string; p_period_start: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       client_roster: {
         Args: never
         Returns: {
@@ -1647,6 +1699,32 @@ export type Database = {
           match_reason: string
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }[]
+      }
+      execute_payout_run: {
+        Args: { p_external_reference: string; p_run_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       exposure_window_days: { Args: never; Returns: number }
       matching_review_gates: {
@@ -1722,6 +1800,18 @@ export type Database = {
           since: string
           summary: string
           target_id: string
+        }[]
+      }
+      payable_audits: {
+        Args: never
+        Returns: {
+          amount_minor_units: number
+          audit_id: string
+          auditor_id: string
+          auditor_name: string
+          completed_at: string
+          gate: Database["public"]["Enums"]["review_gate_mode"]
+          reference: string
         }[]
       }
       prefer_auditor: {

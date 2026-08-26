@@ -42,7 +42,7 @@ reason. Deferred is a real answer and should stay populated.
 | Credit price list | Built | `credit_bundle`, `core/credits.ts` | five bundles, seeded. Price is read, never a constant — a price in code would rewrite past purchases |
 | Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
 | Currency-generic money | Built | `core/money.ts`, `20260826230000_currency_generic_money.sql` | `formatMoney(minorUnits, currency)`; columns are `_minor_units`. No currency column yet — see PATTERNS |
-| Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
+| Payout ledger + run builder | Built | `20260826320000_payout_runs.sql` | draft → approve → executed. Payable is decided by the payment gate, never by client approval. No CSV export yet |
 | Review gates | Built | `review_gate`, `20260826310000_review_gates.sql` | TND-81. Six fixed triggers; payment and client-release resolve independently; most restrictive wins |
 | Risk register | Built | `risk`, `risk_advisory`, `assignment_override` | TND-82. Conflict hard-blocks; exposure warns and auto-raises a risk. The advisory is a separate record |
 
@@ -78,7 +78,7 @@ reason. Deferred is a real answer and should stay populated.
 | S4.4 | Audits — list and situation report | Built |
 | S4.5 | Clients — roster, balances, credit adjustments | Built |
 | S4.6 | Complaint — read, acknowledge, resolve | Built (minimal). TND-80 adds triage paths and PICK-authored rework beside it |
-| S4.7 | Payout runs | Not started — the gate now exists, so this is unblocked |
+| S4.7 | Payout runs | Built |
 | S4.8 | Risk register | Built |
 | S4.9 | Review gates | Built |
 
