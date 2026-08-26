@@ -72,7 +72,15 @@ describe('selectable_auditors (S3.2)', () => {
 
       const rows = await pool(db, ids.clientA);
       const familiar = rows.find((r) => r.state === 'familiarity');
-      expect(familiar?.warning).toMatch(/Familiarity warning.*1 times in 60 days.*can proceed/i);
+      // The window is not written down here. It is exposure_window_days(), the
+      // same one assignment excludes on, and pinning the number in a test was
+      // how the picker and the assignment rule drifted 60 apart from 90.
+      const [{ days }] = await db.arrange<{ days: number }>(
+        'select public.exposure_window_days() as days',
+      );
+      expect(familiar?.warning).toMatch(
+        new RegExp(`Familiarity warning.*1 times in ${days} days.*can proceed`, 'i'),
+      );
     });
   });
 

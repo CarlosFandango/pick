@@ -23,6 +23,7 @@ like before you open it.
 | Queue unsent work | `synced_at is null` on the row itself | a separate outbox table |
 | Validate input | a zod schema in `core/entities.ts`, parsed at the boundary | ad-hoc `if` checks, validating twice |
 | Add a closed set of values | `as const` array in `core` + a PG enum, kept in step | a lookup table, a config file, a string |
+| Keep two copies of one fact honest | a comparison test in `packages/db/test/in-step.test.ts` | remembering, or a code generator |
 | Add a check to the catalogue | new `check_definition` row, new `version` | editing an existing row |
 | Represent money | integer pence, `_pence` suffix | float, decimal string, `Money` class |
 | Derive a value from a column | a stored generated column | parsing in application code |
@@ -129,6 +130,22 @@ looks exactly like a broken form.
 the run. It appends rather than sets, because the ledger is append-only and
 there is no row to overwrite.
 
+### The same idea, twice, with two different numbers
+**Symptom:** the S3.2 picker warned a client that an auditor had audited them
+"1 times in 60 days"; assignment excluded that auditor for 90. Same charity-facing
+idea, a different answer depending which screen asked.
+**Why it hid:** `exposure_window_days()` exists precisely so this cannot happen,
+and the newer function simply did not call it — 60 was written as a literal in
+the query and again inside the warning text. Nothing compares two numbers that
+are supposed to be one. The same gap covered the enums and the booking
+constants: PATTERNS says an `as const` array in core plus a PG enum "kept in
+step", and keeping them in step was a person remembering.
+**Caught now by:** `packages/db/test/in-step.test.ts` — every enum core
+enumerates at runtime compared to its PG counterpart in order, and the booking
+constants exercised through `book_audit` rather than compared as literals. A
+test that pins the number itself is part of the problem: the override test used
+to assert "60 days" in the warning text, and now reads the constant.
+
 ### A column-level REVOKE that does nothing
 **Symptom:** `revoke select (compliance_category) on check_definition from
 authenticated` ran without error and changed nothing at all.
@@ -200,6 +217,18 @@ lint, typecheck or unit tests.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-26 — Facts that exist twice are compared by a test, not by memory
+Some duplication is correct and cannot be removed: the booking form sets its
+`min` dates from core's constants because it cannot await a round trip, and a PG
+enum is what makes a column self-describing. What was missing was the thing that
+fails when the two copies disagree. `in-step.test.ts` compares every enum core
+enumerates at runtime against its PG counterpart, in order, and exercises the
+booking constants through `book_audit`. `packages/db` gains `@picksel/core` as a
+devDependency for it — test-only, and no cycle, since core depends on nothing in
+this workspace. *Rejected:* generating one from the other. A code generator is a
+build step, a format to learn and a thing to debug, to remove a duplication that
+a fifteen-line test makes safe.
 
 ### 2026-08-26 — The compliance category is withheld by the database, not by the client
 `check_definition` is granted column by column and `compliance_category` is not

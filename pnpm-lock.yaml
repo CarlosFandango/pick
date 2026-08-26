@@ -186,6 +186,9 @@ importers:
 
   packages/db:
     devDependencies:
+      '@picksel/core':
+        specifier: workspace:*
+        version: link:../core
       '@types/pg':
         specifier: ^8.15.5
         version: 8.23.1

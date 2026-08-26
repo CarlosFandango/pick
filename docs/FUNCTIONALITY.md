@@ -27,6 +27,7 @@ reason. Deferred is a real answer and should stay populated.
 | Writes go through RPCs | Built | `20260826230000_writes_go_through_rpcs.sql` | direct INSERT/UPDATE/DELETE revoked except field events, complaints, prep |
 | Declared grant surface | Built | `20260826230100_declare_the_whole_surface.sql` | anon holds nothing; the callable function list is explicit |
 | Refusal + inventory suites | Built | `packages/db/test/refusals.test.ts`, `surface.test.ts` | what each role must *not* do, and what the schema exposes |
+| Core/schema parity suite | Built | `packages/db/test/in-step.test.ts` | every enum and domain constant that exists in both places |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category withheld by column grant — no signed-in role can read it |
