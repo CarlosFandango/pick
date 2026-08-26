@@ -14,6 +14,7 @@ reason. Deferred is a real answer and should stay populated.
 | Turborepo monorepo, pnpm workspaces | Built | root | hoisted node-linker for React Native |
 | CI: lint / typecheck / test | Built | `.github/workflows/ci.yml` | plus a job that applies migrations from scratch |
 | Staging migration deploy | Built | `.github/workflows/deploy-staging.yml` | manual + on migration change; production is promoted by hand |
+| Hosted Supabase project | Partial | London (eu-west-2) | project exists; not yet linked — needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. The workflow skips with a notice until then. |
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
