@@ -596,6 +596,36 @@ export type Database = {
           },
         ]
       }
+      credit_bundle: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          price_minor_units: number
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          price_minor_units: number
+          quantity: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          price_minor_units?: number
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       credit_transaction: {
         Row: {
           audit_id: string | null
@@ -1234,7 +1264,6 @@ export type Database = {
             }
           }
       booking_lead_days: { Args: never; Returns: number }
-      credit_price_minor_units: { Args: never; Returns: number }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined
@@ -1506,6 +1535,7 @@ export type Database = {
           warning: string
         }[]
       }
+      single_credit_price_minor_units: { Args: never; Returns: number }
       submit_write_up: {
         Args: { p_audit_id: string; p_results: Json }
         Returns: {

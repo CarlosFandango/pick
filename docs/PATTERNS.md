@@ -27,7 +27,7 @@ like before you open it.
 | Add a check to the catalogue | new `check_definition` row, new `version` | editing an existing row |
 | Represent money | integer minor units, never a float | decimal string, `Money` class |
 | Format money | `formatMoney(minorUnits, currency)` | a `£` in a component, a hardcoded `/100` |
-| Quote a price | amount **and** currency together (`CREDIT_PRICE`) | a bare number named `…Pence` |
+| Quote a price | read `credit_bundle`; amount and currency together | a price constant in app code |
 | Derive a value from a column | a stored generated column | parsing in application code |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |

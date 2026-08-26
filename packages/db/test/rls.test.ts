@@ -171,6 +171,51 @@ describe('the credit ledger', () => {
   });
 });
 
+describe('the credit price list', () => {
+  it('lets a client read it — they cannot decide what to buy otherwise', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db
+        .as(ids.clientA)
+        .query<{ quantity: number }>('select quantity from credit_bundle where is_active');
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('lets an auditor read it too — the price list is not confidential', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db.as(ids.auditor).query('select quantity from credit_bundle');
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('refuses a client setting their own price', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.clientA)
+        .expectRefused(
+          'insert into credit_bundle (quantity, price_minor_units) values (99, 1)',
+          [],
+        );
+      expect(message).toMatch(/row-level security/i);
+    });
+  });
+
+  it('keeps one active bundle per size, so a price is never ambiguous', async () => {
+    await withDatabase(async (db) => {
+      // As admin, who is allowed to write — this is the index doing the work,
+      // not a policy. Two active bundles of the same size would make "what
+      // does one credit cost" a question with two answers.
+      const message = await db
+        .as(ids.admin)
+        .expectRefused(
+          'insert into credit_bundle (quantity, price_minor_units) values (1, 99999)',
+          [],
+        );
+      expect(message).toMatch(/duplicate key|unique/i);
+    });
+  });
+});
+
 describe('organisations and profiles', () => {
   it('shows a client only their own organisation', async () => {
     await withDatabase(async (db) => {

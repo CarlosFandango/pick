@@ -91,6 +91,15 @@ test.describe('S3.5 running out of credits', () => {
     await page.goto('/credits');
 
     await expect(page.getByRole('heading', { name: 'Buying credits' })).toBeVisible();
-    await expect(page.getByText(/invoiced at £175/)).toBeVisible();
+
+    // The price list comes from credit_bundle, so this proves the query, the
+    // policy that lets a client read it, and the seed — not just the markup.
+    const prices = page.getByRole('table').filter({ hasText: 'Credits' });
+    await expect(prices.getByRole('cell', { name: '£250' })).toBeVisible();
+    await expect(prices.getByRole('cell', { name: '£750 · £187.50 each' })).toBeVisible();
+
+    // The superseded figure, asserted absent on the screen where a charity
+    // decides what to spend.
+    await expect(page.getByText('£175')).toHaveCount(0);
   });
 });

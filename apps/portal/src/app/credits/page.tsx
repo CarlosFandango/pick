@@ -1,7 +1,7 @@
 import {
   CREDIT_REASON_LABELS,
+  type CreditBundle,
   type CreditEntry,
-  creditPriceLabel,
   currentBalance,
   deltaLabel,
   runningBalance,
@@ -10,8 +10,7 @@ import {
 import { color, radius } from '@picksel/tokens';
 import { BuyCredits } from '@/components/BuyCredits';
 import { Chrome } from '@/components/Chrome';
-import { requireRole } from '@/lib/auth';
-import { supabaseServer } from '@/lib/supabase';
+import { clientPage } from '@/lib/client-page';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
 const cell = {
@@ -28,21 +27,26 @@ const cell = {
  * what is shown, and a charity can add it up themselves.
  */
 export default async function CreditsPage() {
-  const session = await requireRole('client', 'pick_admin');
-  const supabase = await supabaseServer();
+  const { supabase, organisationName } = await clientPage();
 
-  const [{ data: organisation }, { data: rows }] = await Promise.all([
-    supabase
-      .from('organisation')
-      .select('name')
-      .eq('id', session.organisationId ?? '')
-      .single(),
+  const [{ data: rows }, { data: bundleRows }] = await Promise.all([
     supabase
       .from('credit_transaction')
       .select('id, delta, reason, occurred_at, unit_price_minor_units, note, audit(reference)')
       .order('occurred_at', { ascending: false })
       .limit(200),
+    supabase
+      .from('credit_bundle')
+      .select('quantity, price_minor_units, currency')
+      .eq('is_active', true)
+      .order('quantity'),
   ]);
+
+  const bundles: CreditBundle[] = (bundleRows ?? []).map((row) => ({
+    quantity: row.quantity,
+    priceMinorUnits: row.price_minor_units,
+    currency: row.currency,
+  }));
 
   const entries: CreditEntry[] = (rows ?? []).map((row) => ({
     id: row.id,
@@ -58,13 +62,14 @@ export default async function CreditsPage() {
   const balance = currentBalance(entries);
 
   return (
-    <Chrome active="credits" organisationName={organisation?.name ?? '—'} credits={balance}>
+    <Chrome active="credits" organisationName={organisationName} credits={balance}>
       <div style={{ padding: '26px 32px', maxWidth: 820 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
           Credits
         </h1>
         <p style={{ margin: '0 0 20px', fontSize: 13, color: color.muted }}>
-          One credit books one audit, at {creditPriceLabel()}.
+          One credit books one audit. Credits are sold in bundles, and the price per audit falls as
+          the bundle grows.
         </p>
 
         <div
@@ -83,7 +88,7 @@ export default async function CreditsPage() {
           </div>
         </div>
 
-        <BuyCredits />
+        <BuyCredits bundles={bundles} />
 
         {lines.length === 0 ? (
           <p style={{ fontSize: 13, color: color.muted }}>No credit movements yet.</p>

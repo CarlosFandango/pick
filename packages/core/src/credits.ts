@@ -1,22 +1,43 @@
 import { type CurrencyCode, DEFAULT_CURRENCY, formatMoney } from './money';
 
 /**
- * What one credit costs — one credit books one audit.
+ * A quantity of credits at a price. One credit books one audit.
  *
  * Amount and currency travel together, because an amount on its own is not a
- * price. This is the list price, for screens that quote it; what was actually
- * charged on a given purchase is on the ledger row, because a price that
- * changes must not rewrite history.
+ * price. The list lives in `credit_bundle` and is read, not hardcoded — a
+ * price that changed in code would rewrite the history of every past purchase.
+ * What was actually charged is on the ledger row.
  */
-export const CREDIT_PRICE: { minorUnits: number; currency: CurrencyCode } = {
-  minorUnits: 17_500,
-  currency: DEFAULT_CURRENCY,
-};
-
-/** "£175" — the list price, formatted. */
-export function creditPriceLabel(): string {
-  return formatMoney(CREDIT_PRICE.minorUnits, CREDIT_PRICE.currency);
+export interface CreditBundle {
+  quantity: number;
+  priceMinorUnits: number;
+  currency: CurrencyCode;
 }
+
+/**
+ * What each credit in a bundle works out at.
+ *
+ * The reason credits are not fungible: a charity holding one single credit and
+ * a bundle of four is holding credits worth different amounts, and revenue per
+ * audit is unknowable unless each one remembers what it cost.
+ */
+export function effectiveUnitPrice(bundle: CreditBundle): number {
+  return Math.round(bundle.priceMinorUnits / bundle.quantity);
+}
+
+/** "£250 · £250.00 each" — a bundle as a charity reads it. */
+export function bundleLabel(bundle: CreditBundle): string {
+  const total = formatMoney(bundle.priceMinorUnits, bundle.currency);
+  const each = formatMoney(effectiveUnitPrice(bundle), bundle.currency);
+  return bundle.quantity === 1 ? total : `${total} · ${each} each`;
+}
+
+/** Cheapest first by unit price, which is the order a buyer compares them in. */
+export function sortBundles(bundles: readonly CreditBundle[]): CreditBundle[] {
+  return [...bundles].sort((a, b) => a.quantity - b.quantity);
+}
+
+export const DEFAULT_BUNDLE_CURRENCY: CurrencyCode = DEFAULT_CURRENCY;
 
 export type CreditReason = 'purchase' | 'booking' | 'refund' | 'adjustment' | 'expiry';
 

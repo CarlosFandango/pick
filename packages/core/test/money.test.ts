@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CREDIT_PRICE, creditPriceLabel } from '../src/credits';
-import { DEFAULT_CURRENCY, formatMoney, payBreakdown, totalMinorUnits } from '../src/money';
+import { formatMoney, payBreakdown, totalMinorUnits } from '../src/money';
 
 describe('formatting money', () => {
   it('drops empty decimals on a whole amount and keeps them otherwise', () => {
@@ -32,12 +31,5 @@ describe('formatting money', () => {
 
   it('itemises in whatever currency it is given', () => {
     expect(payBreakdown([{ label: 'audit', minorUnits: 10_000 }], 'EUR')).toBe('€100 audit');
-  });
-});
-
-describe('the credit price', () => {
-  it('carries its currency, because an amount alone is not a price', () => {
-    expect(CREDIT_PRICE.currency).toBe(DEFAULT_CURRENCY);
-    expect(creditPriceLabel()).toBe('£175');
   });
 });
