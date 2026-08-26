@@ -1,6 +1,7 @@
 import {
   CREDIT_REASON_LABELS,
   type CreditEntry,
+  creditPriceLabel,
   currentBalance,
   deltaLabel,
   runningBalance,
@@ -62,7 +63,7 @@ export default async function CreditsPage() {
           Credits
         </h1>
         <p style={{ margin: '0 0 20px', fontSize: 13, color: color.muted }}>
-          One credit books one audit, at £175.
+          One credit books one audit, at {creditPriceLabel()}.
         </p>
 
         <div

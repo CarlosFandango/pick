@@ -31,6 +31,7 @@ reason. Deferred is a real answer and should stay populated.
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
 | Credit ledger | Built | `credit_transaction` + balance view | no purchase flow yet |
+| Currency-generic money | Built | `core/money.ts` | `formatMoney(minorUnits, currency)`; DB columns still `_pence` |
 | Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
 
 ## Screens (design manifest)

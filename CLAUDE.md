@@ -331,7 +331,11 @@ Two ledgers, both permanent, neither with a balance column to drift out of sync:
   rows. A unique partial index makes an audit impossible to pay twice, across
   every run. **The rails are swappable; the ledger is permanent.**
 
-Money is integer pence. Never a float.
+Money is an integer count of a currency's smallest unit. Never a float, and
+never tied to a currency: `formatMoney(minorUnits, currency)` derives its
+divisor from the currency, a price carries its currency with it, and no
+component prints a `£`. The market is UK today; `residency_zone` already says
+it will not stay that way.
 
 ### Residency
 
@@ -386,7 +390,8 @@ pnpm db:start          # local Supabase (Docker)
 pnpm db:reset          # re-apply migrations + seed
 pnpm db:types          # regenerate Database types — after every migration
 pnpm dev               # all apps
-pnpm typecheck && pnpm lint && pnpm test
+pnpm check             # lint + typecheck + unit/component tests — seconds
+pnpm verify            # the lot, including build, RLS and Playwright — minutes
 ```
 
 ## What exists and what does not

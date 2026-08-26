@@ -2,7 +2,7 @@ import {
   AUDITOR_STATUS,
   type AuditStatus,
   auditSubtitle,
-  poundsFromPence,
+  formatMoney,
   type StatusTone,
 } from '@picksel/core';
 import { color, radius, space } from '@picksel/tokens';
@@ -69,7 +69,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
                 <Text style={{ ...text('body'), fontSize: 12, color: color.muted, marginTop: 2 }}>
                   {auditSubtitle([
                     audit.dateLabel,
-                    audit.feePence === null ? null : poundsFromPence(audit.feePence),
+                    audit.feePence === null ? null : formatMoney(audit.feePence),
                     audit.extra,
                   ])}
                 </Text>

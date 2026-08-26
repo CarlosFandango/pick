@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { payBreakdown, poundsFromPence, totalPence } from '../src/format/money';
+import { formatMoney, payBreakdown, totalMinorUnits } from '../src/format/money';
 import { expiresIn, offerArea, windowLabel } from '../src/format/offer';
 
 describe('money', () => {
@@ -10,23 +10,23 @@ describe('money', () => {
     [12550, '£125.50'],
     [0, '£0'],
   ])('renders %i pence as %s', (pence, expected) => {
-    expect(poundsFromPence(pence)).toBe(expected);
+    expect(formatMoney(pence)).toBe(expected);
   });
 
   it('itemises pay the way the offer screen must show it', () => {
     const lines = [
-      { label: 'audit', pence: 10000 },
-      { label: 'travel uplift', pence: 1500 },
+      { label: 'audit', minorUnits: 10000 },
+      { label: 'travel uplift', minorUnits: 1500 },
     ];
     expect(payBreakdown(lines)).toBe('£100 audit + £15 travel uplift');
-    expect(totalPence(lines)).toBe(11500);
+    expect(totalMinorUnits(lines)).toBe(11500);
   });
 
   it('never loses pence to floating point', () => {
     expect(
-      totalPence([
-        { label: 'a', pence: 1 },
-        { label: 'b', pence: 2 },
+      totalMinorUnits([
+        { label: 'a', minorUnits: 1 },
+        { label: 'b', minorUnits: 2 },
       ]),
     ).toBe(3);
   });

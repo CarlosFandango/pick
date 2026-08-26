@@ -15,8 +15,8 @@ function anOffer(over: Partial<OfferView> = {}): OfferView {
     windowEnd: new Date('2026-03-05T00:00:00Z'),
     expiresAt: new Date('2026-03-03T08:00:00Z'),
     pay: [
-      { label: 'audit', pence: 10000 },
-      { label: 'travel uplift', pence: 1500 },
+      { label: 'audit', minorUnits: 10000 },
+      { label: 'travel uplift', minorUnits: 1500 },
     ],
     ...over,
   };
@@ -84,7 +84,7 @@ describe('S1.3 job offer', () => {
   it('renders a pay total with no travel uplift', () => {
     render(
       <OfferScreen
-        offer={anOffer({ pay: [{ label: 'audit', pence: 10000 }] })}
+        offer={anOffer({ pay: [{ label: 'audit', minorUnits: 10000 }] })}
         now={NOW}
         onAccept={noop}
         onDecline={noop}

@@ -1,4 +1,22 @@
-import { poundsFromPence } from './money';
+import { type CurrencyCode, DEFAULT_CURRENCY, formatMoney } from './money';
+
+/**
+ * What one credit costs — one credit books one audit.
+ *
+ * Amount and currency travel together, because an amount on its own is not a
+ * price. This is the list price, for screens that quote it; what was actually
+ * charged on a given purchase is on the ledger row, because a price that
+ * changes must not rewrite history.
+ */
+export const CREDIT_PRICE: { minorUnits: number; currency: CurrencyCode } = {
+  minorUnits: 17_500,
+  currency: DEFAULT_CURRENCY,
+};
+
+/** "£175" — the list price, formatted. */
+export function creditPriceLabel(): string {
+  return formatMoney(CREDIT_PRICE.minorUnits, CREDIT_PRICE.currency);
+}
 
 export type CreditReason = 'purchase' | 'booking' | 'refund' | 'adjustment' | 'expiry';
 
@@ -58,5 +76,5 @@ export function deltaLabel(delta: number): string {
 /** "£700" for a purchase of 4 at £175. Nothing for a movement with no money. */
 export function valueLabel(entry: CreditEntry): string {
   if (!entry.unitPricePence || entry.reason !== 'purchase') return '';
-  return poundsFromPence(entry.unitPricePence * entry.delta);
+  return formatMoney(entry.unitPricePence * entry.delta);
 }

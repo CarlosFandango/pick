@@ -1,4 +1,4 @@
-import { poundsFromPence } from './money';
+import { formatMoney } from './money';
 
 export interface EarningLine {
   auditId: string;
@@ -42,7 +42,7 @@ export function pendingLine(summary: EarningsSummary): string {
   const audits = summary.pendingCount === 1 ? 'audit' : 'audits';
   const parts = [`${summary.pendingCount} ${audits}`];
   if (summary.pendingTravelPence > 0) {
-    parts.push(`incl. ${poundsFromPence(summary.pendingTravelPence)} travel uplift`);
+    parts.push(`incl. ${formatMoney(summary.pendingTravelPence)} travel uplift`);
   }
   return parts.join(' · ');
 }

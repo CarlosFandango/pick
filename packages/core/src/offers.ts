@@ -1,4 +1,4 @@
-import { poundsFromPence } from './money';
+import { formatMoney } from './money';
 
 export type OfferState = 'new' | 'expiring' | 'filled' | 'gone';
 
@@ -52,7 +52,7 @@ export function offerTotalPence(offer: OfferListItem): number {
 
 /** "incl. £15 travel uplift" — the uplift is never hidden inside a total. */
 export function upliftLabel(offer: OfferListItem): string {
-  return offer.travelPence > 0 ? `incl. ${poundsFromPence(offer.travelPence)} travel uplift` : '';
+  return offer.travelPence > 0 ? `incl. ${formatMoney(offer.travelPence)} travel uplift` : '';
 }
 
 /** Live offers first, then the ones that filled. Nothing that is simply gone. */

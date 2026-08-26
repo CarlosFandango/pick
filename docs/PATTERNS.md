@@ -24,7 +24,9 @@ like before you open it.
 | Validate input | a zod schema in `core/entities.ts`, parsed at the boundary | ad-hoc `if` checks, validating twice |
 | Add a closed set of values | `as const` array in `core` + a PG enum, kept in step | a lookup table, a config file, a string |
 | Add a check to the catalogue | new `check_definition` row, new `version` | editing an existing row |
-| Represent money | integer pence, `_pence` suffix | float, decimal string, `Money` class |
+| Represent money | integer minor units, never a float | decimal string, `Money` class |
+| Format money | `formatMoney(minorUnits, currency)` | a `£` in a component, a hardcoded `/100` |
+| Quote a price | amount **and** currency together (`CREDIT_PRICE`) | a bare number named `…Pence` |
 | Derive a value from a column | a stored generated column | parsing in application code |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
@@ -151,6 +153,26 @@ lint, typecheck or unit tests.
 **Caught now by:** `pnpm build` in CI.
 
 ## Decision log
+
+### 2026-08-26 — Currency is data, never baked into the logic
+
+Money stays an integer count of a currency's smallest unit. What changed is
+that nothing in `core` may know *which* currency that is: `formatMoney` takes
+one, derives the divisor from it (yen has no minor unit, so a hardcoded `/100`
+renders ¥500 as ¥5), and a price is an amount **and** a currency travelling
+together. No component prints a `£`.
+
+The market is UK today, but `organisation.residency_zone` already models `eea`
+and `other`. A currency assumed in a helper name, a symbol or a divisor is the
+kind of rewrite that surfaces as wrong numbers on an invoice rather than as a
+failing build.
+
+**Still outstanding:** the database columns are `_pence` suffixed
+(`amount_pence`, `unit_price_pence`, `travel_uplift_pence`), which bakes the
+same assumption into about twenty column names. That is one migration plus a
+types regeneration, and it will never be cheaper than it is now, while there is
+no production data.
+
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.

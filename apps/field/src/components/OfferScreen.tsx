@@ -1,6 +1,6 @@
 import { color, radius, space } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { type PayLine, payBreakdown, poundsFromPence, totalPence } from '@/format/money';
+import { formatMoney, type PayLine, payBreakdown, totalMinorUnits } from '@/format/money';
 import { expiresIn, offerArea, windowLabel } from '@/format/offer';
 import { text } from '@/theme';
 
@@ -35,7 +35,7 @@ export function OfferScreen({
   onDecline: () => void;
   busy?: boolean;
 }) {
-  const total = totalPence(offer.pay);
+  const total = totalMinorUnits(offer.pay);
 
   return (
     <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
@@ -93,10 +93,10 @@ export function OfferScreen({
             TOTAL PAY
           </Text>
           <Text
-            accessibilityLabel={`Total pay ${poundsFromPence(total)}`}
+            accessibilityLabel={`Total pay ${formatMoney(total)}`}
             style={{ ...text('display'), fontSize: 34, color: color.onDark, marginTop: 6 }}
           >
-            {poundsFromPence(total)}
+            {formatMoney(total)}
           </Text>
           <Text style={{ ...text('caption'), color: color.onDarkMuted, marginTop: 6 }}>
             {payBreakdown(offer.pay)}
