@@ -21,13 +21,31 @@ export interface CategoryScore extends Tally {
   criticalFailures: string[];
 }
 
-export interface AuditScore {
+/**
+ * What a check has to carry to contribute to a total.
+ *
+ * Deliberately narrower than CheckDefinition, and specifically without
+ * `compliance_category`: the category is withheld from the API, so a caller
+ * running as a signed-in user cannot read one. Everything a report renders
+ * today — the percentage and the critical failures — is computable without it.
+ */
+export interface ScorableDefinition {
+  id: string;
+  code: string;
+  weight: number;
+  is_critical: boolean;
+}
+
+export interface OverallScore {
   overall: Tally;
-  categories: CategoryScore[];
   /** Codes of failed critical checks. A charity needs these before the total. */
   criticalFailures: string[];
   /** Recorded but unscored — see the NOTE verdict. */
   notes: number;
+}
+
+export interface AuditScore extends OverallScore {
+  categories: CategoryScore[];
 }
 
 /**
@@ -69,20 +87,22 @@ function tally(earned: number, possible: number): Tally {
 }
 
 /**
- * Score an audit against the catalogue version it was run under.
+ * The weighted total and the critical failures, from checks alone.
+ *
+ * This is what a report renders, and it needs nothing about a check except its
+ * weight and whether it is critical — so it is what the client portal calls.
+ * The compliance category is withheld from the API precisely so that a caller
+ * running as a signed-in user cannot read it; asking for the whole
+ * CheckDefinition here would have made that impossible.
  *
  * A NOTE leaves the denominator alone — an auditor who wants something on the
  * record must not drag the score down by saying it.
  */
-export function scoreAudit(
-  definitions: readonly CheckDefinition[],
+export function overallScore(
+  definitions: readonly ScorableDefinition[],
   results: readonly ScorableResult[],
-): AuditScore {
+): OverallScore {
   const byId = new Map(definitions.map((d) => [d.id, d]));
-  const buckets = new Map<
-    ComplianceCategory,
-    { earned: number; possible: number; critical: string[] }
-  >(COMPLIANCE_CATEGORIES.map((c) => [c, { earned: 0, possible: 0, critical: [] }]));
 
   let earned = 0;
   let possible = 0;
@@ -102,17 +122,48 @@ export function scoreAudit(
       continue;
     }
 
-    const bucket = buckets.get(definition.compliance_category);
-    if (!bucket) continue;
-
     possible += definition.weight;
-    bucket.possible += definition.weight;
 
     if (result.outcome === 'pass') {
       earned += definition.weight;
-      bucket.earned += definition.weight;
     } else if (definition.is_critical) {
       criticalFailures.push(definition.code);
+    }
+  }
+
+  return { overall: tally(earned, possible), criticalFailures, notes };
+}
+
+/**
+ * The same score, broken down by what it aggregates over.
+ *
+ * Needs the compliance category, so it needs a caller that can legitimately
+ * read one — PICK's own reporting, not a screen running as the signed-in user.
+ * The totals come from overallScore rather than being recomputed here, so the
+ * headline figure cannot disagree with the breakdown beneath it.
+ */
+export function scoreAudit(
+  definitions: readonly CheckDefinition[],
+  results: readonly ScorableResult[],
+): AuditScore {
+  const byId = new Map(definitions.map((d) => [d.id, d]));
+  const buckets = new Map<
+    ComplianceCategory,
+    { earned: number; possible: number; critical: string[] }
+  >(COMPLIANCE_CATEGORIES.map((c) => [c, { earned: 0, possible: 0, critical: [] }]));
+
+  for (const result of latestResults(results)) {
+    const definition = byId.get(result.check_definition_id);
+    if (!definition || result.outcome === 'note') continue;
+
+    const bucket = buckets.get(definition.compliance_category);
+    if (!bucket) continue;
+
+    bucket.possible += definition.weight;
+
+    if (result.outcome === 'pass') {
+      bucket.earned += definition.weight;
+    } else if (definition.is_critical) {
       bucket.critical.push(definition.code);
     }
   }
@@ -123,10 +174,5 @@ export function scoreAudit(
     criticalFailures: b.critical,
   }));
 
-  return {
-    overall: tally(earned, possible),
-    categories,
-    criticalFailures,
-    notes,
-  };
+  return { ...overallScore(definitions, results), categories };
 }

@@ -228,81 +228,18 @@ describe('organisations and profiles', () => {
   });
 });
 
-describe('every table is protected', () => {
-  // A new table without RLS is invisible in review and catastrophic in
-  // production: it is readable by anyone with the anon key. Assert coverage
-  // rather than remembering.
-  it('has RLS enabled on every table in public', async () => {
-    await withDatabase(async (db) => {
-      const unprotected = await db.arrange<{ tablename: string }>(
-        "select tablename from pg_tables where schemaname = 'public' and not rowsecurity",
-      );
-      expect(unprotected.map((t) => t.tablename)).toEqual([]);
-    });
-  });
-
-  it('has at least one policy on every table', async () => {
-    await withDatabase(async (db) => {
-      const naked = await db.arrange<{ tablename: string }>(
-        `select t.tablename from pg_tables t
-         where t.schemaname = 'public'
-           and not exists (
-             select 1 from pg_policies p
-             where p.schemaname = 'public' and p.tablename = t.tablename
-           )`,
-      );
-      // RLS with no policy denies everything — safe, but always a mistake.
-      expect(naked.map((t) => t.tablename)).toEqual([]);
-    });
-  });
-});
-
-describe('table privileges are declared by the schema, not inherited', () => {
-  // These passed locally and failed in CI purely because a newer Supabase CLI
-  // bootstraps different default privileges. Assert what we depend on.
-  it.each(['audit', 'check_definition', 'organisation', 'user_profile'])(
-    'lets authenticated read %s',
-    async (table) => {
-      await withDatabase(async (db) => {
-        const [row] = await db.arrange<{ ok: boolean }>(
-          'select has_table_privilege($1, $2, $3) as ok',
-          ['authenticated', `public.${table}`, 'select'],
-        );
-        expect(row?.ok).toBe(true);
-      });
-    },
-  );
-
-  it.each(['observation_log', 'check_result', 'credit_transaction'])(
-    'withholds UPDATE and DELETE on %s even after the blanket grant',
-    async (table) => {
-      await withDatabase(async (db) => {
-        const [row] = await db.arrange<{ upd: boolean; del: boolean }>(
-          `select has_table_privilege($1, $2, 'update') as upd,
-                  has_table_privilege($1, $2, 'delete') as del`,
-          ['authenticated', `public.${table}`],
-        );
-        expect(row?.upd).toBe(false);
-        expect(row?.del).toBe(false);
-      });
-    },
-  );
-
-  it('grants anon nothing', async () => {
-    await withDatabase(async (db) => {
-      const [row] = await db.arrange<{ ok: boolean }>(
-        "select has_table_privilege('anon', 'public.audit', 'select') as ok",
-      );
-      expect(row?.ok).toBe(false);
-    });
-  });
-});
+// The inventory assertions that used to live here — RLS on every table, a
+// policy on every table, which privileges `authenticated` and `anon` hold —
+// moved to surface.test.ts, where they sweep every table and every function
+// rather than naming four of each. They were named-table checks, which is
+// exactly how `anon` kept privileges on the four tables added after the revoke
+// that was supposed to remove them.
 
 describe('the check catalogue', () => {
-  it('is readable by any signed-in user', async () => {
+  it('is readable by any signed-in user, minus the withheld column', async () => {
     await withDatabase(async (db) => {
       expect(
-        count(await db.as(ids.auditor).query('select id from check_definition')),
+        count(await db.as(ids.auditor).query('select id, moment, prompt from check_definition')),
       ).toBeGreaterThan(0);
     });
   });

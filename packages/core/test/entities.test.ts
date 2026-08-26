@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { auditStatus, parseAuditStatus, postcode, postcodeArea } from '../src/entities';
+import {
+  auditStatus,
+  checkOutcome,
+  parseAuditStatus,
+  parseCheckOutcome,
+  postcode,
+  postcodeArea,
+} from '../src/entities';
 import { isUuidV7, newId } from '../src/ids';
 import { AUDIT_MOMENTS, momentOrder } from '../src/moments';
 
@@ -70,5 +77,24 @@ describe('parseAuditStatus', () => {
 
   it('rejects anything else loudly rather than defaulting', () => {
     expect(() => parseAuditStatus('banana')).toThrow();
+  });
+});
+
+describe('parseCheckOutcome', () => {
+  it('accepts the three verdicts the design defines', () => {
+    for (const outcome of checkOutcome.options) {
+      expect(parseCheckOutcome(outcome)).toBe(outcome);
+    }
+  });
+
+  it('rejects the verdicts the schema invented before the design existed', () => {
+    // Postgres cannot drop an enum value, so these survive in the type and
+    // nothing writes them. Seeing one means something started to.
+    expect(() => parseCheckOutcome('not_observed')).toThrow(/not_observed/);
+    expect(() => parseCheckOutcome('not_applicable')).toThrow(/not_applicable/);
+  });
+
+  it('never renders OBS', () => {
+    expect(() => parseCheckOutcome('obs')).toThrow();
   });
 });

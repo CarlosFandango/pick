@@ -97,18 +97,39 @@ describe('table privileges are what this file says they are', () => {
 
   it('lets a signed-in user read every table, because RLS decides the rows', async () => {
     await withDatabase(async (db) => {
+      // has_any_column_privilege, not has_table_privilege: check_definition is
+      // granted column by column so the compliance category can be withheld,
+      // and a table-wide check reads that as "unreadable".
       const unreadable = await db.arrange<{ tablename: string }>(
         `select c.relname as tablename
          from pg_class c
          join pg_namespace n on n.oid = c.relnamespace
          where n.nspname = 'public'
            and c.relkind = 'r'
-           and not has_table_privilege('authenticated', c.oid, 'select')
+           and not has_any_column_privilege('authenticated', c.oid, 'select')
          order by 1`,
       );
       // A table nobody may read is either a mistake or a table that should not
       // be in `public` at all. Both are worth a conversation.
       expect(unreadable.map((r) => r.tablename)).toEqual([]);
+    });
+  });
+
+  it('withholds exactly the columns this file says are withheld', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db.arrange<{ tablename: string; column_name: string }>(
+        `select c.relname as tablename, a.attname as column_name
+         from pg_class c
+         join pg_namespace n on n.oid = c.relnamespace
+         join pg_attribute a on a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
+         where n.nspname = 'public'
+           and c.relkind = 'r'
+           and not has_column_privilege('authenticated', c.oid, a.attnum, 'select')
+         order by 1, 2`,
+      );
+      // A column-level REVOKE is silently a no-op while a table-level grant
+      // exists, so this asserts the outcome rather than the statement.
+      expect(rows).toEqual([{ tablename: 'check_definition', column_name: 'compliance_category' }]);
     });
   });
 

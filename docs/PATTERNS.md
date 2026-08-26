@@ -17,6 +17,8 @@ like before you open it.
 | Generate an id for a field event | `newId()` on the device | server default, autoincrement, composite key |
 | Generate an id anywhere else | `default public.uuid_generate_v7()` | `newId()` round-tripped from the client |
 | Correct a field event | insert a new row; read with `latestResults()` | UPDATE (it is blocked, deliberately) |
+| Keep a column off the API | `revoke select on <table>`, then `grant select (cols)` | a column-level REVOKE, which no-ops under a table grant |
+| Score a client-facing report | `overallScore()` | `scoreAudit()`, which needs the withheld category |
 | Sync from device | device-minted id + `on conflict do nothing` | merge, last-writer-wins, server dedup |
 | Queue unsent work | `synced_at is null` on the row itself | a separate outbox table |
 | Validate input | a zod schema in `core/entities.ts`, parsed at the boundary | ad-hoc `if` checks, validating twice |
@@ -127,6 +129,19 @@ looks exactly like a broken form.
 the run. It appends rather than sets, because the ledger is append-only and
 there is no row to overwrite.
 
+### A column-level REVOKE that does nothing
+**Symptom:** `revoke select (compliance_category) on check_definition from
+authenticated` ran without error and changed nothing at all.
+**Why it hid:** Postgres accepts the statement and silently keeps the
+table-level grant, which already covers every column. There is no warning and
+`has_column_privilege` still returns true. A migration reads as if the column is
+withheld while the column is not withheld.
+**Caught now by:** the withheld-column sweep in `surface.test.ts`, which asserts
+the *outcome* rather than trusting the statement. The form that works is `revoke
+select on <table>`, then `grant select (col, col, …)` by name — after which
+`has_table_privilege(..., 'select')` is false and `has_any_column_privilege` is
+true, so any test written the obvious way needs the second one.
+
 ### A rule in a function, and a door left open beside it
 **Symptom:** none. Everything worked. `book_audit` spent a credit, `accept_offer`
 withdrew the losing offers, `release_audit` refused anything not in review — and
@@ -185,6 +200,19 @@ lint, typecheck or unit tests.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-26 — The compliance category is withheld by the database, not by the client
+`check_definition` is granted column by column and `compliance_category` is not
+among them, so no signed-in role can read it — auditor, client or PICK. The
+field app's SQLite schema still leaves it out; that is now a convention on top
+of a boundary rather than the boundary itself. Scoring splits to match:
+`overallScore()` needs only weight and criticality and is what the client report
+calls, `scoreAudit()` keeps the per-category breakdown for a caller that can
+legitimately read one. *Rejected:* hiding it in the UI — the field app holds the
+anon key and can ask PostgREST for any column it likes, so a UI rule is not a
+rule. *Rejected also:* building the admin-facing function to read categories
+now; nothing renders a per-category score yet, and the seam is one `security
+definer` function when something does.
 
 ### 2026-08-26 — Writes go through RPCs; the grant surface is declared, not inherited
 `authenticated` may read what RLS allows and may write directly only where no

@@ -113,6 +113,25 @@ export function parseAuditStatus(value: string): AuditStatus {
   );
 }
 
+/**
+ * Narrow a check outcome read from the database.
+ *
+ * The same problem `parseAuditStatus` solves, for the same reason. The Postgres
+ * enum still carries `not_applicable` and `not_observed` — values invented
+ * before the design drop settled on PASS | FAIL | NOTE — and Postgres cannot
+ * drop an enum value, so nothing writes them and the generated types cannot
+ * know that.
+ *
+ * Throws rather than defaulting: a `not_observed` reaching a client report
+ * would mean something is writing verdicts we retired, and quietly rendering it
+ * as a pass or a fail would be the wrong answer either way.
+ */
+export function parseCheckOutcome(value: string): CheckOutcome {
+  const parsed = checkOutcome.safeParse(value);
+  if (parsed.success) return parsed.data;
+  throw new Error(`Unexpected check outcome "${value}". Verdicts are pass, fail or note.`);
+}
+
 export const checkDefinition = z.object({
   id: uuid,
   code: z.string(),

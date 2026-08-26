@@ -4,11 +4,12 @@ import {
   auditorLabel,
   countsLine,
   DEFAULT_REPORT_SETTINGS,
-  MOMENT_LABELS,
+  momentOrder,
   momentTag,
+  overallScore,
+  parseCheckOutcome,
   type ReviewResult,
   reviewSummary,
-  scoreAudit,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
@@ -43,7 +44,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       ? supabase
           .from('check_result')
           .select(
-            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code, compliance_category, sort_order, version)',
+            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code)',
           )
           .eq('audit_id', id)
           .order('occurred_at', { ascending: false })
@@ -71,25 +72,24 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       {
         checkId: d.id,
         moment: d.moment,
-        momentIndex: Object.keys(MOMENT_LABELS).indexOf(d.moment) + 1,
+        momentIndex: momentOrder(d.moment) + 1,
         prompt: d.prompt,
-        verdict: row.outcome as ReviewResult['verdict'],
+        verdict: parseCheckOutcome(row.outcome),
         note: row.note,
       },
     ];
   });
 
   const summary = reviewSummary(reviewResults);
-  const score = scoreAudit(
-    // `guidance` is auditor-facing and never fetched for a report, but the
-    // scoring type expects the whole definition.
-    [...latest.values()].flatMap((row) =>
-      row.check_definition ? [{ ...row.check_definition, guidance: null }] : [],
-    ),
+  // overallScore, not scoreAudit: the per-category breakdown needs
+  // compliance_category, and the database withholds that column from the API on
+  // purpose. Nothing on this page renders a category, so nothing asks for one.
+  const score = overallScore(
+    [...latest.values()].flatMap((row) => (row.check_definition ? [row.check_definition] : [])),
     [...latest.values()].map((row) => ({
       id: row.id,
       check_definition_id: row.check_definition?.id ?? '',
-      outcome: row.outcome as never,
+      outcome: parseCheckOutcome(row.outcome),
       occurred_at: row.occurred_at,
     })),
   );

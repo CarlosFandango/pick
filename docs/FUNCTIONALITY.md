@@ -29,9 +29,9 @@ reason. Deferred is a real answer and should stay populated.
 | Refusal + inventory suites | Built | `packages/db/test/refusals.test.ts`, `surface.test.ts` | what each role must *not* do, and what the schema exposes |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
-| Moment/category split | Built | `core/moments.ts` | category absent from field app entirely |
+| Moment/category split | Built | `core/moments.ts` | category withheld by column grant — no signed-in role can read it |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
-| Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
+| Scoring | Built | `core/scoring.ts` | `overallScore()` for reports, `scoreAudit()` for per-category; critical failures separate |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
 | Credit ledger | Built | `credit_transaction` + balance view | no purchase flow yet |
 | Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |

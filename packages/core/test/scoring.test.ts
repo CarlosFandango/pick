@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CheckDefinition } from '../src/entities';
-import { latestResults, type ScorableResult, scoreAudit } from '../src/scoring';
+import { latestResults, overallScore, type ScorableResult, scoreAudit } from '../src/scoring';
 
 let seq = 0;
 const id = (n: number) => `00000000-0000-7000-8000-${String(n).padStart(12, '0')}`;
@@ -160,5 +160,58 @@ describe('scoreAudit', () => {
     );
 
     expect(score.overall.percentage).toBe(100);
+  });
+});
+
+describe('scoring a report without the compliance category', () => {
+  // The category is withheld from the API, so a screen running as the signed-in
+  // user cannot read one. Everything a client report shows has to be reachable
+  // without it.
+  it('gives the same total and critical failures as the full score', () => {
+    const light = def({ weight: 2 });
+    const heavy = def({ weight: 3, is_critical: true });
+    const results = [result(light), result(heavy, { outcome: 'fail' })];
+
+    const full = scoreAudit([light, heavy], results);
+    const overall = overallScore([light, heavy], results);
+
+    expect(overall.overall).toEqual(full.overall);
+    expect(overall.criticalFailures).toEqual(full.criticalFailures);
+    expect(overall.notes).toEqual(full.notes);
+  });
+
+  it('scores checks that carry no category at all', () => {
+    const passed = { id: id(900), code: 'CHK-A', weight: 2, is_critical: false };
+    const failed = { id: id(901), code: 'CHK-B', weight: 2, is_critical: true };
+
+    const score = overallScore(
+      [passed, failed],
+      [
+        {
+          id: id(902),
+          check_definition_id: passed.id,
+          outcome: 'pass',
+          occurred_at: '2026-08-25T10:00:00.000Z',
+        },
+        {
+          id: id(903),
+          check_definition_id: failed.id,
+          outcome: 'fail',
+          occurred_at: '2026-08-25T10:00:00.000Z',
+        },
+      ],
+    );
+
+    expect(score.overall.percentage).toBe(50);
+    expect(score.criticalFailures).toEqual(['CHK-B']);
+  });
+
+  it('keeps a note outside the denominator', () => {
+    const d = def({ weight: 4 });
+    const score = overallScore([d], [result(d, { outcome: 'note' })]);
+
+    // 0/0 is "no data", not "nought percent".
+    expect(score.overall.percentage).toBeNull();
+    expect(score.notes).toBe(1);
   });
 });

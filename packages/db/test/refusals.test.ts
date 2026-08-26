@@ -276,6 +276,52 @@ describe('one charity cannot reach another', () => {
   });
 });
 
+describe('the compliance category never reaches an auditor', () => {
+  // Not a privacy rule — a measurement one. An auditor who knows a question is
+  // "the vulnerability one" answers it differently, and the audit stops
+  // measuring what it claims to. The field app's SQLite schema leaves the
+  // column out, but the field app holds the anon key and can ask PostgREST
+  // whatever it likes, so the schema is a convention and this is the boundary.
+  it('refuses an auditor reading the category', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.auditor)
+        .expectRefused('select compliance_category from check_definition');
+      expect(message).toMatch(/permission denied/i);
+    });
+  });
+
+  it('refuses select * on the catalogue, which is how it would leak by accident', async () => {
+    await withDatabase(async (db) => {
+      const message = await db.as(ids.auditor).expectRefused('select * from check_definition');
+      expect(message).toMatch(/permission denied/i);
+    });
+  });
+
+  it('still lets an auditor read the prompts they have to work through', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db
+        .as(ids.auditor)
+        .query('select id, code, moment, prompt, weight, is_critical from check_definition');
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('withholds it from a client and from PICK too', async () => {
+    await withDatabase(async (db) => {
+      // Nothing renders a per-category score yet. When something does, it
+      // arrives as a security definer function gated to PICK and the audit's
+      // own client — not as a grant widened back to everyone.
+      for (const who of [ids.clientA, ids.admin]) {
+        const message = await db
+          .as(who)
+          .expectRefused('select compliance_category from check_definition');
+        expect(message).toMatch(/permission denied/i);
+      }
+    });
+  });
+});
+
 describe('anon is refused at the privilege level, on every table', () => {
   // Not "returns no rows" — refused. Every policy is `to authenticated`, so an
   // anonymous caller matching no policy would get an empty list either way,

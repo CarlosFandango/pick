@@ -1,8 +1,9 @@
 import {
   AUDIT_TYPE_LABELS,
   countsLine,
-  MOMENT_LABELS,
+  momentOrder,
   momentTag,
+  parseCheckOutcome,
   passesLine,
   type ReviewResult,
   reviewSummary,
@@ -61,9 +62,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       {
         checkId: definition.id,
         moment,
-        momentIndex: Object.keys(MOMENT_LABELS).indexOf(moment) + 1,
+        momentIndex: momentOrder(moment) + 1,
         prompt: definition.prompt,
-        verdict: row.outcome as ReviewResult['verdict'],
+        verdict: parseCheckOutcome(row.outcome),
         note: row.note,
       },
     ];
