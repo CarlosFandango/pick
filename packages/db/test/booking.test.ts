@@ -53,7 +53,7 @@ describe('book_audit (S1.1)', () => {
         'select delta, reason from credit_transaction where audit_id = $1',
         [audit?.id],
       );
-      expect(rows).toEqual([{ delta: -1, reason: 'booking' }]);
+      expect(rows).toEqual([{ delta: -1, reason: 'reservation' }]);
     });
   });
 

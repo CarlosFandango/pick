@@ -27,7 +27,7 @@ describe('runningBalance', () => {
   it('shows the balance after every movement', () => {
     const lines = runningBalance([
       entry({ delta: 4, reason: 'purchase' }),
-      entry({ delta: -1, reason: 'booking' }),
+      entry({ delta: -1, reason: 'reservation' }),
       entry({ delta: 1, reason: 'refund' }),
     ]);
 
@@ -36,13 +36,16 @@ describe('runningBalance', () => {
   });
 
   it('is auditable by the person reading it, not something to trust', () => {
-    const lines = runningBalance([entry({ delta: 10 }), entry({ delta: -1, reason: 'booking' })]);
+    const lines = runningBalance([
+      entry({ delta: 10 }),
+      entry({ delta: -1, reason: 'reservation' }),
+    ]);
     expect(lines.at(-1)?.balanceAfter).toBe(10);
     expect(lines.at(0)?.balanceAfter).toBe(9);
   });
 
   it('orders by when things happened, not the order they arrived', () => {
-    const later = entry({ delta: -1, reason: 'booking', occurredAt: new Date(2026, 2, 20) });
+    const later = entry({ delta: -1, reason: 'reservation', occurredAt: new Date(2026, 2, 20) });
     const earlier = entry({ delta: 5, occurredAt: new Date(2026, 2, 1) });
 
     const lines = runningBalance([later, earlier]);
@@ -73,9 +76,9 @@ describe('valueLabel', () => {
   it('says nothing for a movement with no money attached', () => {
     // A booking spends a credit that was already paid for. Pricing it again
     // here would double-count what the charity spent.
-    expect(valueLabel(entry({ delta: -1, reason: 'booking', unitPriceMinorUnits: 25_000 }))).toBe(
-      '',
-    );
+    expect(
+      valueLabel(entry({ delta: -1, reason: 'reservation', unitPriceMinorUnits: 25_000 })),
+    ).toBe('');
     expect(valueLabel(entry({ delta: 1, reason: 'refund' }))).toBe('');
   });
 });

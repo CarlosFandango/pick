@@ -39,7 +39,14 @@ export function sortBundles(bundles: readonly CreditBundle[]): CreditBundle[] {
 
 export const DEFAULT_BUNDLE_CURRENCY: CurrencyCode = DEFAULT_CURRENCY;
 
-export type CreditReason = 'purchase' | 'booking' | 'refund' | 'adjustment' | 'expiry';
+export type CreditReason =
+  | 'purchase'
+  | 'reservation'
+  | 'consumption'
+  | 'release'
+  | 'refund'
+  | 'adjustment'
+  | 'expiry';
 
 export interface CreditEntry {
   id: string;
@@ -51,11 +58,21 @@ export interface CreditEntry {
   note?: string | null;
 }
 
+/**
+ * In the charity's language, not the ledger's.
+ *
+ * A reservation and a consumption are two different facts about the same
+ * credit: it is set aside when the audit is booked and actually spent when the
+ * audit reaches them. A charity reading this should be able to see which of
+ * their credits are committed and which have been used.
+ */
 export const CREDIT_REASON_LABELS: Record<CreditReason, string> = {
   purchase: 'Credits purchased',
-  booking: 'Audit booked',
-  refund: 'Credit returned',
-  adjustment: 'Adjustment',
+  reservation: 'Set aside for an audit',
+  consumption: 'Used — audit delivered',
+  release: 'Returned — audit not delivered',
+  refund: 'Refunded',
+  adjustment: 'Adjustment by PICK',
   expiry: 'Credits expired',
 };
 

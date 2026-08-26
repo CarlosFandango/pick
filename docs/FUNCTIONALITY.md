@@ -35,7 +35,10 @@ reason. Deferred is a real answer and should stay populated.
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
-| Credit ledger | Partial | `credit_transaction` + balance view | spends one credit at booking. Reserve/consume, FIFO and per-credit price are TND-87, not built |
+| Credit ledger lifecycle | Built | `20260826290100_credit_lifecycle.sql` | reserve at booking, consume at release, release on void/no-show. FIFO by purchase date; each credit carries what it cost |
+| Credit position (5 figures) | Built | `organisation_credit_position` view | purchased / reserved / consumed / released / available, all folds over the ledger |
+| Atomic reservation | Built | `book_audit` locks the organisation row | two bookings against a last credit can no longer both succeed |
+| Credit expiry | Deferred | enum value only | the type exists, nothing writes it — the policy is an open decision |
 | Credit price list | Built | `credit_bundle`, `core/credits.ts` | five bundles, seeded. Price is read, never a constant — a price in code would rewrite past purchases |
 | Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
 | Currency-generic money | Built | `core/money.ts`, `20260826230000_currency_generic_money.sql` | `formatMoney(minorUnits, currency)`; columns are `_minor_units`. No currency column yet — see PATTERNS |
@@ -72,7 +75,7 @@ reason. Deferred is a real answer and should stay populated.
 | S4.3 | Auditor roster — vetting, coverage, capability | Built |
 | S4.4 | Audit situation report | Built |
 | S4.5 | Clients — roster, balances, credit adjustments | Built |
-| S4.6 | Complaint triage | Not started — waits for TND-80, which changes it into a triage queue |
+| S4.6 | Complaint — read, acknowledge, resolve | Built (minimal). TND-80 adds triage paths and PICK-authored rework beside it |
 | S4.7 | Payout runs | Not started — waits for TND-81; payment and release holds are the screen's structure |
 
 Screens are wired as components and routes with tests at every level. The

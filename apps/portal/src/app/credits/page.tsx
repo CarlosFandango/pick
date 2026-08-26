@@ -42,6 +42,19 @@ export default async function CreditsPage() {
       .order('quantity'),
   ]);
 
+  // Reserved vs used is the distinction a charity most often asks about: how
+  // many of my credits are committed to audits that have not arrived yet.
+  const { data: positionRow } = await supabase
+    .from('organisation_credit_position')
+    .select('purchased, consumed')
+    .maybeSingle();
+
+  // A view aggregates, so its columns are nullable to the type generator even
+  // though coalesce means they never are.
+  const position = positionRow
+    ? { purchased: positionRow.purchased ?? 0, consumed: positionRow.consumed ?? 0 }
+    : null;
+
   const bundles: CreditBundle[] = (bundleRows ?? []).map((row) => ({
     quantity: row.quantity,
     priceMinorUnits: row.price_minor_units,
@@ -82,10 +95,22 @@ export default async function CreditsPage() {
             marginBottom: 20,
           }}
         >
-          <div style={metaLabel}>Balance</div>
+          <div style={metaLabel}>Available</div>
           <div style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em', marginTop: 4 }}>
             {balance}
           </div>
+          {position ? (
+            <div style={{ marginTop: 8, fontSize: 13, color: color.bodyBrown }}>
+              {position.purchased} bought · {position.consumed} used on audits you have received
+              {balance !== position.purchased - position.consumed ? (
+                <>
+                  {' '}
+                  · {position.purchased - position.consumed - balance} set aside for audits under
+                  way
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <BuyCredits bundles={bundles} />

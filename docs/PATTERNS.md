@@ -162,6 +162,20 @@ times the fix was `kill` on a PID, after minutes of looking at the wrong thing.
 **Caught now by:** the suite runs its own server on its own port (3100) and
 never reuses one. One cold start per run, and the collision cannot happen.
 
+### `create or replace function` with a changed signature makes a second function
+**Symptom:** `function book_audit(unknown, unknown, ...) is not unique`, on a
+call that had worked for weeks from the portal.
+**Why it hid:** adding `p_requires_av` to `book_audit` looked like a rewrite —
+same name, `create or replace`, migration applied cleanly. Postgres identifies
+a function by name *and* argument types, so it created an overload and left the
+old one in place. The portal always passed the new argument, so it always
+resolved unambiguously and nothing failed. The stale version sat there for a
+fortnight, and any call omitting the last argument would have run the OLD body
+— writing the old ledger row and bypassing every rule added since.
+**Caught now by:** `drop function` with the explicit old signature in the
+migration that changes one. When a function's parameters change, the old
+signature has to be named and dropped — replacing it is not what happened.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.

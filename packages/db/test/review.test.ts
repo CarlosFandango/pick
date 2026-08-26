@@ -12,6 +12,15 @@ async function arrangeInReview(db: Db, status = 'in_review') {
      values ($1, $2, $3, $4, 'street', 'SW1A 1AA', current_date, current_date + 3, 11500)`,
     [AUDIT, ids.charityA, ids.auditor, status],
   );
+
+  // The reservation a real booking would have written. Without it there is no
+  // credit set aside, so nothing can be handed back — which is correct
+  // behaviour, and would make the void and no-show tests below assert nothing.
+  await db.arrange(
+    `insert into credit_transaction (organisation_id, delta, reason, audit_id, unit_price_minor_units)
+     values ($1, -1, 'reservation', $2, 25000)`,
+    [ids.charityA, AUDIT],
+  );
 }
 
 const balance = async (db: Db) => {

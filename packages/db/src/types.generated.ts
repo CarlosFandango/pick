@@ -687,6 +687,8 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at: string
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
           unit_price_minor_units: number | null
         }
         Insert: {
@@ -701,6 +703,8 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
+          settles_transaction_id?: string | null
+          source_purchase_id?: string | null
           unit_price_minor_units?: number | null
         }
         Update: {
@@ -715,6 +719,8 @@ export type Database = {
           organisation_id?: string
           reason?: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
+          settles_transaction_id?: string | null
+          source_purchase_id?: string | null
           unit_price_minor_units?: number | null
         }
         Relationships: [
@@ -737,6 +743,20 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transaction_settles_transaction_id_fkey"
+            columns: ["settles_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "credit_transaction"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transaction_source_purchase_id_fkey"
+            columns: ["source_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "credit_transaction"
             referencedColumns: ["id"]
           },
         ]
@@ -1118,6 +1138,26 @@ export type Database = {
           },
         ]
       }
+      organisation_credit_position: {
+        Row: {
+          available: number | null
+          consumed: number | null
+          organisation_id: string | null
+          purchased: number | null
+          refunded: number | null
+          released: number | null
+          reserved_ever: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transaction_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_offer: {
@@ -1188,6 +1228,8 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at: string
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
           unit_price_minor_units: number | null
         }
         SetofOptions: {
@@ -1392,6 +1434,7 @@ export type Database = {
           residency_zone: Database["public"]["Enums"]["residency_zone"]
         }[]
       }
+      consume_credit_for: { Args: { p_audit_id: string }; Returns: undefined }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined
@@ -1406,6 +1449,31 @@ export type Database = {
         }[]
       }
       exposure_window_days: { Args: never; Returns: number }
+      next_purchase_to_draw_from: {
+        Args: { p_organisation_id: string }
+        Returns: {
+          audit_id: string | null
+          created_by: string | null
+          currency: string
+          delta: number
+          external_reference: string | null
+          id: string
+          note: string | null
+          occurred_at: string
+          organisation_id: string
+          reason: Database["public"]["Enums"]["credit_reason"]
+          recorded_at: string
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
+          unit_price_minor_units: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "credit_transaction"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       offer_audit: {
         Args: { p_audit_id: string; p_expires_in?: string }
         Returns: number
@@ -1554,6 +1622,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      release_credit_for: {
+        Args: { p_audit_id: string; p_reason: string }
+        Returns: undefined
       }
       report_no_team_present: {
         Args: { p_audit_id: string; p_note?: string }
@@ -1868,7 +1940,14 @@ export type Database = {
         | "site_conduct"
         | "safeguarding"
         | "record_keeping"
-      credit_reason: "purchase" | "booking" | "refund" | "adjustment" | "expiry"
+      credit_reason:
+        | "purchase"
+        | "reservation"
+        | "refund"
+        | "adjustment"
+        | "expiry"
+        | "release"
+        | "consumption"
       eligibility_flag:
         | "conflict"
         | "familiarity"
@@ -2073,7 +2152,15 @@ export const Constants = {
         "safeguarding",
         "record_keeping",
       ],
-      credit_reason: ["purchase", "booking", "refund", "adjustment", "expiry"],
+      credit_reason: [
+        "purchase",
+        "reservation",
+        "refund",
+        "adjustment",
+        "expiry",
+        "release",
+        "consumption",
+      ],
       eligibility_flag: [
         "conflict",
         "familiarity",

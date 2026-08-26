@@ -99,8 +99,10 @@ test.describe("S3.3 / S3.5 the client's world", () => {
 
   test('shows what each credit movement was for', async ({ page }) => {
     await page.goto('/credits');
-    await expect(page.getByText('Audit booked').first()).toBeVisible();
     await expect(page.getByText('Credits purchased').first()).toBeVisible();
+    // Booking sets a credit aside; it is only spent once the audit arrives.
+    // The two are different facts and the ledger says which is which.
+    await expect(page.getByText('Set aside for an audit').first()).toBeVisible();
   });
 });
 
