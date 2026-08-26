@@ -42,6 +42,22 @@ Mockups are plain HTML with inline styles — open in a browser or read directly
 | S3.5 | Credits & invoices (ledger) | Web | /credits |
 | S3.6 | Complaint fork (about audit vs about fundraiser) | Web | /complaint |
 
+## Phase 4 — Ops cockpit (no mockup — designed in code)
+
+There is no Phase 4 `.dc.html`. S4.1 and S4.2 were designed in code and their
+file-header comments are the spec; the same applies below. Screen IDs are still
+the shared vocabulary, so they are allocated here.
+
+| ID | Screen | Platform | Route |
+|---|---|---|---|
+| S4.1 | Ops home — the queue, not a dashboard | Web | /admin |
+| S4.2 | Assignment console — the algorithm shows its work | Web | /admin/assignment/:id |
+| S4.3 | Auditor roster — vetting, coverage, capability | Web | /admin/auditors |
+| S4.4 | Audit situation report | Web | /admin/audits/:id |
+| S4.5 | Clients — organisations, users, credit adjustments | Web | /admin/clients (not built) |
+| S4.6 | Complaint triage | Web | /admin/complaints/:id (waits for TND-80) |
+| S4.7 | Payout runs | Web | /admin/payouts (waits for TND-81) |
+
 ## Open decisions
 - S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.
 - S1.5: field density — build 5B + S2.3 flag sheet; 5C parked.

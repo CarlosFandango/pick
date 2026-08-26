@@ -350,3 +350,72 @@ describe('the check catalogue', () => {
     });
   });
 });
+
+describe('the auditor roster', () => {
+  it('is admin-only, and shows a non-admin nothing rather than erroring', async () => {
+    // Guarded with `where app.is_admin()` rather than a raise: a client
+    // calling it gets an empty result, which is what RLS does everywhere else.
+    await withDatabase(async (db) => {
+      expect(await db.as(ids.clientA).query('select * from auditor_roster()')).toHaveLength(0);
+      expect(await db.as(ids.auditor).query('select * from auditor_roster()')).toHaveLength(0);
+      expect(
+        (await db.as(ids.admin).query('select * from auditor_roster()')).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  it('puts anyone awaiting vetting first — it is a queue before a directory', async () => {
+    await withDatabase(async (db) => {
+      await db.arrange(
+        "update auditor_profile set approval_status = 'pending', approved_at = null where user_id = $1",
+        [ids.otherAuditor],
+      );
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ approval_status: string }>('select approval_status from auditor_roster()');
+
+      expect(rows[0]?.approval_status).toBe('pending');
+    });
+  });
+
+  it('refuses to let anyone but PICK approve an auditor', async () => {
+    // The gate the whole marketplace hangs on: approval is what makes someone
+    // eligible to be offered work at all.
+    await withDatabase(async (db) => {
+      for (const who of [ids.clientA, ids.auditor]) {
+        const message = await db
+          .as(who)
+          .expectRefused('select approve_auditor($1)', [ids.otherAuditor]);
+        expect(message).toMatch(/only PICK admin/i);
+      }
+    });
+  });
+
+  it('will not suspend anyone without a reason on the record', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.admin)
+        .expectRefused('select suspend_auditor($1, $2)', [ids.auditor, '   ']);
+      expect(message).toMatch(/reason is required/i);
+    });
+  });
+
+  it('suspends future work without touching what was already earned', async () => {
+    // They still did the audits they accepted, and are still owed for them.
+    await withDatabase(async (db) => {
+      const before = await db.arrange<{ count: string }>(
+        'select count(*) from audit where auditor_id = $1',
+        [ids.auditor],
+      );
+
+      await db.as(ids.admin).query('select suspend_auditor($1, $2)', [ids.auditor, 'test']);
+
+      const after = await db.arrange<{ count: string }>(
+        'select count(*) from audit where auditor_id = $1',
+        [ids.auditor],
+      );
+      expect(after[0]?.count).toBe(before[0]?.count);
+    });
+  });
+});

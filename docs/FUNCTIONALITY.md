@@ -69,7 +69,11 @@ reason. Deferred is a real answer and should stay populated.
 | S3.6 | Complaint fork | Built |
 | S4.1 | Ops home | Built |
 | S4.2 | Assignment console | Built |
-| S4.3+ | Remaining ops screens (auditors, clients, payouts, complaints admin) | Not started |
+| S4.3 | Auditor roster — vetting, coverage, capability | Built |
+| S4.4 | Audit situation report | Built |
+| S4.5 | Clients admin | Not started |
+| S4.6 | Complaint triage | Not started — waits for TND-80, which changes it into a triage queue |
+| S4.7 | Payout runs | Not started — waits for TND-81; payment and release holds are the screen's structure |
 
 Screens are wired as components and routes with tests at every level. The
 field app's write-up route is the remaining gap: it is built as a component but

@@ -7,7 +7,9 @@ import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
 const TONE: Record<string, { fill?: string; ink: string }> = {
-  urgent: { fill: color.creative, ink: '#4A1712' },
+  // `ink` on the creative fill measures 5.62:1. The raw hex that was here
+  // (#4A1712) was the only colour in the portal that was not a token.
+  urgent: { fill: color.creative, ink: color.ink },
   attention: { fill: color.auditing, ink: color.auditingInk },
   info: { fill: color.navy, ink: color.onDarkMuted },
   neutral: { ink: color.muted },

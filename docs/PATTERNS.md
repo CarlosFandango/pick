@@ -48,7 +48,7 @@ like before you open it.
 | Set text size or weight | `webTextStyle(role)` / `text(role)` | `fontSize:` in a component |
 | Set a font family | `fontStack`, via the text role | naming a font in a component |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
-| Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
+| Style a portal component | `color.*`/`radius.*` inline + the helpers in `portal/src/lib/theme.ts` | a CSS file with its own palette, `packages/ui` |
 | Style a field component | the same token objects as RN styles | a parallel RN colour constant |
 | Convey pass/fail | colour **and** an icon or label | colour alone |
 | Size a field tap target | `touchTarget.comfortable` | an arbitrary height |
@@ -171,6 +171,26 @@ lint, typecheck or unit tests.
 **Caught now by:** `pnpm build` in CI.
 
 ## Decision log
+
+### 2026-08-26 — Portal primitives live in `lib/theme.ts`, not `packages/ui`
+
+`packages/ui` holds a Button and a Card, is imported by zero screens, and
+styles them with `var(--colour-*)` custom properties and the `space`/`fontSize`
+scales. Every real portal screen uses `color.*`/`radius.*` from
+`@picksel/tokens` plus the helpers in `apps/portal/src/lib/theme.ts`. Those are
+two vocabularies for one job, and extracting into `packages/ui` would have made
+a third.
+
+So the repeated pieces went where the code already is: `card` (which already
+existed and was imported by nothing while 27 sites spelled out its three
+properties), plus `pageTitle` and `adminPage`. The PATTERNS row that said to
+style portal components with `var(--colour-*)` was describing `packages/ui`
+rather than the portal, and has been corrected.
+
+`packages/ui` stays as it is for now: deleting it is a separate change, and it
+is not costing anything while nothing imports it.
+
+
 
 ### 2026-08-26 — Which test layer owns which question
 

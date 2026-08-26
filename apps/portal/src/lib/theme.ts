@@ -72,3 +72,24 @@ export const textButton = {
   color: color.link,
   cursor: 'pointer',
 } as const;
+
+/**
+ * A page heading. Seven screens spelled these three properties out inline.
+ *
+ * Margin is deliberately not set: the parent's flex gap owns spacing, so a
+ * heading does not have to know what follows it.
+ */
+export const pageTitle = {
+  fontWeight: 800,
+  fontSize: 24,
+  letterSpacing: '-0.03em',
+  margin: 0,
+} as const;
+
+/** The admin shell supplies no padding, so every ops page repeats this. */
+export const adminPage = {
+  padding: '22px 28px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+} as const;

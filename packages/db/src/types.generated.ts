@@ -1174,6 +1174,28 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      approve_auditor: {
+        Args: { p_auditor_id: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          av_capable: boolean
+          base_postcode: string | null
+          created_at: string
+          dbs_checked_on: string | null
+          payout_reference: string | null
+          right_to_work_checked_on: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auditor_profile"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assignment_console: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1187,6 +1209,21 @@ export type Database = {
       auditor_code_for: {
         Args: { p_auditor_id: string; p_organisation_id: string }
         Returns: string
+      }
+      auditor_roster: {
+        Args: never
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string
+          areas: string[]
+          audit_types: Database["public"]["Enums"]["audit_type"][]
+          auditor_id: string
+          audits_completed: number
+          av_capable: boolean
+          base_postcode: string
+          full_name: string
+          open_conflicts: number
+        }[]
       }
       base_audit_fee_minor_units: { Args: never; Returns: number }
       book_audit:
@@ -1661,6 +1698,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      suspend_auditor: {
+        Args: { p_auditor_id: string; p_reason: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          av_capable: boolean
+          base_postcode: string | null
+          created_at: string
+          dbs_checked_on: string | null
+          payout_reference: string | null
+          right_to_work_checked_on: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auditor_profile"
           isOneToOne: true
           isSetofReturn: false
         }
