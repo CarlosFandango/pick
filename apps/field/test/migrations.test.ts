@@ -120,3 +120,26 @@ describe('the real migration list', () => {
     expect(MIGRATIONS.join('\n')).not.toContain('compliance_category');
   });
 });
+
+describe('stages on the device (v2)', () => {
+  it('caches the stage list, because a street has no signal', async () => {
+    // An auditor opening the app on a pitch with no connection needs the
+    // sequence. A stage list they cannot read is a session they cannot run.
+    const db = new FakeDatabase();
+    await applyMigrations(db, MIGRATIONS);
+
+    expect(db.executed.join('\n')).toContain('create table if not exists cached_audit_stage');
+  });
+
+  it('records which stage an observation belongs to', async () => {
+    // A stage is not always a moment — the observation phase has no moment of
+    // its own — so `moment` could not carry this.
+    expect(MIGRATIONS.join('\n')).toContain('alter table observation_log add column stage_key');
+  });
+
+  it('still keeps compliance_category off the device', async () => {
+    // Asserted again after adding stages: a stage carries a moment, and it
+    // would be an easy slip to carry the category alongside it.
+    expect(MIGRATIONS.join('\n')).not.toContain('compliance_category');
+  });
+});

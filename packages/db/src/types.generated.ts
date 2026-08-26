@@ -46,6 +46,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -90,6 +91,7 @@ export type Database = {
           session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
+          stage_set_version?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
@@ -134,6 +136,7 @@ export type Database = {
           session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
+          stage_set_version?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
@@ -277,6 +280,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      audit_stage_template: {
+        Row: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          capture_mode: Database["public"]["Enums"]["capture_mode"]
+          created_at: string
+          duration_hint_minutes: number | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          moment: Database["public"]["Enums"]["audit_moment"] | null
+          sequence: number
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          capture_mode: Database["public"]["Enums"]["capture_mode"]
+          created_at?: string
+          duration_hint_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          moment?: Database["public"]["Enums"]["audit_moment"] | null
+          sequence: number
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          audit_type?: Database["public"]["Enums"]["audit_type"]
+          capture_mode?: Database["public"]["Enums"]["capture_mode"]
+          created_at?: string
+          duration_hint_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          moment?: Database["public"]["Enums"]["audit_moment"] | null
+          sequence?: number
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
       }
       auditor_capability: {
         Row: {
@@ -765,6 +813,7 @@ export type Database = {
           payload: Json
           recorded_at: string
           severity: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key: string | null
         }
         Insert: {
           audit_id: string
@@ -777,6 +826,7 @@ export type Database = {
           payload?: Json
           recorded_at?: string
           severity?: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key?: string | null
         }
         Update: {
           audit_id?: string
@@ -789,6 +839,7 @@ export type Database = {
           payload?: Json
           recorded_at?: string
           severity?: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key?: string | null
         }
         Relationships: [
           {
@@ -1107,6 +1158,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1185,6 +1237,7 @@ export type Database = {
               session_started_at: string | null
               shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
               site_name: string | null
+              stage_set_version: number
               started_at: string | null
               status: Database["public"]["Enums"]["audit_status"]
               submitted_at: string | null
@@ -1248,6 +1301,7 @@ export type Database = {
               session_started_at: string | null
               shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
               site_name: string | null
+              stage_set_version: number
               started_at: string | null
               status: Database["public"]["Enums"]["audit_status"]
               submitted_at: string | null
@@ -1340,6 +1394,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1393,6 +1448,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1446,6 +1502,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1503,6 +1560,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1574,6 +1632,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1628,6 +1687,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1675,6 +1735,7 @@ export type Database = {
         | "no_team_present"
       audit_type: "street" | "door_to_door" | "private_site" | "lottery"
       auditor_approval_status: "pending" | "approved" | "suspended" | "rejected"
+      capture_mode: "observation" | "interaction"
       check_outcome:
         | "pass"
         | "fail"
@@ -1883,6 +1944,7 @@ export const Constants = {
       ],
       audit_type: ["street", "door_to_door", "private_site", "lottery"],
       auditor_approval_status: ["pending", "approved", "suspended", "rejected"],
+      capture_mode: ["observation", "interaction"],
       check_outcome: ["pass", "fail", "not_applicable", "not_observed", "note"],
       complaint_status: ["open", "acknowledged", "resolved", "withdrawn"],
       complaint_subject: ["about_audit", "about_fundraiser"],

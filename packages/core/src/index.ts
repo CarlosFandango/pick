@@ -13,6 +13,6 @@ export * from './prep';
 export * from './reporting';
 export * from './review';
 export * from './scoring';
-export * from './session';
+export * from './stages';
 export * from './status';
 export * from './writeup';

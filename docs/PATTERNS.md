@@ -24,6 +24,8 @@ like before you open it.
 | Queue unsent work | `synced_at is null` on the row itself | a separate outbox table |
 | Validate input | a zod schema in `core/entities.ts`, parsed at the boundary | ad-hoc `if` checks, validating twice |
 | Add a closed set of values | `as const` array in `core` + a PG enum, kept in step | a lookup table, a config file, a string |
+| Add a sequence someone else owns | a seeded table (`audit_stage_template`) | an `as const` — their edit becomes a code change |
+| Record a field event of a new shape | an `observation_log` row with a `kind` | a new table per event type |
 | Add a check to the catalogue | new `check_definition` row, new `version` | editing an existing row |
 | Represent money | integer minor units, never a float | decimal string, `Money` class |
 | Format money | `formatMoney(minorUnits, currency)` | a `£` in a component, a hardcoded `/100` |

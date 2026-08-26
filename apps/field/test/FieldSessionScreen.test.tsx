@@ -1,124 +1,186 @@
-import { advance, flag, startSession } from '@picksel/core';
+import { type AuditStage, addTally, advanceStage, startStagedSession } from '@picksel/core';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { FieldSessionScreen, FlagSheet } from '../src/components/FieldSessionScreen';
+
+const STAGES: AuditStage[] = [
+  {
+    key: 'arrival',
+    label: 'Arrival and setup',
+    sequence: 1,
+    captureMode: 'observation',
+    moment: null,
+    durationHintMinutes: null,
+  },
+  {
+    key: 'team_observation',
+    label: 'Team observation',
+    sequence: 2,
+    captureMode: 'observation',
+    moment: 'approach',
+    durationHintMinutes: 45,
+  },
+  {
+    key: 'pitch',
+    label: 'Pitch',
+    sequence: 3,
+    captureMode: 'interaction',
+    moment: 'pitch',
+    durationHintMinutes: null,
+  },
+  {
+    key: 'close',
+    label: 'Close and exit',
+    sequence: 4,
+    captureMode: 'interaction',
+    moment: 'close',
+    durationHintMinutes: null,
+  },
+];
 
 const START = new Date(2026, 2, 3, 11, 38);
 const NOW = new Date(2026, 2, 3, 12, 20, 17);
 const noop = () => undefined;
 
 const props = {
+  stages: STAGES,
   now: NOW,
   areaLabel: 'SE15 · Street',
   onAdvance: noop,
+  onTally: noop,
   onFlag: noop,
   onEnd: noop,
 };
 
+/** A session sitting on the nth stage. */
+const onStage = (index: number) => {
+  let session = startStagedSession(STAGES, START);
+  for (let i = 0; i < index; i++) {
+    session = advanceStage(STAGES, session, new Date(START.getTime() + (i + 1) * 60_000));
+  }
+  return session;
+};
+
 describe('S1.5b field session', () => {
   it('shows the whole shift as a sequence with where they are', () => {
-    const session = advance(startSession(START), new Date(2026, 2, 3, 11, 44));
-    render(<FieldSessionScreen {...props} session={session} />);
+    render(<FieldSessionScreen {...props} session={onStage(1)} />);
 
-    expect(screen.getByText('Approach')).toBeInTheDocument();
-    expect(screen.getByText('Close')).toBeInTheDocument();
-    expect(screen.getByLabelText('Walk-up current')).toBeInTheDocument();
-    expect(screen.getByLabelText('Approach done')).toBeInTheDocument();
-    expect(screen.getByLabelText('Pitch upcoming')).toBeInTheDocument();
+    expect(screen.getByText('Arrival and setup')).toBeInTheDocument();
+    expect(screen.getByText('Close and exit')).toBeInTheDocument();
+    expect(screen.getByLabelText('Team observation current')).toBeInTheDocument();
   });
 
-  it('marks the current moment NOW and stamps the finished ones', () => {
-    const session = advance(startSession(START), new Date(2026, 2, 3, 11, 44));
-    render(<FieldSessionScreen {...props} session={session} />);
-
-    expect(screen.getByText('NOW')).toBeInTheDocument();
-    expect(screen.getByText('11:38')).toBeInTheDocument();
+  it('runs a clock the auditor can read at arm’s length', () => {
+    render(<FieldSessionScreen {...props} session={onStage(0)} />);
+    expect(screen.getByLabelText(/Session running 00:42:17/)).toBeInTheDocument();
   });
 
-  it('runs a session clock', () => {
-    render(<FieldSessionScreen {...props} session={startSession(START)} />);
-    expect(screen.getByLabelText('Session running 00:42:17')).toBeInTheDocument();
-  });
-
-  it('advances on one tap', async () => {
+  it('advances rather than ending, until the last stage', async () => {
     const onAdvance = vi.fn();
-    render(<FieldSessionScreen {...props} session={startSession(START)} onAdvance={onAdvance} />);
+    const user = userEvent.setup();
+    render(<FieldSessionScreen {...props} onAdvance={onAdvance} session={onStage(0)} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'NEXT MOMENT' }));
+    await user.click(screen.getByRole('button', { name: 'NEXT STAGE' }));
     expect(onAdvance).toHaveBeenCalledOnce();
   });
 
-  it('offers to end the session once the last moment is reached', async () => {
+  it('offers to end only once there is nothing left to advance to', async () => {
     const onEnd = vi.fn();
-    let session = startSession(START);
-    for (let i = 0; i < 8; i += 1) session = advance(session, START);
+    const user = userEvent.setup();
+    render(<FieldSessionScreen {...props} onEnd={onEnd} session={onStage(3)} />);
 
-    render(<FieldSessionScreen {...props} session={session} onEnd={onEnd} />);
-
-    expect(screen.queryByRole('button', { name: 'NEXT MOMENT' })).toBeNull();
-    await userEvent.click(screen.getByRole('button', { name: 'END SESSION' }));
+    expect(screen.queryByRole('button', { name: 'NEXT STAGE' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'END SESSION' }));
     expect(onEnd).toHaveBeenCalledOnce();
   });
+});
 
-  it('has a flag button reachable with the same thumb', async () => {
-    const onFlag = vi.fn();
-    render(<FieldSessionScreen {...props} session={startSession(START)} onFlag={onFlag} />);
+describe('what the screen offers per capture mode', () => {
+  it('gives an observer counters, because they can be seen holding a phone', async () => {
+    const onTally = vi.fn();
+    const user = userEvent.setup();
+    render(<FieldSessionScreen {...props} onTally={onTally} session={onStage(1)} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Flag' }));
-    expect(onFlag).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole('button', { name: /Stops, 0 so far/ }));
+    expect(onTally).toHaveBeenCalledWith('stops');
   });
 
-  it('asks the auditor to read nothing but the moment they are in', () => {
-    const session = flag(startSession(START), {
-      id: 'f',
-      moment: 'approach',
-      severity: 'wrong',
-      occurredAt: START,
-    });
-    render(<FieldSessionScreen {...props} session={session} />);
+  it('offers NOTHING to fill in during an interaction', () => {
+    // The rule from TND-83, and the reason this screen was rebuilt: an auditor
+    // being pitched to cannot tap counters. Asserted as the absence of the
+    // controls, not of a label — a redesign may move the words.
+    render(<FieldSessionScreen {...props} session={onStage(2)} />);
 
-    // No check prompts, no categories, no verdicts. Every judgement waits for
-    // write-up; on the street the auditor is watching, not reading.
-    expect(screen.queryByText(/pass|fail|compliance|category|vulnerab/i)).toBeNull();
+    expect(screen.queryByLabelText('Counters')).toBeNull();
+    expect(screen.queryByRole('button', { name: /so far/ })).toBeNull();
+  });
+
+  it('says so, rather than looking broken', () => {
+    render(<FieldSessionScreen {...props} session={onStage(2)} />);
+    expect(screen.getByText(/WRITE IT UP AFTERWARDS/)).toBeInTheDocument();
+  });
+
+  it('keeps the flag reachable in every stage', async () => {
+    // One tap, no reading. It is the only live control during a mystery shop,
+    // and something going wrong mid-pitch is when it is most needed.
+    const onFlag = vi.fn();
+    const user = userEvent.setup();
+
+    for (const index of [1, 2]) {
+      const { unmount } = render(
+        <FieldSessionScreen {...props} onFlag={onFlag} session={onStage(index)} />,
+      );
+      await user.click(screen.getByRole('button', { name: 'Flag' }));
+      unmount();
+    }
+
+    expect(onFlag).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows a running count as the auditor taps', () => {
+    let session = onStage(1);
+    for (const minute of [3, 6]) {
+      session = addTally(STAGES, session, {
+        stageKey: 'team_observation',
+        counterKey: 'stops',
+        occurredAt: new Date(START.getTime() + minute * 60_000),
+      });
+    }
+
+    render(<FieldSessionScreen {...props} session={session} />);
+    expect(screen.getByRole('button', { name: /Stops, 2 so far/ })).toBeInTheDocument();
   });
 });
 
 describe('S2.3 flag sheet', () => {
-  it('offers exactly three severities and no text field', () => {
+  it('offers three severities and no text field', () => {
     render(<FlagSheet onChoose={noop} onCancel={noop} />);
 
-    expect(screen.getByRole('button', { name: /Wrong/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Note/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Fine/ })).toBeInTheDocument();
-    // Typing on a street means looking down, and an auditor looking down is
-    // an auditor not watching.
+    for (const label of ['Wrong', 'Note', 'Fine']) {
+      expect(screen.getByRole('button', { name: new RegExp(label) })).toBeInTheDocument();
+    }
+    // Typing on a street means looking down, and an auditor looking down is an
+    // auditor not watching.
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 
-  it('records a flag as good as well as bad', async () => {
+  it('hands back the severity that was chosen', async () => {
     const onChoose = vi.fn();
+    const user = userEvent.setup();
     render(<FlagSheet onChoose={onChoose} onCancel={noop} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /Fine/ }));
-    // An audit that can only record failure is not an observation tool.
-    expect(onChoose).toHaveBeenCalledWith('fine');
-  });
-
-  it('passes the chosen severity through', async () => {
-    const onChoose = vi.fn();
-    render(<FlagSheet onChoose={onChoose} onCancel={noop} />);
-
-    await userEvent.click(screen.getByRole('button', { name: /Wrong/ }));
+    await user.click(screen.getByRole('button', { name: /Wrong/ }));
     expect(onChoose).toHaveBeenCalledWith('wrong');
   });
 
   it('can be dismissed without recording anything', async () => {
-    const onChoose = vi.fn();
     const onCancel = vi.fn();
+    const onChoose = vi.fn();
+    const user = userEvent.setup();
     render(<FlagSheet onChoose={onChoose} onCancel={onCancel} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onChoose).not.toHaveBeenCalled();
   });

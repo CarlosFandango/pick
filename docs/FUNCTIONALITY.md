@@ -31,6 +31,7 @@ reason. Deferred is a real answer and should stay populated.
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category absent from field app entirely |
+| Audit stages, two capture modes | Built | `audit_stage_template`, `core/stages.ts` | TND-83. Seeded per audit type; sequence is data, so Jaz's walkthrough is a seed change |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
@@ -48,7 +49,7 @@ reason. Deferred is a real answer and should stay populated.
 | S1.2 | Assignment (six eligibility sets) | Built |
 | S1.3 | Job offer | Built |
 | S1.4 | Prep | Built |
-| S1.5b | Field session — moment stepper | Built |
+| S1.5b | Field session — stage stepper, per-stage capture | Built (stage list awaiting Jaz's walkthrough) |
 | S1.6 | Write-up | Built |
 | S1.7 | Review queue | Built |
 | S1.8 | Client report | Built |

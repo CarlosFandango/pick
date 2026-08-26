@@ -1,40 +1,66 @@
 import {
+  type AuditStage,
   clockTime,
-  elapsed,
-  type FieldSession,
+  elapsedSince,
   type FlagSeverity,
-  isLastMoment,
-  MOMENT_LABELS,
-  momentRows,
+  isLastStage,
+  permissions,
+  type StagedSession,
+  currentStage as stageNow,
+  stageRows,
+  tallyCount,
 } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
 import { text } from '@/theme';
 
 /**
- * S1.5b — the field session.
+ * S1.5b — the field session, stage by stage (TND-83).
  *
- * Dark, because it is read on a street. One tap advances the shift. Nothing on
- * this screen asks the auditor to read or decide: every judgement waits for
- * write-up, when they are not standing next to the person they are observing.
+ * Dark, because it is read on a street. What changes between stages is not the
+ * styling but what the auditor is physically able to do:
+ *
+ *   observation — a bystander at a distance. The phone is permitted, so this
+ *                 is where tallies and markers live.
+ *   interaction — being pitched to. Nothing to fill in. The stage list is a
+ *                 rehearsal surface on the way there and a recall scaffold
+ *                 afterwards; the only live control is one discreet marker.
+ *
+ * Every judgement still waits for write-up, when the auditor is not standing
+ * next to the person they are observing.
  */
+
+/** What an observation stage counts. Enumerated, not authored. */
+export const COUNTERS: { key: string; label: string }[] = [
+  { key: 'approaches', label: 'Approaches' },
+  { key: 'stops', label: 'Stops' },
+  { key: 'asks', label: 'Asks' },
+];
+
 export function FieldSessionScreen({
+  stages,
   session,
   now,
   areaLabel,
   onAdvance,
+  onTally,
   onFlag,
   onEnd,
 }: {
-  session: FieldSession;
+  stages: readonly AuditStage[];
+  session: StagedSession;
   now: Date;
   areaLabel: string;
   onAdvance: () => void;
+  onTally: (counterKey: string) => void;
   onFlag: () => void;
   onEnd: () => void;
 }) {
-  const rows = momentRows(session);
-  const finished = isLastMoment(session);
+  const rows = stageRows(stages, session);
+  const current = stageNow(stages, session);
+  const finished = isLastStage(stages, session);
+  const allowed = current ? permissions(current) : { tallies: false, notes: false, markers: false };
+  const running = elapsedSince(session.startedAt, session.endedAt ?? now);
 
   return (
     <View style={{ flex: 1, backgroundColor: color.fieldBg, padding: 22, paddingTop: 68 }}>
@@ -43,18 +69,18 @@ export function FieldSessionScreen({
           {areaLabel.toUpperCase()}
         </Text>
         <Text
-          accessibilityLabel={`Session running ${elapsed(session, now)}`}
+          accessibilityLabel={`Session running ${running}`}
           style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}
         >
-          {elapsed(session, now)}
+          {running}
         </Text>
       </View>
 
       <View style={{ flex: 1, gap: 6, marginTop: 18 }}>
         {rows.map((row) => (
           <View
-            key={row.moment}
-            accessibilityLabel={`${MOMENT_LABELS[row.moment]} ${row.state}`}
+            key={row.stage.key}
+            accessibilityLabel={`${row.stage.label} ${row.state}`}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -80,6 +106,7 @@ export function FieldSessionScreen({
               style={{
                 ...text('title'),
                 fontSize: row.state === 'current' ? 17 : 15,
+                flexShrink: 1,
                 color:
                   row.state === 'upcoming'
                     ? color.fieldDim
@@ -88,7 +115,7 @@ export function FieldSessionScreen({
                       : color.fieldMuted,
               }}
             >
-              {MOMENT_LABELS[row.moment]}
+              {row.stage.label}
             </Text>
             <Text
               style={{
@@ -98,11 +125,56 @@ export function FieldSessionScreen({
                 letterSpacing: row.state === 'current' ? 1 : 0,
               }}
             >
-              {row.state === 'current' ? 'NOW' : row.occurredAt ? clockTime(row.occurredAt) : ''}
+              {row.state === 'current' ? 'NOW' : row.enteredAt ? clockTime(row.enteredAt) : ''}
             </Text>
           </View>
         ))}
       </View>
+
+      {/*
+        Tallies exist only where the auditor can be seen holding a phone. This
+        is the rule from TND-83, not a layout choice — rendering counters
+        during a mystery shop would ask an auditor to tap a screen while
+        someone is talking to them.
+      */}
+      {current && allowed.tallies ? (
+        <View
+          accessibilityLabel="Counters"
+          style={{ flexDirection: 'row', gap: 10, marginBottom: 14 }}
+        >
+          {COUNTERS.map((counter) => (
+            <Pressable
+              key={counter.key}
+              accessibilityRole="button"
+              accessibilityLabel={`${counter.label}, ${tallyCount(session, current.key, counter.key)} so far`}
+              onPress={() => onTally(counter.key)}
+              style={{
+                flex: 1,
+                borderRadius: radius.tile,
+                borderWidth: 1,
+                borderColor: color.fieldDim,
+                paddingVertical: 12,
+                alignItems: 'center',
+                minHeight: touchTarget.comfortable,
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{ ...text('title'), fontSize: 22, color: color.onDark }}>
+                {tallyCount(session, current.key, counter.key)}
+              </Text>
+              <Text style={{ ...text('caption'), color: color.fieldMuted }}>{counter.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      {current && !allowed.tallies ? (
+        <Text
+          style={{ ...text('caption'), color: color.fieldDim, marginBottom: 14, letterSpacing: 1 }}
+        >
+          NOTHING TO RECORD NOW — WRITE IT UP AFTERWARDS
+        </Text>
+      ) : null}
 
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
         <Pressable
@@ -119,7 +191,7 @@ export function FieldSessionScreen({
           }}
         >
           <Text style={{ ...text('title'), fontSize: 15, color: color.onDark }}>
-            {finished ? 'END SESSION' : 'NEXT MOMENT'}
+            {finished ? 'END SESSION' : 'NEXT STAGE'}
           </Text>
         </Pressable>
 
@@ -154,7 +226,8 @@ const SEVERITIES: { value: FlagSeverity; label: string; hint: string }[] = [
  * S2.3 — the flag sheet.
  *
  * Three choices and no text field. Typing on a street means looking down, and
- * an auditor looking down is an auditor not watching.
+ * an auditor looking down is an auditor not watching. This is the one control
+ * that stays available during an interaction stage, because it is a single tap.
  */
 export function FlagSheet({
   onChoose,
@@ -165,11 +238,11 @@ export function FlagSheet({
 }) {
   return (
     <View
-      accessibilityLabel="Flag this moment"
+      accessibilityLabel="Flag this stage"
       style={{ backgroundColor: color.fieldSheet, padding: space.md, gap: space.sm }}
     >
       <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
-        FLAG THIS MOMENT
+        FLAG THIS STAGE
       </Text>
       {SEVERITIES.map((severity) => (
         <Pressable
