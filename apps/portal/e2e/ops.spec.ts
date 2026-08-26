@@ -91,3 +91,41 @@ test.describe('S4.5 clients', () => {
     await expect(page).not.toHaveURL(/\/admin\//);
   });
 });
+
+test.describe('the risk register and the gates', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, 'admin');
+  });
+
+  test('the register explains itself when empty rather than looking broken', async ({ page }) => {
+    await page.goto('/admin/risks');
+    await expect(page.getByRole('heading', { name: 'Risk register' })).toBeVisible();
+  });
+
+  test('a gate can hold payment and release independently', async ({ page }) => {
+    await page.goto('/admin/gates');
+    await expect(page.getByRole('heading', { name: 'Review gates' })).toBeVisible();
+
+    // The separation is the point, and it is stated on the screen because a
+    // future operator toggling these needs to know it is deliberate.
+    await expect(page.getByText(/Holding a report never delays a fee/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'client release' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'payment' }).first()).toBeVisible();
+  });
+
+  test('offers no way to invent a trigger', async ({ page }) => {
+    // Adding one is a code change reviewed like any other. A rule-authoring
+    // engine would be more complex than the tiers it replaced.
+    await page.goto('/admin/gates');
+    await expect(page.locator('input[name="trigger"][type="text"]')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /add.*gate|new gate/i })).toHaveCount(0);
+  });
+
+  test('keeps a client out of both', async ({ page }) => {
+    await signIn(page, 'client');
+    for (const route of ['/admin/risks', '/admin/gates']) {
+      await page.goto(route);
+      await expect(page).not.toHaveURL(/\/admin\//);
+    }
+  });
+});

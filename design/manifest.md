@@ -56,7 +56,9 @@ the shared vocabulary, so they are allocated here.
 | S4.4 | Audit situation report | Web | /admin/audits/:id |
 | S4.5 | Clients — roster, balances, credit adjustments | Web | /admin/clients |
 | S4.6 | Complaint — read, acknowledge, resolve | Web | /admin/complaints/:id (triage paths await TND-80) |
-| S4.7 | Payout runs | Web | /admin/payouts (waits for TND-81) |
+| S4.7 | Payout runs | Web | /admin/payouts (not built) |
+| S4.8 | Risk register — flagged, advised, answered | Web | /admin/risks |
+| S4.9 | Review gates — what holds payment, what holds release | Web | /admin/gates |
 
 ## Open decisions
 - S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.

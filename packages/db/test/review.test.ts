@@ -40,7 +40,7 @@ describe('review_gate_reason (S1.7)', () => {
         .query<{ review_gate_reason: string }>('select review_gate_reason($1)', [AUDIT]);
       // The reason comes before the actions: a reviewer needs to know why
       // before deciding what.
-      expect(row?.review_gate_reason).toMatch(/first 3 audits are gated.*audit 1 of 3/i);
+      expect(row?.review_gate_reason).toMatch(/first 3 audits are reviewed.*number 1/i);
     });
   });
 
@@ -57,12 +57,19 @@ describe('review_gate_reason (S1.7)', () => {
       const [row] = await db
         .as(ids.admin)
         .query<{ review_gate_reason: string }>('select review_gate_reason($1)', [AUDIT]);
-      expect(row?.review_gate_reason).toMatch(/audit 2 of 3/i);
+      expect(row?.review_gate_reason).toMatch(/number 2/i);
     });
   });
 
-  it('stops gating once the auditor is established', async () => {
+  it('stops gating on track record once the auditor is established', async () => {
     await withDatabase(async (db) => {
+      // Scoped to the one trigger. Since TND-81 the reason is every matching
+      // gate joined together, so an established auditor can still be held for
+      // an unrelated reason — asserting the aggregate string is null would be
+      // asserting that no OTHER gate exists, which is a different claim.
+      await db.arrange(
+        "update review_gate set enabled = false where trigger <> 'auditor_first_n_audits'",
+      );
       await arrangeInReview(db);
       for (let i = 0; i < 3; i += 1) {
         await db.arrange(
