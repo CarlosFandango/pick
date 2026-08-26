@@ -35,6 +35,12 @@ export default function RootLayout() {
     <AuthProvider>
       <StatusBar style="auto" />
       <AuthGate />
+      {/*
+        The flag sheet is deliberately NOT a route. It is rendered inline by
+        the session screen, because it must appear on one tap with no
+        navigation transition — an auditor raising a flag is mid-interaction
+        and cannot wait for a screen to slide in.
+      */}
       <Stack
         screenOptions={{
           // The default header titles each screen after its filename ("index").
@@ -42,14 +48,7 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
         }}
-      >
-        {/*
-          The flag sheet is a bare View with no portal of its own, so the
-          route supplies the modal presentation. It is the only control
-          available during an interaction stage and must open in one tap.
-        */}
-        <Stack.Screen name="audits/[id]/flag" options={{ presentation: 'modal' }} />
-      </Stack>
+      />
     </AuthProvider>
   );
 }
