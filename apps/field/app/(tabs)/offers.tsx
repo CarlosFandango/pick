@@ -25,7 +25,7 @@ export default function Offers() {
       offers={data}
       now={new Date()}
       whoAndArea="Your offers"
-      onView={(offer: OfferListItem) => router.push(`/offers/${offer.id}`)}
+      onView={(offer: OfferListItem) => router.push(`/offer/${offer.id}` as never)}
     />
   );
 }

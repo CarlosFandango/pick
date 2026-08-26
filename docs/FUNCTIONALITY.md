@@ -83,9 +83,12 @@ reason. Deferred is a real answer and should stay populated.
 | S4.9 | Review gates | Built |
 
 Screens are wired as components and routes with tests at every level. The
-field app's write-up route is the remaining gap: it is built as a component but
-`WriteUpScreen` still replays moments rather than stages (TND-83), so it is
-wired last, once Jaz's walkthrough settles the sequence.
+auditor loop closes: an auditor can now sign in, take an offer, prep, run a
+session, report a no-show and submit a write-up, which is what moves an audit
+into review without anyone touching the database.
+
+The write-up groups by moment. Stages 3-9 map 1:1 onto those moments, so what
+TND-83 adds is a summary of the observation stage rather than a rebuild.
 
 ## Applications
 
@@ -96,7 +99,8 @@ wired last, once Jaz's walkthrough settles the sequence.
 | Not-found page | Built | `portal/src/app/not-found.tsx` | session-free; copy does not confirm a record exists |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
 | Sign out | Built | `portal/src/lib/sign-out.ts` | form POST from both shells; never a GET link |
-| Field app routes | Built | `apps/field/app` | sign-in, offers, offer detail, my audits, earnings, session + flag modal |
+| Field app routes | Built | `apps/field/app` | tabs (offers / my audits / earnings) + offer, prep, session, write-up, no-show |
+| Field app navigation | Built | `app/(tabs)/_layout.tsx` | tab bar, back on detail screens, none on a live session |
 | Device auth | Built | `field/src/lib/session.tsx`, `lib/supabase.ts` | AsyncStorage session; `ready` kept separate from `session` so a cold start does not sign anyone out |
 | Row-to-prop adapters | Built | `field/src/lib/adapters.ts` | the layer that was missing; 18 tests, no network |
 | Local field-event writes | Built | `field/src/lib/events.ts` | device-minted ids, device clock, left queued |

@@ -5,8 +5,8 @@ import {
   formatMoney,
   type StatusTone,
 } from '@picksel/core';
-import { color, radius, space } from '@picksel/tokens';
-import { ScrollView, Text, View } from 'react-native';
+import { color, radius, space, touchTarget } from '@picksel/tokens';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { text } from '@/theme';
 
 export interface MyAuditRow {
@@ -25,8 +25,21 @@ const TONE: Record<StatusTone, { fill?: string; ink: string }> = {
   info: { fill: color.navy, ink: color.onDarkMuted },
 };
 
-/** S2.5 — my audits. */
-export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
+/**
+ * S2.5 — my audits.
+ *
+ * Rows became tappable when the app got navigation (TND-88): this is where an
+ * auditor picks up a job, so it has to lead somewhere. Where it leads depends
+ * on the state — prep before the shift, the session during, the write-up
+ * after — and the route decides that, not this screen.
+ */
+export function MyAuditsScreen({
+  audits,
+  onOpen,
+}: {
+  audits: MyAuditRow[];
+  onOpen?: (audit: MyAuditRow) => void;
+}) {
   return (
     <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
       <Text
@@ -48,15 +61,18 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
           const tone = TONE[chip.tone];
 
           return (
-            <View
+            <Pressable
               key={audit.id}
+              accessibilityRole={onOpen ? 'button' : undefined}
               accessibilityLabel={`${audit.title}, ${chip.label}`}
+              onPress={onOpen ? () => onOpen(audit) : undefined}
               style={{
                 backgroundColor: color.paper,
                 borderWidth: 1,
                 borderColor: color.oat,
                 borderRadius: radius.tile,
                 padding: 14,
+                minHeight: touchTarget.comfortable,
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 12,
@@ -89,7 +105,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
                   {chip.label}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </ScrollView>

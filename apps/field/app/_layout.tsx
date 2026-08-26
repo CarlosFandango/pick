@@ -1,4 +1,4 @@
-import { pickselDark, pickselLight } from '@picksel/tokens';
+import { color, pickselDark, pickselLight } from '@picksel/tokens';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -28,6 +28,13 @@ function AuthGate() {
   return null;
 }
 
+/** Headers match the field surface: this app is read on a street, at night. */
+const darkHeader = {
+  headerStyle: { backgroundColor: color.fieldSheet },
+  headerTintColor: color.onDark,
+  headerShadowVisible: false,
+} as const;
+
 export default function RootLayout() {
   const { colors } = useColorScheme() === 'dark' ? pickselDark : pickselLight;
 
@@ -48,7 +55,32 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
         }}
-      />
+      >
+        {/*
+          Detail screens get a header, and with it a back button. Without one
+          an auditor who taps into an offer is stranded — which is exactly
+          what shipped, and exactly TND-76 repeated on a second app.
+        */}
+        <Stack.Screen
+          name="offer/[id]"
+          options={{ headerShown: true, headerTitle: 'Offer', ...darkHeader }}
+        />
+        <Stack.Screen
+          name="audit/[id]/prep"
+          options={{ headerShown: true, headerTitle: 'Prep', ...darkHeader }}
+        />
+        <Stack.Screen
+          name="audit/[id]/write-up"
+          options={{ headerShown: true, headerTitle: 'Write-up', ...darkHeader }}
+        />
+        {/*
+          The session gets NO back button on purpose. Leaving mid-shift loses
+          the auditor's place while they are standing in front of the team
+          they are observing, and there is no way back into a session that has
+          already started.
+        */}
+        <Stack.Screen name="audit/[id]/session" options={{ gestureEnabled: false }} />
+      </Stack>
     </AuthProvider>
   );
 }

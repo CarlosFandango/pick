@@ -79,7 +79,7 @@ export default function Session() {
           setSession(endStagedSession(live, at));
           if (stage) void write((c) => recordSessionEnd(c, stage.key, at));
           void syncNow();
-          router.replace(`/audits/${id}/write-up` as never);
+          router.replace(`/audit/${id}/write-up` as never);
         }}
       />
 
