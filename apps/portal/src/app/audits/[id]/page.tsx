@@ -11,15 +11,13 @@ import { notFound } from 'next/navigation';
 import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { PipelineRail } from '@/components/PipelineRail';
-import { requireSession } from '@/lib/auth';
-import { supabaseServer } from '@/lib/supabase';
+import { clientPage } from '@/lib/client-page';
 import { hairline, metaLabel, mono, pillButton } from '@/lib/theme';
 
 /** S3.3 — one audit, with the rail and whatever it is waiting on. */
 export default async function AuditDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = await requireSession();
-  const supabase = await supabaseServer();
+  const { supabase, organisationName, credits } = await clientPage();
 
   const { data: audit } = await supabase
     .from('audit')
@@ -33,25 +31,8 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
 
   const status = parseAuditStatus(audit.status);
 
-  const [{ data: organisation }, { data: balance }] = await Promise.all([
-    supabase
-      .from('organisation')
-      .select('name')
-      .eq('id', session.organisationId ?? '')
-      .single(),
-    supabase
-      .from('organisation_credit_balance')
-      .select('balance')
-      .eq('organisation_id', session.organisationId ?? '')
-      .maybeSingle(),
-  ]);
-
   return (
-    <Chrome
-      active="audits"
-      organisationName={organisation?.name ?? '—'}
-      credits={balance?.balance ?? 0}
-    >
+    <Chrome active="audits" organisationName={organisationName} credits={credits}>
       <div
         style={{
           padding: '26px 32px',

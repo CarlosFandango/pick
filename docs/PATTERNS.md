@@ -13,6 +13,7 @@ like before you open it.
 | Do this | Use | Not this |
 |---|---|---|
 | Read data in the portal | `supabaseServer()` in a Server Component; RLS scopes it | client-side fetch, an API route, a repository class |
+| Open a client screen | `clientPage()` — session, client, chrome data | repeating the organisation and balance queries |
 | Write across tenants | a server action with `createAdminClient()` | loosening an RLS policy |
 | Expose a server action | its own `'use server'` module, one export | adding `'use server'` to a shared lib |
 | Offer a state-changing control | a `<form>` POST to a server action | a link, a GET route |

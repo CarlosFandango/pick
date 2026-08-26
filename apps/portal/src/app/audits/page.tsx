@@ -3,8 +3,7 @@ import { color, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { Chrome } from '@/components/Chrome';
 import { StatusPill } from '@/components/StatusPill';
-import { requireRole } from '@/lib/auth';
-import { supabaseServer } from '@/lib/supabase';
+import { clientPage } from '@/lib/client-page';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
 /** One table cell: the list is real tabular data, so it is a real table. */
@@ -24,33 +23,16 @@ export default async function AuditsPage({
   searchParams: Promise<{ booked?: string }>;
 }) {
   const { booked } = await searchParams;
-  const session = await requireRole('client', 'pick_admin');
-  const supabase = await supabaseServer();
+  const { supabase, organisationName, credits } = await clientPage();
 
-  const [{ data: organisation }, { data: balance }, { data: audits }] = await Promise.all([
-    supabase
-      .from('organisation')
-      .select('name')
-      .eq('id', session.organisationId ?? '')
-      .single(),
-    supabase
-      .from('organisation_credit_balance')
-      .select('balance')
-      .eq('organisation_id', session.organisationId ?? '')
-      .maybeSingle(),
-    supabase
-      .from('audit')
-      .select('id, reference, status, audit_type, postcode, window_start_on, window_end_on')
-      .order('created_at', { ascending: false })
-      .limit(50),
-  ]);
+  const { data: audits } = await supabase
+    .from('audit')
+    .select('id, reference, status, audit_type, postcode, window_start_on, window_end_on')
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   return (
-    <Chrome
-      active="audits"
-      organisationName={organisation?.name ?? '—'}
-      credits={balance?.balance ?? 0}
-    >
+    <Chrome active="audits" organisationName={organisationName} credits={credits}>
       <div style={{ padding: '26px 32px', maxWidth: 880 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
           Audits
