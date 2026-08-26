@@ -112,9 +112,6 @@ importers:
       '@picksel/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
-      '@picksel/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       next:
         specifier: ^15.5.2
         version: 15.5.24(@playwright/test@1.62.1)(@types/node@22.20.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -214,22 +211,6 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.7(@types/node@22.20.1)(jsdom@27.4.0)(lightningcss@1.33.0)(terser@5.50.0)(yaml@2.9.0)
-
-  packages/ui:
-    dependencies:
-      '@picksel/tokens':
-        specifier: workspace:*
-        version: link:../tokens
-    devDependencies:
-      '@types/react':
-        specifier: ^19.1.10
-        version: 19.1.17
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
 
 packages:
 

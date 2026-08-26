@@ -4,7 +4,12 @@ updated: 2026-08-25T17:14:16.993Z
 source: Claude Design project "UI mockups and scoping"
 
 Screen IDs are stable. Reference them in commits, PRs and feedback ("update S2.3").
-Mockups are plain HTML with inline styles — open in a browser or read directly.
+
+The mockups themselves are **not in this repository**. The `.dc.html` files named
+below live in the Claude Design project this manifest was exported from. Until
+they are committed here, "diff the manifest version and update only the screens
+whose mockups changed" cannot be done from a checkout — which is the workflow
+this file exists to make possible.
 
 ## Phase 1 — Golden Path (PICKsel Phase 1 - Golden Path.dc.html)
 | ID | Screen | Persona | Platform | Route (proposed) |

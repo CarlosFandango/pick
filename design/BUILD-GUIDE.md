@@ -14,10 +14,13 @@ releases reports.
 - Shared: design/tokens/tokens.ts is the only styling source. No other colors/fonts.
 
 ## Design source of truth
-design/manifest.md maps stable screen IDs (S1.1…S3.6) to mockups in design/mockups/.
-Build EXACTLY what the mockup shows. When a new design drop lands, diff the manifest
+design/manifest.md maps stable screen IDs (S1.1…S3.6) to the mockup files. Build
+EXACTLY what the mockup shows. When a new design drop lands, diff the manifest
 version and update only the screens whose mockups changed. Reference screen IDs in
 commits and PRs.
+
+Note: there is no design/mockups/ directory in this repository — the .dc.html
+files are in the Claude Design project, not the checkout. See design/manifest.md.
 
 ## Domain rules (non-negotiable, from design spec)
 - Clients never choose the shift date within their 3+ day window; auditors accept a

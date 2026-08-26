@@ -193,13 +193,14 @@ packages/
   db/        Supabase schema, migrations, generated types
   core/      Domain: entities, zod validation, scoring. No I/O.
   tokens/    Design system: colour roles, spacing, type scale. Both apps.
-  ui/        Web components. Portal only — field has its own.
 ```
 
 `core` is the shared brain and must stay free of I/O, React and platform APIs so
-both apps can use it. `ui` is web-only by definition; React Native cannot render
-it. Logic shared between the apps lives in `core`; the shared *look* lives in
-`tokens`.
+both apps can use it. Logic shared between the apps lives in `core`; the shared
+*look* lives in `tokens`. There is no shared component package: the portal
+styles inline from token roles and the field app renders the same roles as React
+Native styles, which is the whole point of sharing a vocabulary rather than
+components.
 
 ### The design system: share the vocabulary, not the components
 

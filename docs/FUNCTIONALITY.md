@@ -3,9 +3,15 @@
 What exists, what is coming, what was deliberately left out. **Update this in the
 same commit as the change** — a register that lags is worse than none.
 
-Status: **Built** = working and tested · **Partial** = usable, gaps noted ·
-**Planned** = agreed, not started · **Deferred** = deliberately not built, with a
-reason. Deferred is a real answer and should stay populated.
+Status: **Built** = working, tested and reachable in the app ·
+**Component** = built and tested, but no route renders it yet ·
+**Partial** = usable, gaps noted · **Planned** = agreed, not started ·
+**Deferred** = deliberately not built, with a reason. Deferred is a real answer
+and should stay populated.
+
+**Component** is not a softer Built. It is the difference between work done and
+work shipped, and the field app is entirely in it: eight screens exist as tested
+components and `apps/field/app/` still has one route that says "Scaffold".
 
 ## Foundations
 
@@ -23,14 +29,14 @@ reason. Deferred is a real answer and should stay populated.
 
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
-| Schema: 12 tables, 15 enums, 1 view | Built | `packages/db/supabase/migrations` | verified on PG17 |
+| Schema | Built | `packages/db/supabase/migrations` | 18 tables, 23 enums, 1 view; counts asserted by `in-step.test.ts`, not by memory |
 | RLS on every table | Built | `20260825090700_rls.sql` | every table, asserted by a sweep rather than a count |
 | Writes go through RPCs | Built | `20260826230000_writes_go_through_rpcs.sql` | direct INSERT/UPDATE/DELETE revoked except field events, complaints, prep |
 | Declared grant surface | Built | `20260826230100_declare_the_whole_surface.sql` | anon holds nothing; the callable function list is explicit |
 | Refusal + inventory suites | Built | `packages/db/test/refusals.test.ts`, `surface.test.ts` | what each role must *not* do, and what the schema exposes |
 | Core/schema parity suite | Built | `packages/db/test/in-step.test.ts` | every enum and domain constant that exists in both places |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
-| Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
+| Check catalogue v1 | Built | `seed.sql` | 29 checks, all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category withheld by column grant — no signed-in role can read it |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | `overallScore()` for reports, `scoreAudit()` for per-category; critical failures separate |
@@ -43,23 +49,23 @@ reason. Deferred is a real answer and should stay populated.
 | ID | Screen | Status |
 |---|---|---|
 | S1.1 | Book an audit | Built |
-| S1.2 | Assignment (six eligibility sets) | Built |
-| S1.3 | Job offer | Built |
-| S1.4 | Prep | Built |
-| S1.5b | Field session — moment stepper | Built |
-| S1.6 | Write-up | Built |
+| S1.2 | Assignment (six eligibility sets) | Built — a rule, not a screen |
+| S1.3 | Job offer | Component |
+| S1.4 | Prep | Component |
+| S1.5b | Field session — moment stepper | Component |
+| S1.6 | Write-up | Component |
 | S1.7 | Review queue | Built |
 | S1.8 | Client report | Built |
 | S1.9 | Client dashboard | Built |
-| S2.1 | Offers list | Built |
-| S2.2 | Accept + conflict | Built (conflict declaration deferred) |
-| S2.3 | Field flag sheet | Built |
-| S2.4 | Write-up returned | Built |
-| S2.5 | My audits | Built |
-| S2.6 | Earnings | Built |
-| S2.7 | No-show flow | Built |
+| S2.1 | Offers list | Component |
+| S2.2 | Accept + conflict | Component (conflict declaration deferred) |
+| S2.3 | Field flag sheet | Component |
+| S2.4 | Write-up returned | Component |
+| S2.5 | My audits | Component |
+| S2.6 | Earnings | Component |
+| S2.7 | No-show flow | Component |
 | S3.1 | Booking deepened (A/V, lead time) | Built |
-| S3.2 | Auditor override picker | Built |
+| S3.2 | Auditor override picker | Partial — `selectable_auditors` / `prefer_auditor` and their tests exist; `/book/choose-auditor` does not |
 | S3.3 | Audit list + detail | Built |
 | S3.4 | Report header — coded auditor | Built (naming is a flag, default off) |
 | S3.5 | Credits ledger | Built |
@@ -68,21 +74,22 @@ reason. Deferred is a real answer and should stay populated.
 | S4.2 | Assignment console | Built |
 | S4.3+ | Remaining ops screens (auditors, clients, payouts, complaints admin) | Not started |
 
-Screens are wired as components and routes with tests at every level; several
-are not yet joined up to navigation in the field app, which has no router
-screens beyond the shell.
+Portal screens are routes: eleven `page.tsx` files, reachable and checked by
+`pnpm check:routes`. Field screens are components with tests and no router
+entry — `apps/field/app/` holds `_layout.tsx` and an `index.tsx` that renders
+"Scaffold. No features yet." Nothing an auditor could install reaches any of
+them, which is what **Component** above means.
 
 ## Applications
 
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
-| Portal shell + session refresh | Partial | `apps/portal` | middleware + `requireRole()`; no screens |
+| Portal shell + session refresh | Built | `apps/portal` | middleware + `requireRole()`; 11 routes |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
-| Field app shell | Partial | `apps/field` | expo-router, one screen |
+| Field app shell | Partial | `apps/field` | expo-router, one scaffold route; the eight screens are not wired to it |
 | Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox; 9 tests incl. resume-from-partial |
 | Sync push | Built | `field/src/sync/outbox.ts` | 10 tests: batching, failure isolation, payload parsing, idempotence |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
-| Shared web components | Partial | `packages/ui` | Button, Card — token-driven placeholders |
 | Design tokens + themes | Built | `packages/tokens` | light/dark, WCAG AA contrast |
 | Typography scale + fonts | Built | `packages/tokens/src/typography.ts` | 5 semantic roles; web and native verified identical by test |
 | Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | roles reference the drop; a copied hex fails `check:tokens` |
@@ -94,6 +101,10 @@ screens beyond the shell.
 | Gap | Where | Why it matters |
 |---|---|---|
 | No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
+| Two auditor codes, with opposite intentions | `core/reporting.ts`, `auditor_code_for()` | The report codes from the audit reference so a charity *cannot* correlate an auditor across reports; the S3.2 picker codes from auditor+charity so they *can*, deliberately, to re-pick someone they rate. Both cannot be right. S3.4 is marked DECISION PENDING in the manifest, so this is a product call, not a bug to fix quietly. |
+| `audit.auditor_id` is readable by the client | `audit_read` policy | Verified: a client sees the raw UUID and cannot resolve it to any profile, so no name leaks — but the id is stable, which already defeats the report's stated non-correlation property regardless of which code wins above. Column privileges cannot express "hidden from clients only", so the fix is the shape used elsewhere here: a `security definer` read for the client-facing audit screens. |
+| Portal has no unit tests | `apps/portal` | Server actions are covered only by Playwright, which needs a live stack. The actions are thin and mostly parse-then-call, so a Vitest pass over the zod schemas and branch logic is cheap. |
+| The type scale is not enforced | `apps/portal`, `apps/field` | 16 distinct font sizes against a six-step scale; `webTextStyle()` is called once, on `<body>`. `check:tokens` covers colour only, because enforcing type means first agreeing what the scale should contain. |
 
 ## Not built yet
 

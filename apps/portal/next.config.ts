@@ -8,13 +8,7 @@ const config: NextConfig = {
   // changes what gets traced into the build.
   outputFileTracingRoot: path.join(import.meta.dirname, '../..'),
   // Workspace packages ship TypeScript source, not a build step.
-  transpilePackages: [
-    '@picksel/api',
-    '@picksel/core',
-    '@picksel/db',
-    '@picksel/tokens',
-    '@picksel/ui',
-  ],
+  transpilePackages: ['@picksel/api', '@picksel/core', '@picksel/db', '@picksel/tokens'],
 };
 
 export default config;

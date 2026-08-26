@@ -38,7 +38,7 @@ like before you open it.
 | Change the schema | a new migration, then `pnpm db:types` | editing a pushed migration, `db execute`, an unexported Studio change |
 | Write DDL | explicit statements, one object each | a `DO` block building SQL with `format()`/`execute` |
 | Repeat DDL across tables | write it out per table | loop over a table-name array |
-| Share code between apps | `packages/core` | `packages/ui` (web only — RN cannot render it) |
+| Share code between apps | `packages/core` | a shared component package — RN cannot render web components |
 | Colour, spacing, type size | a role or scale from `@picksel/tokens` | a hex literal, a magic number |
 | Set text size or weight | `webTextStyle(role)` / `text(role)` | `fontSize:` in a component |
 | Set a font family | `fontStack`, via the text role | naming a font in a component |
@@ -64,7 +64,6 @@ core    pure domain — no I/O, no React, no platform APIs.  Both apps depend on
 tokens  design system. Zero dependencies, nothing platform-specific. Both apps.
 api     the only place a Supabase client is constructed.
 db      schema is the source of truth; types are generated from it, never written.
-ui      web components. Portal only.
 apps    composition and presentation. Business rules do not live here.
 ```
 
@@ -233,6 +232,17 @@ lint, typecheck or unit tests.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-26 — No shared component package
+`packages/ui` held a Button and a Card, was a dependency and a
+`transpilePackages` entry of the portal, and was imported by nothing after
+twelve screens were built. It was not a partial implementation of the canonical
+pattern — the portal styles inline from token roles, which is what PATTERNS says
+to do — it was a competing one, sitting there as a permanent question about
+which to use. Deleted. *Rejected:* adopting it instead; a web component library
+cannot serve the field app, so it would have been a third styling vocabulary
+rather than a shared one, and the shared vocabulary is `packages/tokens`.
+Recovering it is one `git revert`.
 
 ### 2026-08-26 — The theme references the design drop rather than copying it
 `packages/tokens/src/theme.ts` mapped every role onto a hex literal with the
