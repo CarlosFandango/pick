@@ -1,10 +1,10 @@
 import { AUDIT_TYPE_LABELS } from '@picksel/core';
-import { color } from '@picksel/tokens';
 import { AdminChrome } from '@/components/AdminChrome';
+import { AuditorRoster } from '@/components/admin/AuditorRoster';
 import { BackLink } from '@/components/BackLink';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
-import { adminPage, card, metaLabel, mono, pageTitle } from '@/lib/theme';
+import { adminPage, metaLabel, pageTitle } from '@/lib/theme';
 import { AuditorActions } from './AuditorActions';
 
 /**
@@ -40,94 +40,23 @@ export default async function AuditorsPage() {
           </span>
         </div>
 
-        {rows.length === 0 ? (
-          <p style={{ fontSize: 13, color: color.muted }}>
-            Nobody has applied yet. Auditors appear here as soon as they sign up.
-          </p>
-        ) : (
-          <ul
-            style={{
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}
-          >
-            {rows.map((auditor) => (
-              <li
-                key={auditor.auditor_id}
-                style={{
-                  ...card,
-                  borderTop:
-                    auditor.approval_status === 'pending'
-                      ? `5px solid ${color.auditing}`
-                      : `1px solid ${color.oat}`,
-                  padding: 16,
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 18,
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                    <span style={{ fontWeight: 700, fontSize: 15 }}>{auditor.full_name}</span>
-                    <span
-                      style={{
-                        ...metaLabel,
-                        color:
-                          auditor.approval_status === 'approved' ? color.teal : color.auditingText,
-                      }}
-                    >
-                      {auditor.approval_status.toUpperCase()}
-                    </span>
-                  </div>
-
-                  <div style={{ marginTop: 6, fontSize: 13, color: color.bodyBrown }}>
-                    {auditor.audits_completed} completed
-                    {auditor.open_conflicts > 0 ? (
-                      // Conflicts are a hard block on assignment, never waivable.
-                      // Surfaced here because it explains why someone is idle.
-                      <>
-                        {' · '}
-                        <b>{auditor.open_conflicts} declared conflict(s)</b>
-                      </>
-                    ) : null}
-                    {auditor.av_capable ? ' · A/V capable' : ''}
-                  </div>
-
-                  <div style={{ marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                    <Facts label="Areas">
-                      {auditor.areas.length ? auditor.areas.join(' ') : 'none set'}
-                    </Facts>
-                    <Facts label="Methodologies">
-                      {auditor.audit_types.length
-                        ? auditor.audit_types.map((t) => AUDIT_TYPE_LABELS[t]).join(', ')
-                        : 'none set'}
-                    </Facts>
-                    <Facts label="Based">{auditor.base_postcode ?? '—'}</Facts>
-                  </div>
-                </div>
-
-                <AuditorActions auditorId={auditor.auditor_id} status={auditor.approval_status} />
-              </li>
-            ))}
-          </ul>
-        )}
+        <AuditorRoster
+          auditors={rows.map((a) => ({
+            auditorId: a.auditor_id,
+            fullName: a.full_name,
+            approvalStatus: a.approval_status,
+            basePostcode: a.base_postcode,
+            avCapable: a.av_capable,
+            areas: a.areas,
+            methodologies: a.audit_types.map((t) => AUDIT_TYPE_LABELS[t]),
+            auditsCompleted: a.audits_completed,
+            openConflicts: a.open_conflicts,
+          }))}
+          actions={(auditor) => (
+            <AuditorActions auditorId={auditor.auditorId} status={auditor.approvalStatus} />
+          )}
+        />
       </div>
     </AdminChrome>
-  );
-}
-
-/** A labelled fact. Coverage and capability are why someone is or is not matched. */
-function Facts({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <span style={{ fontSize: 12.5 }}>
-      <span style={{ ...metaLabel, marginRight: 6 }}>{label}</span>
-      <span style={{ fontFamily: label === 'Areas' ? mono : undefined, color: color.bodyBrown }}>
-        {children}
-      </span>
-    </span>
   );
 }
