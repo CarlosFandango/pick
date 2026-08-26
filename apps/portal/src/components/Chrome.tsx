@@ -1,6 +1,7 @@
 import { color } from '@picksel/tokens';
 import type { ReactNode } from 'react';
-import { hairline, mono, sans } from '@/lib/theme';
+import { signOut } from '@/lib/sign-out';
+import { hairline, mono, sans, textButton } from '@/lib/theme';
 
 /**
  * The portal shell from S1.1: wordmark, three tabs, credits, organisation.
@@ -73,6 +74,11 @@ export function Chrome({
           {organisationName ? (
             <span style={{ fontSize: 12.5, color: color.muted }}>{organisationName}</span>
           ) : null}
+          <form action={signOut}>
+            <button type="submit" style={textButton}>
+              Sign out
+            </button>
+          </form>
         </div>
       </header>
       {children}

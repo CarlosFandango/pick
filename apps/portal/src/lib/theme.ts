@@ -60,3 +60,15 @@ export const srOnly = {
   whiteSpace: 'nowrap',
   border: 0,
 } as const;
+
+/** A button that reads as a link: secondary actions the design does not pill. */
+export const textButton = {
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  fontFamily: sans,
+  fontSize: 12.5,
+  fontWeight: 600,
+  color: color.link,
+  cursor: 'pointer',
+} as const;

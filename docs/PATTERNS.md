@@ -14,6 +14,8 @@ like before you open it.
 |---|---|---|
 | Read data in the portal | `supabaseServer()` in a Server Component; RLS scopes it | client-side fetch, an API route, a repository class |
 | Write across tenants | a server action with `createAdminClient()` | loosening an RLS policy |
+| Expose a server action | its own `'use server'` module, one export | adding `'use server'` to a shared lib |
+| Offer a state-changing control | a `<form>` POST to a server action | a link, a GET route |
 | Generate an id for a field event | `newId()` on the device | server default, autoincrement, composite key |
 | Generate an id anywhere else | `default public.uuid_generate_v7()` | `newId()` round-tripped from the client |
 | Correct a field event | insert a new row; read with `latestResults()` | UPDATE (it is blocked, deliberately) |

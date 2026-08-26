@@ -1,6 +1,7 @@
 import { color } from '@picksel/tokens';
 import type { ReactNode } from 'react';
-import { mono, sans } from '@/lib/theme';
+import { signOut } from '@/lib/sign-out';
+import { mono, sans, textButton } from '@/lib/theme';
 
 /** The admin shell from S1.7 — navy, so nobody confuses it with the client portal. */
 export function AdminChrome({
@@ -38,6 +39,11 @@ export function AdminChrome({
           </span>
         ) : null}
         <span style={{ marginLeft: 'auto', fontSize: 12, color: color.onDarkMuted }}>{who}</span>
+        <form action={signOut}>
+          <button type="submit" style={{ ...textButton, color: color.onDarkMuted }}>
+            Sign out
+          </button>
+        </form>
       </header>
       {children}
     </div>
