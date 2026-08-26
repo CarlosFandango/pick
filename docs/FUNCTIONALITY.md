@@ -17,7 +17,7 @@ reason. Deferred is a real answer and should stay populated.
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
-| Token/secret tripwires | Built | `scripts/check-secrets.sh`, `check-tokens.sh` | run first in CI; a colour literal outside the drop fails the build |
+| Token/secret/route tripwires | Built | `scripts/check-*.sh` | run first in CI; a leaked key, a colour literal or a link to a missing page fails the build |
 
 ## Domain
 

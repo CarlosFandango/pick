@@ -19,7 +19,16 @@ export interface OpsPresentation {
   chip: string;
   tone: 'urgent' | 'attention' | 'neutral' | 'info';
   action: string;
-  href: (item: OpsItem) => string;
+  /**
+   * Where the action happens, or null while that screen does not exist.
+   *
+   * Four of these pointed at routes nobody had built — /admin/audits/:id,
+   * /admin/complaints/:id, /admin/auditors — so the queue offered an action
+   * that produced a 404. A queue that lies about what it can do is worse than
+   * one that admits the gap: the line still says something needs a human, and
+   * the missing screen stays visible instead of looking finished.
+   */
+  href: (item: OpsItem) => string | null;
 }
 
 /**
@@ -33,7 +42,8 @@ export const OPS_PRESENTATION: Record<OpsItemKind, OpsPresentation> = {
     chip: 'OFFER EXPIRING',
     tone: 'urgent',
     action: 'Reassign',
-    href: (item) => `/admin/audits/${item.targetId}`,
+    // S4.2. Reassigning is exactly what the assignment console is for.
+    href: (item) => `/admin/assignment/${item.targetId}`,
   },
   review_gate: {
     chip: 'REVIEW GATE',
@@ -45,25 +55,29 @@ export const OPS_PRESENTATION: Record<OpsItemKind, OpsPresentation> = {
     chip: 'NO SHOW',
     tone: 'info',
     action: 'Process',
-    href: (item) => `/admin/audits/${item.targetId}`,
+    // Waiting on the audit admin screen (S4.3+).
+    href: () => null,
   },
   complaint: {
     chip: 'COMPLAINT',
     tone: 'neutral',
     action: 'Open',
-    href: (item) => `/admin/complaints/${item.targetId}`,
+    // Waiting on complaints admin (S4.3+).
+    href: () => null,
   },
   vetting: {
     chip: 'VETTING',
     tone: 'neutral',
     action: 'Vet',
-    href: () => '/admin/auditors',
+    // Waiting on the auditors screen (S4.3+).
+    href: () => null,
   },
   stale_write_up: {
     chip: 'STALE',
     tone: 'neutral',
     action: 'Nudge',
-    href: (item) => `/admin/audits/${item.targetId}`,
+    // Waiting on the audit admin screen (S4.3+).
+    href: () => null,
   },
 };
 

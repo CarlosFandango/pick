@@ -91,7 +91,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   return (
     <Chrome
-      active="reports"
+      active="audits"
       organisationName={organisation?.name ?? '—'}
       credits={balance?.balance ?? 0}
     >

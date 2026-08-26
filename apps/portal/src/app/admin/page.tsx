@@ -136,12 +136,19 @@ export default async function OpsHomePage() {
                         <span style={{ color: color.muted }}> · {waitingFor(item, now)}</span>
                       ) : null}
                     </span>
-                    <Link
-                      href={presentation.href(item)}
-                      style={{ fontWeight: 700, color: color.link, textDecoration: 'none' }}
-                    >
-                      {presentation.action} →
-                    </Link>
+                    {(() => {
+                      const href = presentation.href(item);
+                      // No link while the screen that owns this action is
+                      // unbuilt. The line still says a human is needed.
+                      return href ? (
+                        <Link
+                          href={href}
+                          style={{ fontWeight: 700, color: color.link, textDecoration: 'none' }}
+                        >
+                          {presentation.action} →
+                        </Link>
+                      ) : null;
+                    })()}
                   </li>
                 );
               })}

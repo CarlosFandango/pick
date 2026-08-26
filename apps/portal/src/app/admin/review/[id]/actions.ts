@@ -19,8 +19,8 @@ export async function releaseAudit(_prev: ReviewState, form: FormData): Promise<
   });
   if (error) return { error: error.message };
 
-  revalidatePath('/admin/review');
-  redirect('/admin/review');
+  revalidatePath('/admin');
+  redirect('/admin');
 }
 
 /** Return to the auditor, unlocking only the moments that need rework. */
@@ -40,8 +40,8 @@ export async function returnToAuditor(_prev: ReviewState, form: FormData): Promi
   });
   if (error) return { error: error.message };
 
-  revalidatePath('/admin/review');
-  redirect('/admin/review');
+  revalidatePath('/admin');
+  redirect('/admin');
 }
 
 /** Void it. The client did not get an audit, so their credit goes back. */
@@ -57,6 +57,6 @@ export async function voidAudit(_prev: ReviewState, form: FormData): Promise<Rev
   });
   if (error) return { error: error.message };
 
-  revalidatePath('/admin/review');
-  redirect('/admin/review');
+  revalidatePath('/admin');
+  redirect('/admin');
 }

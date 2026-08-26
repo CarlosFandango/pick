@@ -1,4 +1,5 @@
 import { color } from '@picksel/tokens';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { hairline, mono, sans } from '@/lib/theme';
 
@@ -14,15 +15,18 @@ export function Chrome({
   credits,
   children,
 }: {
-  active: 'book' | 'audits' | 'reports' | 'credits';
+  active: 'book' | 'audits' | 'credits';
   organisationName: string;
   credits: number;
   children: ReactNode;
 }) {
+  // Three, as S1.1 shows. A fourth "Reports" tab pointed at /reports, which
+  // the design does not have and this app never built — reports are reached
+  // from the audit they belong to (S1.9 → S1.8), which is the only place a
+  // client knows which report they want.
   const tabs = [
     { key: 'book', label: 'Book', href: '/book' },
     { key: 'audits', label: 'Audits', href: '/audits' },
-    { key: 'reports', label: 'Reports', href: '/reports' },
     { key: 'credits', label: 'Credits', href: '/credits' },
   ] as const;
 
@@ -41,7 +45,7 @@ export function Chrome({
         <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.1em' }}>PICKSEL</div>
         <nav style={{ display: 'flex', gap: 22, fontSize: 13, fontWeight: 600 }}>
           {tabs.map((tab) => (
-            <a
+            <Link
               key={tab.key}
               href={tab.href}
               style={{
@@ -53,7 +57,7 @@ export function Chrome({
               }}
             >
               {tab.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>

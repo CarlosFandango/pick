@@ -39,6 +39,12 @@ jobs:
       - name: Design tokens
         run: pnpm check:tokens
 
+      # A route is a string, so a link to a page nobody built typechecks
+      # perfectly and 404s at request time. Static, so it runs here rather than
+      # in the job that needs a database and a browser.
+      - name: Portal routes
+        run: pnpm check:routes
+
       - name: Lint
         run: pnpm lint
 

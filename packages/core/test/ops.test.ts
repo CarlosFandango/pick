@@ -46,11 +46,19 @@ describe('ops presentation', () => {
     expect(urgent).toEqual(['offer_expiring']);
   });
 
-  it('sends each action somewhere specific', () => {
+  it('sends each action to a screen that exists', () => {
     expect(OPS_PRESENTATION.review_gate.href(item())).toBe('/admin/review/abc');
-    expect(OPS_PRESENTATION.vetting.href(item({ kind: 'vetting', targetId: null }))).toBe(
-      '/admin/auditors',
+    expect(OPS_PRESENTATION.offer_expiring.href(item({ kind: 'offer_expiring' }))).toBe(
+      '/admin/assignment/abc',
     );
+  });
+
+  it('offers no link for an action whose screen is not built', () => {
+    // Four of these used to point at routes nobody had built, so the queue
+    // offered an action that produced a 404. Null is the honest answer until
+    // the screen lands: the line still says a human is needed.
+    const unbuilt = KINDS.filter((k) => OPS_PRESENTATION[k].href(item({ kind: k })) === null);
+    expect(unbuilt).toEqual(['no_show', 'complaint', 'vetting', 'stale_write_up']);
   });
 });
 

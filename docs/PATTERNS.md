@@ -44,6 +44,8 @@ like before you open it.
 | Set a font family | `fontStack`, via the text role | naming a font in a component |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
 | Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
+| Link between portal screens | `next/link`, to a route with a `page.tsx` | a bare `<a href>`, or a route the design has not got |
+| Offer an action with no screen yet | `href` returning `null`, so no link renders | pointing at the route the screen will one day have |
 | Style a field component | the same token objects as RN styles | a parallel RN colour constant |
 | Convey pass/fail | colour **and** an icon or label | colour alone |
 | Size a field tap target | `touchTarget.comfortable` | an arbitrary height |
@@ -129,6 +131,20 @@ looks exactly like a broken form.
 **Caught now by:** a global setup that tops the ledger up to a floor before
 the run. It appends rather than sets, because the ledger is append-only and
 there is no row to overwrite.
+
+### Links to pages nobody built
+**Symptom:** the Reports tab on every client screen, the redirect after every
+successful review action, and four of the six actions on the ops home all led to
+a 404. Releasing an audit — the primary path off S1.7 — landed on one.
+**Why it hid:** a route is a string. Next resolves it at request time, so lint,
+tsc and the unit tests all have nothing to say, and the Playwright suite walks
+the booking spine and the role gates rather than the navigation. The ops home's
+links live in `core`, one package away from the app that has to serve them.
+**Caught now by:** `pnpm check:routes`, which compares every route-shaped
+literal in the portal and in `ops.ts` against the `page.tsx` files that exist.
+Static, so it runs beside the secret and token tripwires instead of in the job
+that needs a database and a browser. Anchor such a check on the string, not on
+`href=` — there are five spellings and the first version of this missed two.
 
 ### The same idea, twice, with two different numbers
 **Symptom:** the S3.2 picker warned a client that an auditor had audited them
