@@ -31,12 +31,29 @@ export interface LedgerLine extends CreditEntry {
   balanceAfter: number;
 }
 
-export function runningBalance(entries: readonly CreditEntry[]): LedgerLine[] {
+/**
+ * @param closingBalance the organisation's balance after the newest entry in
+ * `entries`.
+ *
+ * Required, and deliberately so. A screen showing the most recent hundred
+ * movements of a longer ledger cannot know what the balance was before them,
+ * and accumulating from zero puts every figure on the page out by the same
+ * amount — plausibly, silently, and disagreeing with the balance every other
+ * screen reads from `organisation_credit_balance`. Making the caller name the
+ * closing balance is the compiler asking a question that is easy to forget and
+ * expensive to get wrong. A caller that genuinely holds the whole ledger passes
+ * `currentBalance(entries)`.
+ */
+export function runningBalance(
+  entries: readonly CreditEntry[],
+  closingBalance: number,
+): LedgerLine[] {
   const oldestFirst = [...entries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime() || a.id.localeCompare(b.id),
   );
 
-  let balance = 0;
+  let balance = closingBalance - currentBalance(oldestFirst);
+
   const lines = oldestFirst.map((entry) => {
     balance += entry.delta;
     return { ...entry, balanceAfter: balance };

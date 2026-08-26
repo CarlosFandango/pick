@@ -1,7 +1,6 @@
 import {
   CREDIT_REASON_LABELS,
   type CreditEntry,
-  currentBalance,
   deltaLabel,
   runningBalance,
   valueLabel,
@@ -11,6 +10,9 @@ import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
+
+/** Most recent movements shown. The balance is never derived from this many. */
+const LEDGER_PAGE = 200;
 
 const cell = {
   padding: '12px 16px',
@@ -29,17 +31,26 @@ export default async function CreditsPage() {
   const session = await requireRole('client', 'pick_admin');
   const supabase = await supabaseServer();
 
-  const [{ data: organisation }, { data: rows }] = await Promise.all([
+  // The balance comes from the view, over the whole ledger — not from summing
+  // the page below. This screen shows the most recent movements, and a total
+  // derived from those alone would disagree with every other screen the moment
+  // an organisation has more of them than fit.
+  const [{ data: organisation }, { data: balance }, { data: rows }] = await Promise.all([
     supabase
       .from('organisation')
       .select('name')
       .eq('id', session.organisationId ?? '')
       .single(),
     supabase
+      .from('organisation_credit_balance')
+      .select('balance')
+      .eq('organisation_id', session.organisationId ?? '')
+      .maybeSingle(),
+    supabase
       .from('credit_transaction')
       .select('id, delta, reason, occurred_at, unit_price_pence, note, audit(reference)')
       .order('occurred_at', { ascending: false })
-      .limit(200),
+      .limit(LEDGER_PAGE),
   ]);
 
   const entries: CreditEntry[] = (rows ?? []).map((row) => ({
@@ -52,11 +63,11 @@ export default async function CreditsPage() {
     note: row.note,
   }));
 
-  const lines = runningBalance(entries);
-  const balance = currentBalance(entries);
+  const credits = balance?.balance ?? 0;
+  const lines = runningBalance(entries, credits);
 
   return (
-    <Chrome active="credits" organisationName={organisation?.name ?? '—'} credits={balance}>
+    <Chrome active="credits" organisationName={organisation?.name ?? '—'} credits={credits}>
       <div style={{ padding: '26px 32px', maxWidth: 820 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
           Credits
@@ -77,7 +88,7 @@ export default async function CreditsPage() {
         >
           <div style={metaLabel}>Balance</div>
           <div style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em', marginTop: 4 }}>
-            {balance}
+            {credits}
           </div>
         </div>
 

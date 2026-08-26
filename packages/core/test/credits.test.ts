@@ -21,18 +21,20 @@ const entry = (over: Partial<CreditEntry> = {}): CreditEntry => {
 
 describe('runningBalance', () => {
   it('shows the balance after every movement', () => {
-    const lines = runningBalance([
+    const ledger = [
       entry({ delta: 4, reason: 'purchase' }),
       entry({ delta: -1, reason: 'booking' }),
       entry({ delta: 1, reason: 'refund' }),
-    ]);
+    ];
+    const lines = runningBalance(ledger, currentBalance(ledger));
 
     // Newest first for reading; the balance still reads down from the top.
     expect(lines.map((l) => l.balanceAfter)).toEqual([4, 3, 4]);
   });
 
   it('is auditable by the person reading it, not something to trust', () => {
-    const lines = runningBalance([entry({ delta: 10 }), entry({ delta: -1, reason: 'booking' })]);
+    const ledger = [entry({ delta: 10 }), entry({ delta: -1, reason: 'booking' })];
+    const lines = runningBalance(ledger, currentBalance(ledger));
     expect(lines.at(-1)?.balanceAfter).toBe(10);
     expect(lines.at(0)?.balanceAfter).toBe(9);
   });
@@ -41,13 +43,13 @@ describe('runningBalance', () => {
     const later = entry({ delta: -1, reason: 'booking', occurredAt: new Date(2026, 2, 20) });
     const earlier = entry({ delta: 5, occurredAt: new Date(2026, 2, 1) });
 
-    const lines = runningBalance([later, earlier]);
+    const lines = runningBalance([later, earlier], currentBalance([later, earlier]));
     expect(lines.map((l) => l.id)).toEqual([later.id, earlier.id]);
     expect(lines.at(0)?.balanceAfter).toBe(4);
   });
 
   it('handles an empty ledger', () => {
-    expect(runningBalance([])).toEqual([]);
+    expect(runningBalance([], 0)).toEqual([]);
     expect(currentBalance([])).toBe(0);
   });
 });
@@ -69,5 +71,34 @@ describe('valueLabel', () => {
     // against it would double-count what the charity spent.
     expect(valueLabel(entry({ delta: -1, reason: 'booking', unitPricePence: 17500 }))).toBe('');
     expect(valueLabel(entry({ delta: 1, reason: 'refund' }))).toBe('');
+  });
+});
+
+describe('a paged ledger', () => {
+  // The screen shows the most recent movements of a ledger that may be longer.
+  // Accumulating from zero would put every figure on it out by the same amount,
+  // plausibly, and disagree with the balance every other screen reads from the
+  // view.
+  const page = [
+    entry({ id: 'p001', delta: 4, reason: 'purchase', occurredAt: new Date('2026-08-01') }),
+    entry({ id: 'p002', delta: -1, reason: 'booking', occurredAt: new Date('2026-08-02') }),
+  ];
+
+  it('reads down from the balance it was given, not from zero', () => {
+    // Balance is 20 now; the two movements shown net to +3, so before them it
+    // was 17.
+    const lines = runningBalance(page, 20);
+
+    expect(lines.map((l) => l.balanceAfter)).toEqual([20, 21]);
+  });
+
+  it('ends on the balance the rest of the product shows', () => {
+    const lines = runningBalance(page, 20);
+    expect(lines[0]?.balanceAfter).toBe(20);
+  });
+
+  it('reads down from zero when the caller really does hold the whole ledger', () => {
+    const lines = runningBalance(page, currentBalance(page));
+    expect(lines.map((l) => l.balanceAfter)).toEqual([3, 4]);
   });
 });
