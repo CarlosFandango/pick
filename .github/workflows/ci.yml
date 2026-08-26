@@ -34,6 +34,11 @@ jobs:
       - name: Secret exposure
         run: pnpm check:secrets
 
+      # Same idea, different rule: a hex literal in a component survives a
+      # rebrand and quietly renders the old brand. Neither lint nor tsc sees it.
+      - name: Design tokens
+        run: pnpm check:tokens
+
       - name: Lint
         run: pnpm lint
 

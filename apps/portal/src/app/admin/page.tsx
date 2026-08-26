@@ -6,8 +6,14 @@ import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
+/**
+ * Chip fill and its paired ink, per the design's rule that an accent used as a
+ * fill needs the ink the brand pairs with it. Every value is from the drop —
+ * `urgent` used to carry an invented #4A1712, which is the one thing a
+ * component may never do.
+ */
 const TONE: Record<string, { fill?: string; ink: string }> = {
-  urgent: { fill: color.creative, ink: '#4A1712' },
+  urgent: { fill: color.creative, ink: color.creativeText },
   attention: { fill: color.auditing, ink: color.auditingInk },
   info: { fill: color.navy, ink: color.onDarkMuted },
   neutral: { ink: color.muted },

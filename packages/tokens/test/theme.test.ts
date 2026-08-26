@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { color } from '../src/brand';
 import { themeToCssText, themeToCssVariables } from '../src/css';
 import { space, touchTarget } from '../src/primitives';
 import { pickselDark, pickselLight, type Theme, type ThemeColors, themes } from '../src/theme';
@@ -131,5 +132,26 @@ describe('primitives', () => {
 
   it('exposes both schemes', () => {
     expect(Object.keys(themes)).toEqual(['light', 'dark']);
+  });
+});
+
+describe('the design drop is the only source of colour', () => {
+  const fromTheDrop = new Set(Object.values(color).map((v) => String(v).toUpperCase()));
+
+  it.each(ALL_THEMES)('$name/$scheme names no colour the brand does not have', (theme) => {
+    // Every role used to be a hex literal with the token name in a trailing
+    // comment. A new design drop could then change `color.bone` and leave the
+    // theme on the old value, silently, under a comment saying otherwise.
+    // Referencing makes that impossible; this makes copying it back visible.
+    const invented = Object.entries(theme.colors).filter(
+      ([, value]) => !fromTheDrop.has(value.toUpperCase()),
+    );
+    expect(invented).toEqual([]);
+  });
+
+  it('covers every role from the drop rather than by luck', () => {
+    // A theme could satisfy the test above while being entirely one colour.
+    const distinct = new Set(Object.values(pickselLight.colors));
+    expect(distinct.size).toBeGreaterThan(8);
   });
 });

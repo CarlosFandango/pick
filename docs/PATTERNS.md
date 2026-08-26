@@ -218,6 +218,19 @@ lint, typecheck or unit tests.
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
 
+### 2026-08-26 — The theme references the design drop rather than copying it
+`packages/tokens/src/theme.ts` mapped every role onto a hex literal with the
+token name in a trailing comment — `background: '#F4EFE6', // bone`. A new
+design drop would change `color.bone` and leave the theme on the old value,
+silently, under a comment asserting otherwise, in the one file the whole rebrand
+promise rests on. Now every role is `color.<token>`. Verified as a pure
+substitution: all 26 literals matched their named token exactly before the
+change. `theme.test.ts` asserts no theme names a colour the drop does not have,
+and `pnpm check:tokens` fails the build on a colour literal anywhere in `apps/`
+or `packages/` outside the drop itself. *Rejected:* a lint rule — Biome cannot
+express "no hex outside these two directories", and a fifteen-line grep in CI
+beside `check-secrets.sh` costs nothing to maintain.
+
 ### 2026-08-26 — Facts that exist twice are compared by a test, not by memory
 Some duplication is correct and cannot be removed: the booking form sets its
 `min` dates from core's constants because it cannot await a round trip, and a PG

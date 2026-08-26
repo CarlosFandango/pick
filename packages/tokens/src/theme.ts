@@ -1,3 +1,5 @@
+import { color } from './brand';
+
 /**
  * Semantic colour roles.
  *
@@ -46,10 +48,12 @@ export interface Theme {
 /**
  * The PICK brand, mapped onto the roles above.
  *
- * Every value comes from `design/tokens/tokens.ts` — the design drop is the
- * only styling source, and nothing here may invent a colour. Where the brand
- * offers a pairing (an accent used as a fill vs as text), the role picks the
- * pair the brand specifies rather than lightening or darkening anything.
+ * Every value is a reference into `design/tokens/tokens.ts`, not a copy of one.
+ * These used to be hex literals with the token name in a trailing comment,
+ * which meant a new design drop could change `color.bone` and leave the theme
+ * on the old value — silently, under a comment asserting otherwise. Where the
+ * brand offers a pairing (an accent used as a fill vs as text), the role picks
+ * the pair the brand specifies rather than lightening or darkening anything.
  *
  * `success` is teal and `fail` is the creative deep pair, per `semantics` in
  * the design tokens. Those are the brand's own choices; the contrast tests in
@@ -60,23 +64,23 @@ export const pickselLight: Theme = {
   name: 'pick',
   scheme: 'light',
   colors: {
-    background: '#F4EFE6', // bone
-    surface: '#FBF8F1', // paper
-    surfaceRaised: '#FFFFFF', // white
-    border: '#E5DFD0', // oat — 1px hairlines, no shadows
+    background: color.bone,
+    surface: color.paper,
+    surfaceRaised: color.white,
+    border: color.oat,
 
-    text: '#1C1A15', // ink
-    textMuted: '#625C4C', // muted
-    textInverse: '#F4EFE6', // bone, on teal/navy fills
+    text: color.ink,
+    textMuted: color.muted,
+    textInverse: color.bone, // on teal and navy fills
 
-    primary: '#0B5D5C', // teal
-    primaryPressed: '#04201F', // teal ink
+    primary: color.teal,
+    primaryPressed: color.tealInk,
 
-    danger: '#A4382C', // creative deep pair — fail-red in PICKsel
-    success: '#0B5D5C', // teal — pass
-    warning: '#8A6100', // auditing deep pair — note
+    danger: color.creativeText, // the brand's deep pair, used as fail-red here
+    success: color.teal,
+    warning: color.auditingText, // the auditing deep pair — a NOTE, not a failure
 
-    focus: '#0B6A68', // link
+    focus: color.link,
   },
 };
 
@@ -89,23 +93,23 @@ export const pickselField: Theme = {
   name: 'pick',
   scheme: 'dark',
   colors: {
-    background: '#041825', // fieldBg
-    surface: '#0A2438', // fieldSheet
-    surfaceRaised: '#062134', // navy
-    border: '#4E6377', // fieldDim
+    background: color.fieldBg,
+    surface: color.fieldSheet,
+    surfaceRaised: color.navy,
+    border: color.fieldDim,
 
-    text: '#F4EFE6', // onDark
-    textMuted: '#7E93A6', // fieldMuted
-    textInverse: '#041825',
+    text: color.onDark,
+    textMuted: color.fieldMuted,
+    textInverse: color.fieldBg,
 
-    primary: '#3F86E8', // blue — the on-navy companion
-    primaryPressed: '#C6D4E2',
+    primary: color.blue,
+    primaryPressed: color.onDarkMuted,
 
-    danger: '#EC6A5E', // creative at full strength, legible on navy
-    success: '#0E9B99', // consulting teal, legible on navy
-    warning: '#F2A900', // auditing amber
+    danger: color.creative,
+    success: color.consulting,
+    warning: color.auditing,
 
-    focus: '#3F86E8',
+    focus: color.blue,
   },
 };
 

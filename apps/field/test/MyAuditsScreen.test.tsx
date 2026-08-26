@@ -1,3 +1,4 @@
+import { pickselLight } from '@picksel/tokens';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { type MyAuditRow, MyAuditsScreen } from '../src/components/MyAuditsScreen';
@@ -48,8 +49,12 @@ describe('S2.5 my audits', () => {
         ]}
       />,
     );
-    // #A4382C is fail-red. An audit's status is never the auditor failing.
-    expect(container.innerHTML).not.toMatch(/A4382C/i);
+    // An audit's status is never the auditor failing. Read from the theme, not
+    // written out: a hex pinned in a test breaks on the next rebrand, which is
+    // exactly when these tests need to still mean something.
+    expect(container.innerHTML.toUpperCase()).not.toContain(
+      pickselLight.colors.danger.toUpperCase(),
+    );
   });
 
   it('shows an approved audit with its score', () => {

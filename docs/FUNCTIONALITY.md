@@ -17,6 +17,7 @@ reason. Deferred is a real answer and should stay populated.
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
+| Token/secret tripwires | Built | `scripts/check-secrets.sh`, `check-tokens.sh` | run first in CI; a colour literal outside the drop fails the build |
 
 ## Domain
 
@@ -84,7 +85,7 @@ screens beyond the shell.
 | Shared web components | Partial | `packages/ui` | Button, Card — token-driven placeholders |
 | Design tokens + themes | Built | `packages/tokens` | light/dark, WCAG AA contrast |
 | Typography scale + fonts | Built | `packages/tokens/src/typography.ts` | 5 semantic roles; web and native verified identical by test |
-| Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | `Theme` type makes a missing role a compile error |
+| Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | roles reference the drop; a copied hex fails `check:tokens` |
 | Portal theming | Built | `portal/src/app/layout.tsx` | CSS custom properties generated from tokens |
 | Field theming | Built | `field/src/theme.ts` | same tokens as RN styles, follows system scheme |
 
