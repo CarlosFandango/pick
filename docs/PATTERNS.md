@@ -26,6 +26,8 @@ like before you open it.
 | Derive a value from a column | a stored generated column | parsing in application code |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
+| Prove a role *cannot* do something | a direct table write in `test/refusals.test.ts` | calling the RPC with the wrong role and stopping there |
+| Expose a new table or RPC | grant it by name, then add it to `test/surface.test.ts` | letting the platform's default privileges decide |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
 | Test app logic that touches a platform | depend on a narrow interface, pass a double | mocking `expo-sqlite`, booting a simulator |
@@ -125,6 +127,52 @@ looks exactly like a broken form.
 the run. It appends rather than sets, because the ledger is append-only and
 there is no row to overwrite.
 
+### A rule in a function, and a door left open beside it
+**Symptom:** none. Everything worked. `book_audit` spent a credit, `accept_offer`
+withdrew the losing offers, `release_audit` refused anything not in review — and
+a client could `insert into audit` for a free audit booked for tomorrow, an
+auditor could `update audit set auditor_fee_pence = 999999, status = 'released'`,
+and an auditor could `update audit_offer set outcome = 'accepted'` and strand
+the audit forever behind the unique index.
+**Why it hid:** the rule was real, tested and enforced — inside the function.
+`authenticated` also held table-level INSERT/UPDATE/DELETE on everything, and
+each policy let the obvious caller through, so beside every checked path was an
+unchecked one that did the same write. Every refusal test we had called the
+*function* with the wrong role; not one went at the table directly. A hole in
+the table path looks exactly like a system that works.
+**Caught now by:** `packages/db/test/refusals.test.ts` — what each role must not
+be able to do, always as a direct table write, never as an RPC call. Write an
+RPC, write the refusal for doing the same thing without it.
+
+### A snapshot grant, undone by a default privilege
+**Symptom:** `anon` held SELECT on `complaint`, `prep_progress`,
+`auditor_conflict` and `auditor_capability`; `authenticated` could execute every
+internal helper including `auditor_code_for`, which exists to make an auditor
+unidentifiable.
+**Why it hid:** `revoke all on all tables in schema public from anon` reads like
+a rule and is a snapshot — it says nothing about the table created two
+migrations later, which picks the platform's default privileges straight back
+up. Postgres grants EXECUTE on a new function to PUBLIC for the same reason.
+The test that should have caught it asserted `anon` had no privilege on
+`public.audit` — one table, by name, and the wrong one.
+**Caught now by:** `packages/db/test/surface.test.ts`, which sweeps every table
+and every function rather than naming one, and `alter default privileges`
+statements that cover objects nobody has created yet. A revoke without a
+matching default-privileges rule is half a revoke.
+
+### A function that was replaced, and wasn't
+**Symptom:** two `book_audit`s. The rebuilt one refused a window starting inside
+the lead time; the original, still granted, did not.
+**Why it hid:** `create or replace function` replaces a function with the *same*
+argument list. 20260826180000 added a ninth parameter, so it created an
+overload and left the eight-argument version installed — and the migration reads
+exactly like a replacement. It was visible the whole time in
+`types.generated.ts`, where `book_audit` was a union of two signatures, and that
+union read as a generator quirk rather than a fact about the schema.
+**Caught now by:** `surface.test.ts` asserting no overloaded function name in
+`public`. A deliberate overload will fail that test, which is the right moment
+to ask whether both signatures should be reachable.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.
@@ -137,6 +185,20 @@ lint, typecheck or unit tests.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-26 — Writes go through RPCs; the grant surface is declared, not inherited
+`authenticated` may read what RLS allows and may write directly only where no
+invariant spans two tables: a field event it minted, a complaint, its own prep
+progress. Every other write is a `security definer` function or the service role
+in a server action. Table privileges and the callable function list are stated
+explicitly in migrations and asserted as inventories in `surface.test.ts`, so a
+new table or RPC is unreachable until somebody decides what may touch it.
+*Rejected:* keeping the blanket `grant select, insert, update, delete on all
+tables` and relying on policies alone — it had already produced three ways to
+skip a checked path, and a policy that looks tight is not the same as a
+privilege that does not exist. *Rejected also:* per-column grants on `audit` to
+keep an admin's direct-write ability; nothing writes `audit` outside an RPC, and
+an unused capability is a permanent question.
 
 ### 2026-08-25 — One React version, pinned to React Native's requirement
 `pnpm.overrides` pins react/react-dom to 19.1.0 workspace-wide. Expo 54 needs

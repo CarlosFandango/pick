@@ -179,15 +179,20 @@ describe('organisations and profiles', () => {
     });
   });
 
-  // An UPDATE with no matching policy is filtered by USING, so it changes
-  // nothing and raises nothing — a silent no-op, not an error. Assert the data
-  // is unchanged: that is the property that matters, and an error-shaped
-  // assertion would pass for the wrong reason.
+  // These used to be silent no-ops: an UPDATE with no matching policy is
+  // filtered by USING, changes nothing and raises nothing. Since profile and
+  // organisation writes moved to the service role, `authenticated` holds no
+  // UPDATE on either table at all, so the attempt now fails at the GRANT.
+  // Louder, and it does not depend on a policy staying tight.
   it('does not let a client rename their organisation directly', async () => {
     await withDatabase(async (db) => {
-      await db
+      const message = await db
         .as(ids.clientA)
-        .query('update organisation set name = $1 where id = $2', ['Hijacked', ids.charityA]);
+        .expectRefused('update organisation set name = $1 where id = $2', [
+          'Hijacked',
+          ids.charityA,
+        ]);
+      expect(message).toMatch(/permission denied/i);
 
       const [org] = await db.arrange<{ name: string }>(
         'select name from organisation where id = $1',
@@ -199,9 +204,13 @@ describe('organisations and profiles', () => {
 
   it('does not let a client promote themselves to admin', async () => {
     await withDatabase(async (db) => {
-      await db
+      const message = await db
         .as(ids.clientA)
-        .query('update user_profile set role = $1 where id = $2', ['pick_admin', ids.clientA]);
+        .expectRefused('update user_profile set role = $1 where id = $2', [
+          'pick_admin',
+          ids.clientA,
+        ]);
+      expect(message).toMatch(/permission denied/i);
 
       const [profile] = await db.arrange<{ role: string }>(
         'select role from user_profile where id = $1',

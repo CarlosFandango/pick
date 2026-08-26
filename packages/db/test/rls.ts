@@ -118,14 +118,19 @@ export async function withDatabase(body: (h: Harness) => Promise<void>): Promise
         },
         expectRefused: async (sql, params) => {
           await become(userId);
+          // A refused statement aborts the transaction, so recovery has to
+          // happen somewhere. It happens on a savepoint taken immediately
+          // before the attempt, not on the one wrapping the whole test: rolling
+          // back to that would also discard whatever the test arranged, and a
+          // refusal test usually wants to go on and prove nothing changed.
+          await client.query('savepoint attempt');
           try {
             await client.query(sql, params);
           } catch (error) {
-            // A refused statement aborts the transaction; recover so the test
-            // can carry on asserting.
-            await client.query('rollback to savepoint clean').catch(() => undefined);
+            await client.query('rollback to savepoint attempt').catch(() => undefined);
             return error instanceof Error ? error.message : String(error);
           }
+          await client.query('release savepoint attempt').catch(() => undefined);
           throw new Error(`expected the statement to be refused, but it succeeded:\n${sql}`);
         },
       }),

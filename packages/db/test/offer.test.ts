@@ -68,9 +68,10 @@ describe('the offer an auditor sees (S1.3)', () => {
       const [offer] = await db
         .as(ids.auditor)
         .query<{ travel_uplift_pence: number }>('select travel_uplift_pence from audit_offer');
-      const [base] = await db
-        .as(ids.auditor)
-        .query<{ base: number }>('select base_audit_fee_pence() as base');
+      // Read as postgres: the assertion is "the base fee is £100", not "an
+      // auditor may call this function". The enumerated constants are internal
+      // — they run inside security definer functions and are not granted out.
+      const [base] = await db.arrange<{ base: number }>('select base_audit_fee_pence() as base');
       expect(Number(base?.base)).toBe(10000);
       expect(Number(offer?.travel_uplift_pence)).toBeGreaterThanOrEqual(0);
     });

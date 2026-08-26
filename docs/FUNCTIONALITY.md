@@ -23,7 +23,10 @@ reason. Deferred is a real answer and should stay populated.
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
 | Schema: 12 tables, 15 enums, 1 view | Built | `packages/db/supabase/migrations` | verified on PG17 |
-| RLS on every table | Built | `20260825090700_rls.sql` | 12/12 enabled; 25 tests impersonating real roles, run in CI |
+| RLS on every table | Built | `20260825090700_rls.sql` | every table, asserted by a sweep rather than a count |
+| Writes go through RPCs | Built | `20260826230000_writes_go_through_rpcs.sql` | direct INSERT/UPDATE/DELETE revoked except field events, complaints, prep |
+| Declared grant surface | Built | `20260826230100_declare_the_whole_surface.sql` | anon holds nothing; the callable function list is explicit |
+| Refusal + inventory suites | Built | `packages/db/test/refusals.test.ts`, `surface.test.ts` | what each role must *not* do, and what the schema exposes |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category absent from field app entirely |
