@@ -1336,6 +1336,23 @@ export type Database = {
         Args: { p_audit_id: string; p_expires_in?: string }
         Returns: number
       }
+      offer_board: {
+        Args: never
+        Returns: {
+          audit_id: string
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          base_minor_units: number
+          expires_at: string
+          offer_id: string
+          outcome: string
+          postcode_outward: string
+          requires_av: boolean
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          travel_uplift_minor_units: number
+          window_end_on: string
+          window_start_on: string
+        }[]
+      }
       ops_counters: {
         Args: never
         Returns: {

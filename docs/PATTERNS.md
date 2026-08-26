@@ -13,6 +13,9 @@ like before you open it.
 | Do this | Use | Not this |
 |---|---|---|
 | Read data in the portal | `supabaseServer()` in a Server Component; RLS scopes it | client-side fetch, an API route, a repository class |
+| Read data in the field app | a function in `field/src/lib/queries.ts` + `useLoad` | fetching inside a screen, a caching library |
+| Turn a row into props | an adapter in `field/src/lib/adapters.ts` | shaping inside the screen or the query |
+| Show a row RLS hides for good reason | a `security definer` RPC returning only what the screen may reveal | loosening the policy, a service-role key on a device |
 | Open a client screen | `clientPage()` — session, client, chrome data | repeating the organisation and balance queries |
 | Write across tenants | a server action with `createAdminClient()` | loosening an RLS policy |
 | Expose a server action | its own `'use server'` module, one export | adding `'use server'` to a shared lib |

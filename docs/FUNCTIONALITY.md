@@ -71,9 +71,10 @@ reason. Deferred is a real answer and should stay populated.
 | S4.2 | Assignment console | Built |
 | S4.3+ | Remaining ops screens (auditors, clients, payouts, complaints admin) | Not started |
 
-Screens are wired as components and routes with tests at every level; several
-are not yet joined up to navigation in the field app, which has no router
-screens beyond the shell.
+Screens are wired as components and routes with tests at every level. The
+field app's write-up route is the remaining gap: it is built as a component but
+`WriteUpScreen` still replays moments rather than stages (TND-83), so it is
+wired last, once Jaz's walkthrough settles the sequence.
 
 ## Applications
 
@@ -84,7 +85,11 @@ screens beyond the shell.
 | Not-found page | Built | `portal/src/app/not-found.tsx` | session-free; copy does not confirm a record exists |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
 | Sign out | Built | `portal/src/lib/sign-out.ts` | form POST from both shells; never a GET link |
-| Field app shell | Partial | `apps/field` | expo-router, one screen |
+| Field app routes | Built | `apps/field/app` | sign-in, offers, offer detail, my audits, earnings, session + flag modal |
+| Device auth | Built | `field/src/lib/session.tsx`, `lib/supabase.ts` | AsyncStorage session; `ready` kept separate from `session` so a cold start does not sign anyone out |
+| Row-to-prop adapters | Built | `field/src/lib/adapters.ts` | the layer that was missing; 18 tests, no network |
+| Local field-event writes | Built | `field/src/lib/events.ts` | device-minted ids, device clock, left queued |
+| Sync trigger | Built | `field/src/lib/sync.ts` | called where signal is likely, never on a timer; never throws |
 | Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox; 9 tests incl. resume-from-partial |
 | Sync push | Built | `field/src/sync/outbox.ts` | 10 tests: batching, failure isolation, payload parsing, idempotence |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
@@ -103,9 +108,9 @@ screens beyond the shell.
 
 ## Not built yet
 
-Sign-in screens · audit booking flow · matching algorithm · report generation ·
-notifications · payment capture · payout CSV export · auditor onboarding ·
-scheduled jobs · analytics dashboards
+Portal sign-in design (scaffolding today) · report generation · notifications ·
+payment capture · payout CSV export · auditor onboarding · scheduled jobs ·
+analytics dashboards
 
 ## Deferred, with reasons
 

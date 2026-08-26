@@ -237,3 +237,78 @@ describe('decline_offer', () => {
     });
   });
 });
+
+describe('the offer board an auditor actually reads', () => {
+  it('shows an auditor their own offers, with the audit behind them', async () => {
+    // The reason this function exists: audit_read allows auditor_id =
+    // auth.uid(), which is not true before acceptance, so a plain join returns
+    // nothing for exactly the rows the offers screen is for.
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const direct = await db.as(ids.auditor).query('select id from audit where id = $1', [AUDIT]);
+      expect(direct, 'the audit should NOT be directly readable yet').toHaveLength(0);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<{ audit_id: string; postcode_outward: string }>('select * from offer_board()');
+      const mine = board.filter((r) => r.audit_id === AUDIT);
+      expect(mine).toHaveLength(1);
+      expect(mine[0]?.postcode_outward).toBe('SW1A');
+    });
+  });
+
+  it("never shows one auditor another's offer", async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<{ offer_id: string }>('select offer_id from offer_board()');
+      const theirs = await offerIdFor(db, ids.otherAuditor);
+
+      expect(board.map((r) => r.offer_id)).not.toContain(theirs);
+    });
+  });
+
+  it('withholds the pitch detail, so declining reveals nothing', async () => {
+    // An auditor who turns a job down must not come away knowing where the
+    // team will be standing. The offer shows an area.
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<Record<string, unknown>>('select * from offer_board()');
+      const columns = Object.keys(board[0] ?? {});
+
+      for (const leak of ['pitch_detail', 'site_name', 'campaign_name', 'postcode']) {
+        expect(columns, `offer_board leaks ${leak}`).not.toContain(leak);
+      }
+    });
+  });
+
+  it('quotes the pay the auditor will be shown before accepting', async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const [row] = await db
+        .as(ids.auditor)
+        .query<{ base_minor_units: number; travel_uplift_minor_units: number }>(
+          'select base_minor_units, travel_uplift_minor_units from offer_board() where audit_id = $1',
+          [AUDIT],
+        );
+
+      expect(Number(row?.base_minor_units)).toBe(10000);
+      expect(Number(row?.travel_uplift_minor_units)).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  it('shows a client nothing, whatever they ask it for', async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+      const board = await db.as(ids.clientA).query('select * from offer_board()');
+      expect(board).toHaveLength(0);
+    });
+  });
+});
