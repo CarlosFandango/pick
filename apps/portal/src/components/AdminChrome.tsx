@@ -1,4 +1,5 @@
 import { color } from '@picksel/tokens';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { signOut } from '@/lib/sign-out';
 import { mono, sans, textButton } from '@/lib/theme';
@@ -25,7 +26,34 @@ export function AdminChrome({
           color: color.onDark,
         }}
       >
-        <span style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.1em' }}>PICKSEL ADMIN</span>
+        <Link href="/admin" style={{ ...wordmark, textDecoration: 'none', color: color.onDark }}>
+          PICKSEL ADMIN
+        </Link>
+
+        {/*
+          The ops home is a queue — what needs a human today. That is right for
+          it, but it left everything else unreachable: an audit booked for next
+          month appeared nowhere, and nothing linked to the assignment console
+          at all. These are the directories the queue is not.
+        */}
+        <nav style={{ display: 'flex', gap: 16, fontSize: 12, fontWeight: 600 }}>
+          {[
+            { href: '/admin/audits', label: 'Audits' },
+            { href: '/admin/auditors', label: 'Auditors' },
+            { href: '/admin/clients', label: 'Clients' },
+            { href: '/admin/risks', label: 'Risks' },
+            { href: '/admin/gates', label: 'Gates' },
+          ].map((tab) => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              style={{ color: color.onDarkMuted, textDecoration: 'none' }}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </nav>
+
         {queuePosition ? (
           <span
             style={{
@@ -49,3 +77,5 @@ export function AdminChrome({
     </div>
   );
 }
+
+const wordmark = { fontWeight: 800, fontSize: 13, letterSpacing: '0.1em' } as const;

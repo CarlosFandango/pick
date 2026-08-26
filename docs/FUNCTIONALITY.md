@@ -75,7 +75,7 @@ reason. Deferred is a real answer and should stay populated.
 | S4.1 | Ops home | Built |
 | S4.2 | Assignment console | Built |
 | S4.3 | Auditor roster — vetting, coverage, capability | Built |
-| S4.4 | Audit situation report | Built |
+| S4.4 | Audits — list and situation report | Built |
 | S4.5 | Clients — roster, balances, credit adjustments | Built |
 | S4.6 | Complaint — read, acknowledge, resolve | Built (minimal). TND-80 adds triage paths and PICK-authored rework beside it |
 | S4.7 | Payout runs | Not started — the gate now exists, so this is unblocked |

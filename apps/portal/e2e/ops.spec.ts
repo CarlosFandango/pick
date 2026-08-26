@@ -129,3 +129,40 @@ test.describe('the risk register and the gates', () => {
     }
   });
 });
+
+test.describe('finding an audit that is not in today’s queue', () => {
+  test('lists every audit, not just the ones needing a human today', async ({ page }) => {
+    // The gap this closed: the ops home is a queue, and an audit booked for
+    // next month appeared in it nowhere. Not filtered — unreachable, because
+    // nothing else listed audits and nothing linked to the assignment console.
+    await signIn(page, 'admin');
+    await page.goto('/admin/audits');
+
+    await expect(page.getByRole('heading', { name: 'Audits' })).toBeVisible();
+    for (const heading of ['Reference', 'Charity', 'Type', 'Location', 'Window', 'Status']) {
+      await expect(page.getByRole('columnheader', { name: heading })).toBeVisible();
+    }
+  });
+
+  test('offers the assignment console on an audit still waiting for an auditor', async ({
+    page,
+  }) => {
+    await signIn(page, 'admin');
+    await page.goto('/admin/audits');
+
+    const assign = page.getByRole('link', { name: 'Assign' }).first();
+    if ((await assign.count()) === 0) test.skip();
+
+    await assign.click();
+    await expect(page).toHaveURL(/\/admin\/assignment\//);
+  });
+
+  test('every admin screen is reachable from the header, not only by URL', async ({ page }) => {
+    await signIn(page, 'admin');
+    await page.goto('/admin');
+
+    for (const label of ['Audits', 'Auditors', 'Clients', 'Risks', 'Gates']) {
+      await expect(page.getByRole('link', { name: label, exact: true })).toBeVisible();
+    }
+  });
+});
