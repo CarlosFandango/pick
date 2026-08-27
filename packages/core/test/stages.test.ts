@@ -15,6 +15,9 @@ import {
   tallyCount,
 } from '../src/stages';
 
+const WATCHING = { tallies: true, notes: true, markers: true };
+const BEING_PITCHED_TO = { tallies: false, notes: false, markers: true };
+
 /** The seeded default, trimmed to what a test needs to say something. */
 const STAGES: AuditStage[] = [
   {
@@ -22,6 +25,7 @@ const STAGES: AuditStage[] = [
     label: 'Arrival and setup',
     sequence: 1,
     captureMode: 'observation',
+    permissions: WATCHING,
     moment: null,
     durationHintMinutes: null,
   },
@@ -30,6 +34,7 @@ const STAGES: AuditStage[] = [
     label: 'Team observation',
     sequence: 2,
     captureMode: 'observation',
+    permissions: WATCHING,
     moment: 'approach',
     durationHintMinutes: 45,
   },
@@ -38,6 +43,7 @@ const STAGES: AuditStage[] = [
     label: 'Pitch',
     sequence: 3,
     captureMode: 'interaction',
+    permissions: BEING_PITCHED_TO,
     moment: 'pitch',
     durationHintMinutes: null,
   },
@@ -46,6 +52,7 @@ const STAGES: AuditStage[] = [
     label: 'Close and exit',
     sequence: 4,
     captureMode: 'interaction',
+    permissions: BEING_PITCHED_TO,
     moment: 'close',
     durationHintMinutes: null,
   },
@@ -55,31 +62,27 @@ const START = new Date(2026, 2, 3, 11, 0, 0);
 const at = (minutes: number) => new Date(START.getTime() + minutes * 60_000);
 
 describe('what an auditor may do during a stage', () => {
-  it('lets an observer hold a phone', () => {
-    // A bystander at a distance. Tallies over 45 minutes are the whole point
-    // of this half — nobody recalls a stop rate afterwards.
-    const observing = permissions(STAGES[1] as AuditStage);
-    expect(observing.tallies).toBe(true);
-    expect(observing.notes).toBe(true);
+  // What each stage permits is configuration (`audit_capture_mode`), not a
+  // rule in here — asserting the shipped values against a fixture that states
+  // them would only prove the fixture agrees with itself. The seeded values
+  // are pinned in `packages/db/test`, against the seed.
+  //
+  // What stays code, and so belongs here, is that the permissions are obeyed.
+
+  it('takes what is permitted from the stage rather than deciding it', () => {
+    // Any stage may be configured any way. A third stage arriving as a row
+    // must work without a release, which is the whole point of TND-83.
+    const unusual: AuditStage = {
+      ...(STAGES[2] as AuditStage),
+      permissions: { tallies: true, notes: false, markers: false },
+    };
+    expect(permissions(unusual)).toEqual({ tallies: true, notes: false, markers: false });
   });
 
-  it('gives someone being pitched to nothing to fill in', () => {
-    // The discretion constraint is severe here and mild in the other phase.
-    // An auditor tapping counters while a fundraiser talks to them is not a
-    // mystery shopper any more.
-    const interacting = permissions(STAGES[2] as AuditStage);
-    expect(interacting.tallies).toBe(false);
-    expect(interacting.notes).toBe(false);
-  });
-
-  it('keeps a single marker available throughout', () => {
-    // One tap, no reading. The spec allows "a single discreet marker at most"
-    // during an interaction, and something going wrong mid-pitch is exactly
-    // when an auditor needs to record that it did.
-    for (const stage of STAGES) {
-      expect(permissions(stage).markers, stage.key).toBe(true);
-    }
-  });
+  // That the permissions are then obeyed is covered under "tallies" below —
+  // `addTally` refusing a stage that does not permit one is the enforcement,
+  // and it is what stops a stale render or a stray tap recording a count the
+  // stage was configured never to allow.
 });
 
 describe('moving through the stages', () => {

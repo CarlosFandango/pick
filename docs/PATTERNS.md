@@ -186,6 +186,50 @@ lint, typecheck or unit tests.
 
 ## Decision log
 
+### 2026-08-27 — Behaviour that varies by configuration travels with the row
+
+`capture_mode` was a Postgres enum with two values, and `permissions()` in core
+was a `switch` over them deciding whether an auditor could tally, take notes or
+drop a marker. Adding a third stage cost a migration, an enum value, a switch
+arm and a deploy — for something the business, not the developer, owns.
+
+It is now `audit_capture_mode`: a row per stage carrying `allows_tallies`,
+`allows_notes` and `allows_markers`. `permissions()` returns what the row says.
+The rule "an interaction stage exposes no tally counter" is a `false` in a
+column.
+
+**The flags live on the stage, not on the 36 `audit_stage_template` rows that
+reference it.** Copying them per step would be 36 chances to disagree, and the
+constraint is a property of the stage.
+
+**Where the tests went.** The unit test that asserted an interaction stage
+permits no tally became circular the moment the value came from a fixture —
+it proved the fixture agreed with itself. The rule moved to the seed, so its
+test moved to `packages/db/test/capture-modes.test.ts`, against the seed. What
+stays in `core` is the *enforcement*: `addTally` refusing a stage that does not
+permit one. Generally: **when a rule becomes configuration, its test follows it
+to the layer that now owns it, and the unit layer keeps only the obedience.**
+
+**Absent flags fail closed** (`allowed()` in `apps/field/src/lib/adapters.ts`).
+SQLite has no boolean, so a cached row carries 0/1, and one cached before the
+flags existed carries nothing. Capturing too little is visible on the next
+shift and gets reported; wrongly permitting a tally during a mystery shop
+corrupts the audit with nobody noticing. Fail towards the failure that is loud.
+
+**The reason lives next to the setting.** `audit_capture_mode.caution` holds
+the explanation of why the interaction stage is restricted, and the admin
+screen shows it beside the toggle. Someone changing this in a year will not
+have read the spec, and a bare switch gives them nothing to weigh. A pinned
+test asserts the text is present, because an empty column here is a silent
+regression.
+
+**Deliberately not done: renaming the concepts.** The business calls
+observation and interaction "stages"; the code calls the nine sequence rows
+"stages" and these "capture modes". Straightening that out means touching
+`observation_log.stage_key`, `audit.stage_set_version`, the whole
+`StagedSession` model and the local SQLite schema — a rename sweep riding along
+inside a feature commit. It is real confusion and worth fixing on its own.
+
 ### 2026-08-26 — Portal primitives live in `lib/theme.ts`, not `packages/ui`
 
 `packages/ui` holds a Button and a Card, is imported by zero screens, and

@@ -107,6 +107,23 @@ export const MIGRATIONS: string[] = [
 
   create index if not exists observation_log_stage on observation_log (audit_id, stage_key);
   `,
+
+  // v3 — what a stage permits, cached alongside it (TND-83)
+  //
+  // The rule "an interaction stage exposes no tally counter" used to be a
+  // branch in core. It is now a row in `audit_capture_mode`, which means the
+  // device has to carry it: an auditor prepping underground gets their stages
+  // from this table, and a stage without its permissions cannot be run.
+  //
+  // Nullable with no default, and `toAuditStage` reads absent as "capture
+  // nothing". A row cached before this migration has no flags, and failing
+  // closed makes that visible on the next session rather than silently
+  // permitting a tally during a mystery shop.
+  `
+  alter table cached_audit_stage add column allows_tallies integer;
+  alter table cached_audit_stage add column allows_notes integer;
+  alter table cached_audit_stage add column allows_markers integer;
+  `,
 ];
 
 /**

@@ -93,12 +93,29 @@ export async function fetchEarnings(): Promise<EarningLine[]> {
 export async function fetchStages(auditType: AuditType): Promise<AuditStage[]> {
   const { data, error } = await supabase()
     .from('audit_stage_template')
-    .select('sequence, key, label, capture_mode, moment, duration_hint_minutes')
+    .select(
+      'sequence, key, label, capture_mode, moment, duration_hint_minutes, ' +
+        'audit_capture_mode(allows_tallies, allows_notes, allows_markers)',
+    )
     .eq('audit_type', auditType)
     .eq('is_active', true)
     .order('sequence');
   if (error) throw error;
-  return ((data ?? []) as unknown as StageRow[]).map(toAuditStage);
+
+  // Flatten the embed to the shape the local cache also stores, so an offline
+  // read and an online read reach `toAuditStage` identically.
+  const rows = (data ?? []) as unknown as (StageRow & {
+    audit_capture_mode: Pick<StageRow, 'allows_tallies' | 'allows_notes' | 'allows_markers'> | null;
+  })[];
+
+  return rows
+    .map(({ audit_capture_mode: mode, ...stage }) => ({
+      ...stage,
+      allows_tallies: mode?.allows_tallies ?? null,
+      allows_notes: mode?.allows_notes ?? null,
+      allows_markers: mode?.allows_markers ?? null,
+    }))
+    .map(toAuditStage);
 }
 
 export async function acceptOffer(offerId: string): Promise<void> {

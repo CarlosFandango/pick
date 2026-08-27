@@ -12,13 +12,24 @@ import type { AuditMoment } from './moments';
  * The stage list is data, seeded per audit type in `audit_stage_template`.
  * Nothing here hardcodes a sequence.
  */
-export type CaptureMode = 'observation' | 'interaction';
+/**
+ * Deliberately a string, not a union of the two we ship with.
+ *
+ * The stage list is configuration (`audit_capture_mode`), so a third stage is
+ * a row rather than a release. Closing this type would put the list back in
+ * the code, which is the thing TND-83 exists to undo. The safety that a union
+ * would have given moves to `StagePermissions`, which is the part any caller
+ * actually branches on.
+ */
+export type CaptureMode = string;
 
 export interface AuditStage {
   key: string;
   label: string;
   sequence: number;
   captureMode: CaptureMode;
+  /** What may be captured during this stage. Configuration, not a constant. */
+  permissions: StagePermissions;
   /** The moment whose checks belong to this stage. Null on a tally stage. */
   moment: AuditMoment | null;
   durationHintMinutes: number | null;
@@ -57,9 +68,14 @@ export interface StagedSession {
 /**
  * What an auditor may physically do during a stage.
  *
- * `interaction` allows a marker and nothing else — the spec permits "a single
- * discreet marker at most". Tallies and notes require looking at a screen for
- * long enough to be noticed by the person pitching to you.
+ * As shipped, `interaction` allows a marker and nothing else — the spec
+ * permits "a single discreet marker at most". Tallies and notes require
+ * looking at a screen for long enough to be noticed by the person pitching to
+ * you.
+ *
+ * That is a seeded row rather than a rule here, so it can be changed without a
+ * release. The reason it is set that way is recorded as `caution` on the row,
+ * where whoever changes it will see it.
  */
 export interface StagePermissions {
   tallies: boolean;
@@ -67,9 +83,14 @@ export interface StagePermissions {
   markers: boolean;
 }
 
+/**
+ * Kept as a function rather than reading `stage.permissions` at each call
+ * site. It is the one name every screen asks through, so where permissions
+ * come from stays a single decision — which is how they moved out of here to
+ * the database without any caller changing.
+ */
 export function permissions(stage: AuditStage): StagePermissions {
-  const observing = stage.captureMode === 'observation';
-  return { tallies: observing, notes: observing, markers: true };
+  return stage.permissions;
 }
 
 export function startStagedSession(stages: readonly AuditStage[], at: Date): StagedSession {

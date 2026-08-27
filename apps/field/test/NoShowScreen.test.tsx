@@ -11,6 +11,7 @@ const STAGES: AuditStage[] = [
     label: 'Arrival and setup',
     sequence: 1,
     captureMode: 'observation',
+    permissions: { tallies: true, notes: true, markers: true },
     moment: null,
     durationHintMinutes: null,
   },

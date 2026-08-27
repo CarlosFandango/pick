@@ -252,6 +252,45 @@ export type Database = {
           },
         ]
       }
+      audit_capture_mode: {
+        Row: {
+          allows_markers: boolean
+          allows_notes: boolean
+          allows_tallies: boolean
+          caution: string | null
+          created_at: string
+          is_active: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allows_markers?: boolean
+          allows_notes?: boolean
+          allows_tallies?: boolean
+          caution?: string | null
+          created_at?: string
+          is_active?: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          allows_markers?: boolean
+          allows_notes?: boolean
+          allows_tallies?: boolean
+          caution?: string | null
+          created_at?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_offer: {
         Row: {
           audit_id: string
@@ -353,7 +392,7 @@ export type Database = {
       audit_stage_template: {
         Row: {
           audit_type: Database["public"]["Enums"]["audit_type"]
-          capture_mode: Database["public"]["Enums"]["capture_mode"]
+          capture_mode: string
           created_at: string
           duration_hint_minutes: number | null
           id: string
@@ -367,7 +406,7 @@ export type Database = {
         }
         Insert: {
           audit_type: Database["public"]["Enums"]["audit_type"]
-          capture_mode: Database["public"]["Enums"]["capture_mode"]
+          capture_mode: string
           created_at?: string
           duration_hint_minutes?: number | null
           id?: string
@@ -381,7 +420,7 @@ export type Database = {
         }
         Update: {
           audit_type?: Database["public"]["Enums"]["audit_type"]
-          capture_mode?: Database["public"]["Enums"]["capture_mode"]
+          capture_mode?: string
           created_at?: string
           duration_hint_minutes?: number | null
           id?: string
@@ -393,7 +432,15 @@ export type Database = {
           updated_at?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "audit_stage_template_capture_mode_fkey"
+            columns: ["capture_mode"]
+            isOneToOne: false
+            referencedRelation: "audit_capture_mode"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       auditor_capability: {
         Row: {
@@ -2250,7 +2297,6 @@ export type Database = {
         | "no_team_present"
       audit_type: "street" | "door_to_door" | "private_site" | "lottery"
       auditor_approval_status: "pending" | "approved" | "suspended" | "rejected"
-      capture_mode: "observation" | "interaction"
       check_outcome:
         | "pass"
         | "fail"
@@ -2482,7 +2528,6 @@ export const Constants = {
       ],
       audit_type: ["street", "door_to_door", "private_site", "lottery"],
       auditor_approval_status: ["pending", "approved", "suspended", "rejected"],
-      capture_mode: ["observation", "interaction"],
       check_outcome: ["pass", "fail", "not_applicable", "not_observed", "note"],
       client_response: ["proceeded", "withdrew", "no_response"],
       complaint_status: ["open", "acknowledged", "resolved", "withdrawn"],

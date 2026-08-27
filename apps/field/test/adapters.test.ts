@@ -151,17 +151,50 @@ describe('earnings', () => {
 });
 
 describe('stages from the database', () => {
+  const ARRIVAL = {
+    sequence: 1,
+    key: 'arrival',
+    label: 'Arrival and setup',
+    capture_mode: 'observation',
+    allows_tallies: true,
+    allows_notes: true,
+    allows_markers: true,
+    moment: null,
+    duration_hint_minutes: null,
+  };
+
   it('keeps a stage with no moment, which is the observation phase', () => {
-    const stage = toAuditStage({
-      sequence: 1,
-      key: 'arrival',
-      label: 'Arrival and setup',
-      capture_mode: 'observation',
-      moment: null,
-      duration_hint_minutes: null,
-    });
+    const stage = toAuditStage(ARRIVAL);
 
     expect(stage.moment).toBeNull();
     expect(stage.captureMode).toBe('observation');
+    expect(stage.permissions).toEqual({ tallies: true, notes: true, markers: true });
+  });
+
+  it('reads a cached stage, where SQLite stores 0 and 1 rather than booleans', () => {
+    const stage = toAuditStage({
+      ...ARRIVAL,
+      capture_mode: 'interaction',
+      allows_tallies: 0,
+      allows_notes: 0,
+      allows_markers: 1,
+    });
+
+    expect(stage.permissions).toEqual({ tallies: false, notes: false, markers: true });
+  });
+
+  it('captures nothing when a stage arrives without its permissions', () => {
+    // Cached before the flags existed, or a capture mode that failed to
+    // resolve. Failing closed makes that visible on the next session — the
+    // opposite default would silently permit tallying during a mystery shop,
+    // which is the one failure nobody would notice.
+    const stage = toAuditStage({
+      ...ARRIVAL,
+      allows_tallies: null,
+      allows_notes: null,
+      allows_markers: null,
+    });
+
+    expect(stage.permissions).toEqual({ tallies: false, notes: false, markers: false });
   });
 });

@@ -144,13 +144,35 @@ export function toEarningLines(
   });
 }
 
+/**
+ * Flat on purpose: this is the shape both the network and the local cache
+ * hand over. `fetchStages` flattens the embedded capture mode before mapping,
+ * so a stage read from SQLite offline and one read from Postgres online go
+ * through exactly the same code.
+ */
 export interface StageRow {
   sequence: number;
   key: string;
   label: string;
   capture_mode: string;
+  allows_tallies: boolean | number | null;
+  allows_notes: boolean | number | null;
+  allows_markers: boolean | number | null;
   moment: string | null;
   duration_hint_minutes: number | null;
+}
+
+/**
+ * Absent flags fail closed.
+ *
+ * SQLite has no boolean type, so a cached row carries 0/1. A row with nothing
+ * at all means the capture mode did not resolve, and the safe reading of that
+ * is "capture nothing": a stage that records too little is visibly broken and
+ * gets reported, while one that wrongly permits tallying during a mystery shop
+ * damages the audit with nobody noticing.
+ */
+function allowed(flag: boolean | number | null | undefined): boolean {
+  return flag === true || flag === 1;
 }
 
 export function toAuditStage(row: StageRow): AuditStage {
@@ -158,7 +180,12 @@ export function toAuditStage(row: StageRow): AuditStage {
     key: row.key,
     label: row.label,
     sequence: Number(row.sequence),
-    captureMode: row.capture_mode as AuditStage['captureMode'],
+    captureMode: row.capture_mode,
+    permissions: {
+      tallies: allowed(row.allows_tallies),
+      notes: allowed(row.allows_notes),
+      markers: allowed(row.allows_markers),
+    },
     moment: row.moment as AuditStage['moment'],
     durationHintMinutes: row.duration_hint_minutes,
   };
