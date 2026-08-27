@@ -44,6 +44,7 @@ export function AdminChrome({
             { href: '/admin/payouts', label: 'Payouts' },
             { href: '/admin/risks', label: 'Risks' },
             { href: '/admin/gates', label: 'Gates' },
+            { href: '/admin/stages', label: 'Stages' },
           ].map((tab) => (
             <Link
               key={tab.href}

@@ -59,6 +59,7 @@ the shared vocabulary, so they are allocated here.
 | S4.7 | Payout runs — owed, drafted, approved, paid | Web | /admin/payouts |
 | S4.8 | Risk register — flagged, advised, answered | Web | /admin/risks |
 | S4.9 | Review gates — what holds payment, what holds release | Web | /admin/gates |
+| S4.10 | Audit stages — what each stage permits, and the sequence | Web | /admin/stages (sequence read-only) |
 
 ## Open decisions
 - S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.

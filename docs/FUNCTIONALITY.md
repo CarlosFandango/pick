@@ -32,7 +32,8 @@ reason. Deferred is a real answer and should stay populated.
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category absent from field app entirely |
 | Audit stages, two capture modes | Built | `audit_stage_template`, `core/stages.ts` | TND-83. Seeded per audit type; sequence is data, so Jaz's walkthrough is a seed change |
-| What each stage permits | Built | `audit_capture_mode` | TND-83. Was an enum plus a `switch` in core; now a row with `allows_tallies` / `allows_notes` / `allows_markers`. A third stage is an insert. No admin screen yet — see below |
+| What each stage permits | Built | `audit_capture_mode`, S4.10 `/admin/stages` | TND-83. Was an enum plus a `switch` in core; now a row with `allows_tallies` / `allows_notes` / `allows_markers`, editable by PICK admin. A third stage is an insert |
+| Stage sequence editing | Partial | S4.10 `/admin/stages` | Read-only. Reordering has to publish a new `stage_set_version` rather than move rows an in-flight shift is reading — same argument as TND-84 |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
