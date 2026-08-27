@@ -171,6 +171,57 @@ describe('the credit ledger', () => {
   });
 });
 
+describe('the credit price list', () => {
+  it('lets a client read it — they cannot decide what to buy otherwise', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db
+        .as(ids.clientA)
+        .query<{ quantity: number }>('select quantity from credit_bundle where is_active');
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('lets an auditor read it too — the price list is not confidential', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db.as(ids.auditor).query('select quantity from credit_bundle');
+      expect(rows.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('refuses a client setting their own price', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.clientA)
+        .expectRefused(
+          'insert into credit_bundle (quantity, price_minor_units) values (99, 1)',
+          [],
+        );
+      // Refused at the GRANT now, not the policy: the price list is seeded, so
+      // no signed-in role writes it at all. Louder, and it does not depend on a
+      // policy staying tight.
+      expect(message).toMatch(/permission denied/i);
+    });
+  });
+
+  it('keeps one active bundle per size, so a price is never ambiguous', async () => {
+    await withDatabase(async (db) => {
+      // As postgres, because this is the index doing the work and not a
+      // policy — and no signed-in role, admin included, may write the price
+      // list any more. Two active bundles of the same size would make "what
+      // does one credit cost" a question with two answers.
+      let message = '';
+      try {
+        await db.arrange(
+          'insert into credit_bundle (quantity, price_minor_units) values (1, 99999)',
+        );
+      } catch (error) {
+        message = error instanceof Error ? error.message : String(error);
+      }
+      expect(message).toMatch(/duplicate key|unique/i);
+    });
+  });
+});
+
 describe('organisations and profiles', () => {
   it('shows a client only their own organisation', async () => {
     await withDatabase(async (db) => {
@@ -248,6 +299,158 @@ describe('the check catalogue', () => {
     await withDatabase(async (db) => {
       const message = await db.as(null).expectRefused('select id from check_definition');
       expect(message).toMatch(/permission denied/i);
+    });
+  });
+});
+
+describe('the auditor roster', () => {
+  it('is admin-only, and shows a non-admin nothing rather than erroring', async () => {
+    // Guarded with `where app.is_admin()` rather than a raise: a client
+    // calling it gets an empty result, which is what RLS does everywhere else.
+    await withDatabase(async (db) => {
+      expect(await db.as(ids.clientA).query('select * from auditor_roster()')).toHaveLength(0);
+      expect(await db.as(ids.auditor).query('select * from auditor_roster()')).toHaveLength(0);
+      expect(
+        (await db.as(ids.admin).query('select * from auditor_roster()')).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  it('puts anyone awaiting vetting first — it is a queue before a directory', async () => {
+    await withDatabase(async (db) => {
+      await db.arrange(
+        "update auditor_profile set approval_status = 'pending', approved_at = null where user_id = $1",
+        [ids.otherAuditor],
+      );
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ approval_status: string }>('select approval_status from auditor_roster()');
+
+      expect(rows[0]?.approval_status).toBe('pending');
+    });
+  });
+
+  it('refuses to let anyone but PICK approve an auditor', async () => {
+    // The gate the whole marketplace hangs on: approval is what makes someone
+    // eligible to be offered work at all.
+    await withDatabase(async (db) => {
+      for (const who of [ids.clientA, ids.auditor]) {
+        const message = await db
+          .as(who)
+          .expectRefused('select approve_auditor($1)', [ids.otherAuditor]);
+        expect(message).toMatch(/only PICK admin/i);
+      }
+    });
+  });
+
+  it('will not suspend anyone without a reason on the record', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.admin)
+        .expectRefused('select suspend_auditor($1, $2)', [ids.auditor, '   ']);
+      expect(message).toMatch(/reason is required/i);
+    });
+  });
+
+  it('suspends future work without touching what was already earned', async () => {
+    // They still did the audits they accepted, and are still owed for them.
+    await withDatabase(async (db) => {
+      const before = await db.arrange<{ count: string }>(
+        'select count(*) from audit where auditor_id = $1',
+        [ids.auditor],
+      );
+
+      await db.as(ids.admin).query('select suspend_auditor($1, $2)', [ids.auditor, 'test']);
+
+      const after = await db.arrange<{ count: string }>(
+        'select count(*) from audit where auditor_id = $1',
+        [ids.auditor],
+      );
+      expect(after[0]?.count).toBe(before[0]?.count);
+    });
+  });
+});
+
+describe('the client roster and credit adjustments', () => {
+  it('is admin-only', async () => {
+    await withDatabase(async (db) => {
+      expect(await db.as(ids.clientA).query('select * from client_roster()')).toHaveLength(0);
+      expect(
+        (await db.as(ids.admin).query('select * from client_roster()')).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  it('reports a balance that is the sum of the ledger, not a stored number', async () => {
+    await withDatabase(async (db) => {
+      const [before] = await db
+        .as(ids.admin)
+        .query<{ balance: number }>(
+          'select balance from client_roster() where organisation_id = $1',
+          [ids.charityA],
+        );
+
+      await db
+        .as(ids.admin)
+        .query('select adjust_credits($1, $2, $3)', [
+          ids.charityA,
+          3,
+          'goodwill after a cancelled shift',
+        ]);
+
+      const [after] = await db
+        .as(ids.admin)
+        .query<{ balance: number }>(
+          'select balance from client_roster() where organisation_id = $1',
+          [ids.charityA],
+        );
+
+      expect(Number(after?.balance)).toBe(Number(before?.balance) + 3);
+    });
+  });
+
+  it('records an adjustment as a new row, never an edit', async () => {
+    // The ledger is evidence. A correction is another row; the balance is the
+    // sum of what is shown and a charity can add it up themselves.
+    await withDatabase(async (db) => {
+      await db
+        .as(ids.admin)
+        .query('select adjust_credits($1, $2, $3)', [ids.charityA, -1, 'duplicate booking voided']);
+
+      const rows = await db
+        .as(ids.admin)
+        .query<{ reason: string; note: string; created_by: string }>(
+          "select reason, note, created_by from credit_transaction where organisation_id = $1 and reason = 'adjustment'",
+          [ids.charityA],
+        );
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.note).toBe('duplicate booking voided');
+      expect(rows[0]?.created_by).toBe(ids.admin);
+    });
+  });
+
+  it('refuses an adjustment with no reason, and one of zero', async () => {
+    await withDatabase(async (db) => {
+      const noReason = await db
+        .as(ids.admin)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 5, '  ']);
+      expect(noReason).toMatch(/reason is required/i);
+
+      const noChange = await db
+        .as(ids.admin)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 0, 'nothing']);
+      expect(noChange).toMatch(/records nothing/i);
+    });
+  });
+
+  it('refuses a client adjusting their own balance', async () => {
+    await withDatabase(async (db) => {
+      const message = await db
+        .as(ids.clientA)
+        .expectRefused('select adjust_credits($1, $2, $3)', [ids.charityA, 100, 'please']);
+      expect(message).toMatch(/only PICK admin/i);
     });
   });
 });

@@ -41,26 +41,51 @@ const WRITABLE: Record<string, ReadonlyArray<'insert' | 'update' | 'delete'>> = 
   credit_transaction: ['insert'],
   // An auditor's own flashcard progress (S1.4). Theirs to write and re-write.
   prep_progress: ['insert', 'update', 'delete'],
+  // Settings a PICK admin edits on a screen, each with no invariant spanning
+  // two tables — so there is no RPC beside them to be a hole next to. UPDATE
+  // only: nothing creates or deletes a capture mode, a gate or an advisory
+  // through the API.
+  audit_capture_mode: ['update'],
+  review_gate: ['update'],
+  risk_advisory: ['update'],
 };
 
 /** Functions a signed-in user is meant to call. Everything else is internal. */
 const RPCS = [
   'accept_offer',
+  'adjust_credits',
+  'advise_on_risk',
+  'approve_auditor',
+  'approve_payout_run',
   'assignment_console',
   'audit_auditor_code',
+  'audit_gate_state',
+  'auditor_roster',
   'book_audit',
+  'build_payout_run',
+  'client_roster',
+  'consume_credit_for',
   'decline_offer',
   'eligible_auditors',
+  'execute_payout_run',
+  'matching_review_gates',
+  'next_purchase_to_draw_from',
   'offer_audit',
+  'offer_board',
   'ops_counters',
   'ops_queue',
+  'payable_audits',
   'prefer_auditor',
+  'raise_risk',
   'release_audit',
+  'release_credit_for',
   'report_no_team_present',
   'return_write_up',
   'review_gate_reason',
   'selectable_auditors',
+  'single_credit_price_minor_units',
   'submit_write_up',
+  'suspend_auditor',
   'void_audit',
   // Not an RPC: a column default, evaluated as the role doing the INSERT.
   'uuid_generate_v7',

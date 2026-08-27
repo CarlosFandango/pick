@@ -1,8 +1,8 @@
 import { COMPLAINT_ROUTES } from '@picksel/core';
 import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
+import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
-import { requireRole } from '@/lib/auth';
-import { supabaseServer } from '@/lib/supabase';
+import { clientPage } from '@/lib/client-page';
 import { hairline, metaLabel } from '@/lib/theme';
 import { ComplaintForm } from './ComplaintForm';
 
@@ -15,34 +15,20 @@ import { ComplaintForm } from './ComplaintForm';
  * the failure mode it exists to prevent.
  */
 export default async function ComplaintPage() {
-  const session = await requireRole('client', 'pick_admin');
-  const supabase = await supabaseServer();
+  const { supabase, organisationName, credits } = await clientPage();
 
-  const [{ data: organisation }, { data: balance }, { data: audits }] = await Promise.all([
-    supabase
-      .from('organisation')
-      .select('name')
-      .eq('id', session.organisationId ?? '')
-      .single(),
-    supabase
-      .from('organisation_credit_balance')
-      .select('balance')
-      .eq('organisation_id', session.organisationId ?? '')
-      .maybeSingle(),
-    supabase
-      .from('audit')
-      .select('id, reference, postcode')
-      .order('created_at', { ascending: false })
-      .limit(50),
-  ]);
+  const { data: audits } = await supabase
+    .from('audit')
+    .select('id, reference, postcode')
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   return (
-    <Chrome
-      active="audits"
-      organisationName={organisation?.name ?? '—'}
-      credits={balance?.balance ?? 0}
-    >
+    <Chrome active="audits" organisationName={organisationName} credits={credits}>
       <div style={{ padding: '26px 32px', maxWidth: 720 }}>
+        <div style={{ marginBottom: 16 }}>
+          <BackLink href="/audits" label="All audits" />
+        </div>
         <h1
           style={{
             fontWeight: fontWeight.extrabold,

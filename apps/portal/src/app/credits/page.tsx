@@ -1,14 +1,15 @@
 import {
   CREDIT_REASON_LABELS,
+  type CreditBundle,
   type CreditEntry,
   deltaLabel,
   runningBalance,
   valueLabel,
 } from '@picksel/core';
 import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
+import { BuyCredits } from '@/components/BuyCredits';
 import { Chrome } from '@/components/Chrome';
-import { requireRole } from '@/lib/auth';
-import { supabaseServer } from '@/lib/supabase';
+import { clientPage } from '@/lib/client-page';
 import { hairline, metaLabel, mono } from '@/lib/theme';
 
 /** Most recent movements shown. The balance is never derived from this many. */
@@ -28,30 +29,39 @@ const cell = {
  * what is shown, and a charity can add it up themselves.
  */
 export default async function CreditsPage() {
-  const session = await requireRole('client', 'pick_admin');
-  const supabase = await supabaseServer();
+  const { supabase, organisationName } = await clientPage();
 
-  // The balance comes from the view, over the whole ledger — not from summing
-  // the page below. This screen shows the most recent movements, and a total
-  // derived from those alone would disagree with every other screen the moment
-  // an organisation has more of them than fit.
-  const [{ data: organisation }, { data: balance }, { data: rows }] = await Promise.all([
-    supabase
-      .from('organisation')
-      .select('name')
-      .eq('id', session.organisationId ?? '')
-      .single(),
-    supabase
-      .from('organisation_credit_balance')
-      .select('balance')
-      .eq('organisation_id', session.organisationId ?? '')
-      .maybeSingle(),
+  const [{ data: rows }, { data: bundleRows }] = await Promise.all([
     supabase
       .from('credit_transaction')
-      .select('id, delta, reason, occurred_at, unit_price_pence, note, audit(reference)')
+      .select('id, delta, reason, occurred_at, unit_price_minor_units, note, audit(reference)')
       .order('occurred_at', { ascending: false })
       .limit(LEDGER_PAGE),
+    supabase
+      .from('credit_bundle')
+      .select('quantity, price_minor_units, currency')
+      .eq('is_active', true)
+      .order('quantity'),
   ]);
+
+  // Reserved vs used is the distinction a charity most often asks about: how
+  // many of my credits are committed to audits that have not arrived yet.
+  const { data: positionRow } = await supabase
+    .from('organisation_credit_position')
+    .select('purchased, consumed, available')
+    .maybeSingle();
+
+  // A view aggregates, so its columns are nullable to the type generator even
+  // though coalesce means they never are.
+  const position = positionRow
+    ? { purchased: positionRow.purchased ?? 0, consumed: positionRow.consumed ?? 0 }
+    : null;
+
+  const bundles: CreditBundle[] = (bundleRows ?? []).map((row) => ({
+    quantity: row.quantity,
+    priceMinorUnits: row.price_minor_units,
+    currency: row.currency,
+  }));
 
   const entries: CreditEntry[] = (rows ?? []).map((row) => ({
     id: row.id,
@@ -59,15 +69,19 @@ export default async function CreditsPage() {
     reason: row.reason,
     occurredAt: new Date(row.occurred_at),
     auditReference: row.audit?.reference ?? null,
-    unitPricePence: row.unit_price_pence,
+    unitPriceMinorUnits: row.unit_price_minor_units,
     note: row.note,
   }));
 
-  const credits = balance?.balance ?? 0;
-  const lines = runningBalance(entries, credits);
+  // `available` folds the whole ledger; the rows below are the most recent
+  // page of it. Summing the page instead would disagree with every other screen
+  // the moment a charity has more movements than fit, and would start the
+  // running balance from an opening figure it had silently treated as zero.
+  const balance = positionRow?.available ?? 0;
+  const lines = runningBalance(entries, balance);
 
   return (
-    <Chrome active="credits" organisationName={organisation?.name ?? '—'} credits={credits}>
+    <Chrome active="credits" organisationName={organisationName} credits={balance}>
       <div style={{ padding: '26px 32px', maxWidth: 820 }}>
         <h1
           style={{
@@ -80,7 +94,8 @@ export default async function CreditsPage() {
           Credits
         </h1>
         <p style={{ margin: '0 0 20px', fontSize: fontSize.sm, color: color.muted }}>
-          One credit books one audit, at £175.
+          One credit books one audit. Credits are sold in bundles, and the price per audit falls as
+          the bundle grows.
         </p>
 
         <div
@@ -93,7 +108,7 @@ export default async function CreditsPage() {
             marginBottom: 20,
           }}
         >
-          <div style={metaLabel}>Balance</div>
+          <div style={metaLabel}>Available</div>
           <div
             style={{
               fontWeight: fontWeight.extrabold,
@@ -102,9 +117,23 @@ export default async function CreditsPage() {
               marginTop: 4,
             }}
           >
-            {credits}
+            {balance}
           </div>
+          {position ? (
+            <div style={{ marginTop: 8, fontSize: fontSize.sm, color: color.bodyBrown }}>
+              {position.purchased} bought · {position.consumed} used on audits you have received
+              {balance !== position.purchased - position.consumed ? (
+                <>
+                  {' '}
+                  · {position.purchased - position.consumed - balance} set aside for audits under
+                  way
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
+
+        <BuyCredits bundles={bundles} />
 
         {lines.length === 0 ? (
           <p style={{ fontSize: fontSize.sm, color: color.muted }}>No credit movements yet.</p>

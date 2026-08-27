@@ -76,6 +76,54 @@ export const MIGRATIONS: string[] = [
   create index if not exists observation_log_pending on observation_log (synced_at) where synced_at is null;
   create index if not exists evidence_pending on evidence_attachment (synced_at) where synced_at is null;
   `,
+
+  // v2 — stages (TND-83)
+  //
+  // An audit runs as a sequence of stages, each declaring whether the auditor
+  // can be seen holding a phone. Stage entry, exit and tallies are all
+  // observation_log rows — kind 'timing' and 'count' already exist, and the
+  // table already syncs, is already append-only and already mints its own ids.
+  // What it lacked was somewhere to say WHICH stage: a stage is not always a
+  // moment, so `moment` could not carry it.
+  //
+  // The stage list itself is cached, not derived: an auditor opens the app on
+  // a street with no signal, and a sequence they cannot read is a session they
+  // cannot run.
+  `
+  alter table observation_log add column stage_key text;
+
+  create table if not exists cached_audit_stage (
+    audit_type text not null,
+    version integer not null default 1,
+    sequence integer not null,
+    key text not null,
+    label text not null,
+    capture_mode text not null,
+    moment text,
+    duration_hint_minutes integer,
+    fetched_at text not null,
+    primary key (audit_type, version, key)
+  );
+
+  create index if not exists observation_log_stage on observation_log (audit_id, stage_key);
+  `,
+
+  // v3 — what a stage permits, cached alongside it (TND-83)
+  //
+  // The rule "an interaction stage exposes no tally counter" used to be a
+  // branch in core. It is now a row in `audit_capture_mode`, which means the
+  // device has to carry it: an auditor prepping underground gets their stages
+  // from this table, and a stage without its permissions cannot be run.
+  //
+  // Nullable with no default, and `toAuditStage` reads absent as "capture
+  // nothing". A row cached before this migration has no flags, and failing
+  // closed makes that visible on the next session rather than silently
+  // permitting a tally during a mystery shop.
+  `
+  alter table cached_audit_stage add column allows_tallies integer;
+  alter table cached_audit_stage add column allows_notes integer;
+  alter table cached_audit_stage add column allows_markers integer;
+  `,
 ];
 
 /**

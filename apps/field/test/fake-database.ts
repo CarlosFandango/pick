@@ -15,6 +15,8 @@ export class FakeDatabase implements LocalDatabase {
   userVersion = 0;
   readonly tables = new Map<string, Row[]>();
   readonly executed: string[] = [];
+  /** Every runAsync, so a test can assert what was written rather than mock it. */
+  readonly statements: [string, BindValue[]][] = [];
   readonly transactions: number[] = [];
   /** Tables that should throw on read, to simulate a failing push. */
   failOn = new Set<string>();
@@ -56,6 +58,21 @@ export class FakeDatabase implements LocalDatabase {
   }
 
   async runAsync(source: string, params: BindValue[] = []): Promise<unknown> {
+    this.statements.push([source, params]);
+
+    const inserted = source.match(/insert into (\w+)/)?.[1];
+    if (inserted) {
+      // Column order is taken from the statement, so a test can assert on the
+      // row rather than on a positional parameter list.
+      const columns = source.match(/\(([^)]*)\)/)?.[1]?.split(',') ?? [];
+      const row: Row = {};
+      columns.forEach((column, i) => {
+        row[column.trim()] = params[i];
+      });
+      this.tables.set(inserted, [...(this.tables.get(inserted) ?? []), row]);
+      return { changes: 1 };
+    }
+
     const table = source.match(/update (\w+)/)?.[1];
     if (!table) throw new Error(`unrecognised statement: ${source}`);
 

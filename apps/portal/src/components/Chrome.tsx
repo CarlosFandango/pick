@@ -1,7 +1,8 @@
 import { color, fontSize, fontWeight } from '@picksel/tokens';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { hairline, mono, sans } from '@/lib/theme';
+import { signOut } from '@/lib/sign-out';
+import { hairline, mono, sans, textButton } from '@/lib/theme';
 
 /**
  * The portal shell from S1.1: wordmark, three tabs, credits, organisation.
@@ -15,13 +16,14 @@ export function Chrome({
   credits,
   children,
 }: {
-  active: 'book' | 'audits' | 'credits';
-  organisationName: string;
-  credits: number;
+  active?: 'book' | 'audits' | 'credits';
+  /** Absent where there is no session to read it from — see `not-found.tsx`. */
+  organisationName?: string;
+  credits?: number;
   children: ReactNode;
 }) {
-  // Three, as S1.1 shows. A fourth "Reports" tab pointed at /reports, which
-  // the design does not have and this app never built — reports are reached
+  // Three, as S1.1 shows. A fourth "Reports" tab pointed at /reports, which the
+  // design does not have and this app has never built — reports are reached
   // from the audit they belong to (S1.9 → S1.8), which is the only place a
   // client knows which report they want.
   const tabs = [
@@ -76,17 +78,26 @@ export function Chrome({
           ))}
         </nav>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span
-            style={{
-              fontFamily: mono,
-              fontSize: fontSize.xs,
-              letterSpacing: '0.1em',
-              color: color.bodyBrown,
-            }}
-          >
-            CREDITS <b style={{ color: color.ink }}>{credits}</b>
-          </span>
-          <span style={{ fontSize: fontSize.xs, color: color.muted }}>{organisationName}</span>
+          {credits === undefined ? null : (
+            <span
+              style={{
+                fontFamily: mono,
+                fontSize: fontSize.xs,
+                letterSpacing: '0.1em',
+                color: color.bodyBrown,
+              }}
+            >
+              CREDITS <b style={{ color: color.ink }}>{credits}</b>
+            </span>
+          )}
+          {organisationName ? (
+            <span style={{ fontSize: fontSize.xs, color: color.muted }}>{organisationName}</span>
+          ) : null}
+          <form action={signOut}>
+            <button type="submit" style={textButton}>
+              Sign out
+            </button>
+          </form>
         </div>
       </header>
       {children}

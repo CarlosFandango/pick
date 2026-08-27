@@ -9,11 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      assignment_override: {
+        Row: {
+          audit_id: string
+          chosen_auditor_id: string
+          created_at: string
+          id: string
+          overridden_by: string
+          reason: string | null
+          risk_id: string | null
+          system_auditor_id: string | null
+        }
+        Insert: {
+          audit_id: string
+          chosen_auditor_id: string
+          created_at?: string
+          id?: string
+          overridden_by: string
+          reason?: string | null
+          risk_id?: string | null
+          system_auditor_id?: string | null
+        }
+        Update: {
+          audit_id?: string
+          chosen_auditor_id?: string
+          created_at?: string
+          id?: string
+          overridden_by?: string
+          reason?: string | null
+          risk_id?: string | null
+          system_auditor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_override_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_override_chosen_auditor_id_fkey"
+            columns: ["chosen_auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "assignment_override_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_override_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risk"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_override_system_auditor_id_fkey"
+            columns: ["system_auditor_id"]
+            isOneToOne: false
+            referencedRelation: "auditor_profile"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       audit: {
         Row: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -31,7 +100,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -46,6 +115,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -57,7 +127,7 @@ export type Database = {
         Insert: {
           address_line?: string | null
           audit_type?: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence?: number | null
+          auditor_fee_minor_units?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
           cancellation_reason?: string | null
@@ -75,7 +145,7 @@ export type Database = {
           postcode_area?: string | null
           postcode_outward?: string | null
           preferred_auditor_id?: string | null
-          price_pence?: number
+          price_minor_units?: number
           reference?: string
           released_at?: string | null
           released_by?: string | null
@@ -90,6 +160,7 @@ export type Database = {
           session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
+          stage_set_version?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
@@ -101,7 +172,7 @@ export type Database = {
         Update: {
           address_line?: string | null
           audit_type?: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence?: number | null
+          auditor_fee_minor_units?: number | null
           auditor_id?: string | null
           campaign_name?: string | null
           cancellation_reason?: string | null
@@ -119,7 +190,7 @@ export type Database = {
           postcode_area?: string | null
           postcode_outward?: string | null
           preferred_auditor_id?: string | null
-          price_pence?: number
+          price_minor_units?: number
           reference?: string
           released_at?: string | null
           released_by?: string | null
@@ -134,6 +205,7 @@ export type Database = {
           session_started_at?: string | null
           shift_payment_method?: Database["public"]["Enums"]["shift_payment_method"]
           site_name?: string | null
+          stage_set_version?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           submitted_at?: string | null
@@ -180,6 +252,45 @@ export type Database = {
           },
         ]
       }
+      audit_capture_mode: {
+        Row: {
+          allows_markers: boolean
+          allows_notes: boolean
+          allows_tallies: boolean
+          caution: string | null
+          created_at: string
+          is_active: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allows_markers?: boolean
+          allows_notes?: boolean
+          allows_tallies?: boolean
+          caution?: string | null
+          created_at?: string
+          is_active?: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          allows_markers?: boolean
+          allows_notes?: boolean
+          allows_tallies?: boolean
+          caution?: string | null
+          created_at?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_offer: {
         Row: {
           audit_id: string
@@ -192,7 +303,7 @@ export type Database = {
           offered_at: string
           outcome: Database["public"]["Enums"]["assignment_outcome"]
           responded_at: string | null
-          travel_uplift_pence: number
+          travel_uplift_minor_units: number
           updated_at: string
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -207,7 +318,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
-          travel_uplift_pence?: number
+          travel_uplift_minor_units?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -222,7 +333,7 @@ export type Database = {
           offered_at?: string
           outcome?: Database["public"]["Enums"]["assignment_outcome"]
           responded_at?: string | null
-          travel_uplift_pence?: number
+          travel_uplift_minor_units?: number
           updated_at?: string
           warnings?: Database["public"]["Enums"]["eligibility_flag"][]
         }
@@ -245,7 +356,7 @@ export type Database = {
       }
       audit_pay_item: {
         Row: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string
           created_at: string
           id: string
@@ -253,7 +364,7 @@ export type Database = {
           note: string | null
         }
         Insert: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string
           created_at?: string
           id?: string
@@ -261,7 +372,7 @@ export type Database = {
           note?: string | null
         }
         Update: {
-          amount_pence?: number
+          amount_minor_units?: number
           audit_id?: string
           created_at?: string
           id?: string
@@ -275,6 +386,59 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "audit"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_stage_template: {
+        Row: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          capture_mode: string
+          created_at: string
+          duration_hint_minutes: number | null
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          moment: Database["public"]["Enums"]["audit_moment"] | null
+          sequence: number
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          capture_mode: string
+          created_at?: string
+          duration_hint_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          moment?: Database["public"]["Enums"]["audit_moment"] | null
+          sequence: number
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          audit_type?: Database["public"]["Enums"]["audit_type"]
+          capture_mode?: string
+          created_at?: string
+          duration_hint_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          moment?: Database["public"]["Enums"]["audit_moment"] | null
+          sequence?: number
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_stage_template_capture_mode_fkey"
+            columns: ["capture_mode"]
+            isOneToOne: false
+            referencedRelation: "audit_capture_mode"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -596,6 +760,36 @@ export type Database = {
           },
         ]
       }
+      credit_bundle: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          price_minor_units: number
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          price_minor_units: number
+          quantity: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          price_minor_units?: number
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       credit_transaction: {
         Row: {
           audit_id: string | null
@@ -609,7 +803,9 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at: string
-          unit_price_pence: number | null
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
+          unit_price_minor_units: number | null
         }
         Insert: {
           audit_id?: string | null
@@ -623,7 +819,9 @@ export type Database = {
           organisation_id: string
           reason: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
-          unit_price_pence?: number | null
+          settles_transaction_id?: string | null
+          source_purchase_id?: string | null
+          unit_price_minor_units?: number | null
         }
         Update: {
           audit_id?: string | null
@@ -637,7 +835,9 @@ export type Database = {
           organisation_id?: string
           reason?: Database["public"]["Enums"]["credit_reason"]
           recorded_at?: string
-          unit_price_pence?: number | null
+          settles_transaction_id?: string | null
+          source_purchase_id?: string | null
+          unit_price_minor_units?: number | null
         }
         Relationships: [
           {
@@ -659,6 +859,20 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transaction_settles_transaction_id_fkey"
+            columns: ["settles_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "credit_transaction"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transaction_source_purchase_id_fkey"
+            columns: ["source_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "credit_transaction"
             referencedColumns: ["id"]
           },
         ]
@@ -735,6 +949,7 @@ export type Database = {
           payload: Json
           recorded_at: string
           severity: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key: string | null
         }
         Insert: {
           audit_id: string
@@ -747,6 +962,7 @@ export type Database = {
           payload?: Json
           recorded_at?: string
           severity?: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key?: string | null
         }
         Update: {
           audit_id?: string
@@ -759,6 +975,7 @@ export type Database = {
           payload?: Json
           recorded_at?: string
           severity?: Database["public"]["Enums"]["flag_severity"] | null
+          stage_key?: string | null
         }
         Relationships: [
           {
@@ -815,7 +1032,7 @@ export type Database = {
       }
       payout_line_item: {
         Row: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id: string | null
           auditor_id: string
           created_at: string
@@ -827,7 +1044,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          amount_pence: number
+          amount_minor_units: number
           audit_id?: string | null
           auditor_id: string
           created_at?: string
@@ -839,7 +1056,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          amount_pence?: number
+          amount_minor_units?: number
           audit_id?: string | null
           auditor_id?: string
           created_at?: string
@@ -889,7 +1106,7 @@ export type Database = {
           period_start: string
           reference: string
           status: Database["public"]["Enums"]["payout_run_status"]
-          total_pence: number
+          total_minor_units: number
           updated_at: string
         }
         Insert: {
@@ -906,7 +1123,7 @@ export type Database = {
           period_start: string
           reference?: string
           status?: Database["public"]["Enums"]["payout_run_status"]
-          total_pence?: number
+          total_minor_units?: number
           updated_at?: string
         }
         Update: {
@@ -923,7 +1140,7 @@ export type Database = {
           period_start?: string
           reference?: string
           status?: Database["public"]["Enums"]["payout_run_status"]
-          total_pence?: number
+          total_minor_units?: number
           updated_at?: string
         }
         Relationships: [
@@ -972,6 +1189,174 @@ export type Database = {
             columns: ["check_definition_id"]
             isOneToOne: false
             referencedRelation: "check_definition"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_gate: {
+        Row: {
+          approver_id: string | null
+          created_at: string
+          enabled: boolean
+          id: string
+          mode: Database["public"]["Enums"]["review_gate_mode"]
+          on_timeout: Database["public"]["Enums"]["review_timeout_action"]
+          scope: Database["public"]["Enums"]["review_gate_scope"]
+          threshold: number | null
+          timeout_days: number
+          trigger: Database["public"]["Enums"]["review_gate_trigger"]
+          updated_at: string
+        }
+        Insert: {
+          approver_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          mode?: Database["public"]["Enums"]["review_gate_mode"]
+          on_timeout?: Database["public"]["Enums"]["review_timeout_action"]
+          scope?: Database["public"]["Enums"]["review_gate_scope"]
+          threshold?: number | null
+          timeout_days?: number
+          trigger: Database["public"]["Enums"]["review_gate_trigger"]
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          mode?: Database["public"]["Enums"]["review_gate_mode"]
+          on_timeout?: Database["public"]["Enums"]["review_timeout_action"]
+          scope?: Database["public"]["Enums"]["review_gate_scope"]
+          threshold?: number | null
+          timeout_days?: number
+          trigger?: Database["public"]["Enums"]["review_gate_trigger"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_gate_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk: {
+        Row: {
+          created_at: string
+          detail: string
+          id: string
+          organisation_id: string | null
+          raised_at: string
+          raised_by: Database["public"]["Enums"]["risk_source"]
+          raised_by_id: string | null
+          severity: Database["public"]["Enums"]["risk_severity"]
+          status: Database["public"]["Enums"]["risk_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["risk_subject"]
+          type: Database["public"]["Enums"]["risk_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detail: string
+          id?: string
+          organisation_id?: string | null
+          raised_at?: string
+          raised_by?: Database["public"]["Enums"]["risk_source"]
+          raised_by_id?: string | null
+          severity?: Database["public"]["Enums"]["risk_severity"]
+          status?: Database["public"]["Enums"]["risk_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["risk_subject"]
+          type: Database["public"]["Enums"]["risk_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string
+          id?: string
+          organisation_id?: string | null
+          raised_at?: string
+          raised_by?: Database["public"]["Enums"]["risk_source"]
+          raised_by_id?: string | null
+          severity?: Database["public"]["Enums"]["risk_severity"]
+          status?: Database["public"]["Enums"]["risk_status"]
+          subject_id?: string
+          subject_type?: Database["public"]["Enums"]["risk_subject"]
+          type?: Database["public"]["Enums"]["risk_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_raised_by_id_fkey"
+            columns: ["raised_by_id"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_advisory: {
+        Row: {
+          advised_at: string
+          advised_by: string
+          channel: string
+          client_response: Database["public"]["Enums"]["client_response"] | null
+          content: string
+          created_at: string
+          id: string
+          responded_at: string | null
+          risk_id: string
+        }
+        Insert: {
+          advised_at?: string
+          advised_by: string
+          channel?: string
+          client_response?:
+            | Database["public"]["Enums"]["client_response"]
+            | null
+          content: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          risk_id: string
+        }
+        Update: {
+          advised_at?: string
+          advised_by?: string
+          channel?: string
+          client_response?:
+            | Database["public"]["Enums"]["client_response"]
+            | null
+          content?: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          risk_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_advisory_advised_by_fkey"
+            columns: ["advised_by"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_advisory_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risk"
             referencedColumns: ["id"]
           },
         ]
@@ -1037,6 +1422,26 @@ export type Database = {
           },
         ]
       }
+      organisation_credit_position: {
+        Row: {
+          available: number | null
+          consumed: number | null
+          organisation_id: string | null
+          purchased: number | null
+          refunded: number | null
+          released: number | null
+          reserved_ever: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transaction_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_offer: {
@@ -1044,7 +1449,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1062,7 +1467,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1077,6 +1482,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1092,6 +1498,99 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      adjust_credits: {
+        Args: { p_delta: number; p_organisation_id: string; p_reason: string }
+        Returns: {
+          audit_id: string | null
+          created_by: string | null
+          currency: string
+          delta: number
+          external_reference: string | null
+          id: string
+          note: string | null
+          occurred_at: string
+          organisation_id: string
+          reason: Database["public"]["Enums"]["credit_reason"]
+          recorded_at: string
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
+          unit_price_minor_units: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "credit_transaction"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      advise_on_risk: {
+        Args: { p_channel?: string; p_content: string; p_risk_id: string }
+        Returns: {
+          advised_at: string
+          advised_by: string
+          channel: string
+          client_response: Database["public"]["Enums"]["client_response"] | null
+          content: string
+          created_at: string
+          id: string
+          responded_at: string | null
+          risk_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "risk_advisory"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      approve_auditor: {
+        Args: { p_auditor_id: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          av_capable: boolean
+          base_postcode: string | null
+          created_at: string
+          dbs_checked_on: string | null
+          payout_reference: string | null
+          right_to_work_checked_on: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auditor_profile"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      approve_payout_run: {
+        Args: { p_run_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assignment_console: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1102,6 +1601,13 @@ export type Database = {
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }[]
       }
+      audit_gate_state: {
+        Args: { p_audit_id: string }
+        Returns: {
+          client_release: Database["public"]["Enums"]["review_gate_mode"]
+          payment: Database["public"]["Enums"]["review_gate_mode"]
+        }[]
+      }
       audit_auditor_code: {
         Args: { p_audit_id: string }
         Returns: string
@@ -1110,7 +1616,22 @@ export type Database = {
         Args: { p_auditor_id: string; p_organisation_id: string }
         Returns: string
       }
-      base_audit_fee_pence: { Args: never; Returns: number }
+      auditor_roster: {
+        Args: never
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string
+          areas: string[]
+          audit_types: Database["public"]["Enums"]["audit_type"][]
+          auditor_id: string
+          audits_completed: number
+          av_capable: boolean
+          base_postcode: string
+          full_name: string
+          open_conflicts: number
+        }[]
+      }
+      base_audit_fee_minor_units: { Args: never; Returns: number }
       book_audit: {
         Args: {
           p_audit_type: Database["public"]["Enums"]["audit_type"]
@@ -1126,7 +1647,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1144,7 +1665,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1159,6 +1680,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1175,11 +1697,52 @@ export type Database = {
         }
       }
       booking_lead_days: { Args: never; Returns: number }
+      build_payout_run: {
+        Args: { p_period_end: string; p_period_start: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      client_roster: {
+        Args: never
+        Returns: {
+          audits_booked: number
+          audits_released: number
+          balance: number
+          charity_number: string
+          is_active: boolean
+          members: number
+          name: string
+          organisation_id: string
+          residency_zone: Database["public"]["Enums"]["residency_zone"]
+        }[]
+      }
+      consume_credit_for: { Args: { p_audit_id: string }; Returns: undefined }
       decline_offer: {
         Args: { p_offer_id: string; p_reason?: string }
         Returns: undefined
       }
-      default_travel_uplift_pence: { Args: never; Returns: number }
+      default_travel_uplift_minor_units: { Args: never; Returns: number }
       eligible_auditors: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1188,10 +1751,87 @@ export type Database = {
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }[]
       }
+      execute_payout_run: {
+        Args: { p_external_reference: string; p_run_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          executed_at: string | null
+          execution_method: Database["public"]["Enums"]["payout_execution_method"]
+          external_reference: string | null
+          id: string
+          period_end: string
+          period_start: string
+          reference: string
+          status: Database["public"]["Enums"]["payout_run_status"]
+          total_minor_units: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payout_run"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       exposure_window_days: { Args: never; Returns: number }
+      matching_review_gates: {
+        Args: { p_audit_id: string }
+        Returns: {
+          mode: Database["public"]["Enums"]["review_gate_mode"]
+          reason: string
+          scope: Database["public"]["Enums"]["review_gate_scope"]
+          trigger: Database["public"]["Enums"]["review_gate_trigger"]
+        }[]
+      }
+      next_purchase_to_draw_from: {
+        Args: { p_organisation_id: string }
+        Returns: {
+          audit_id: string | null
+          created_by: string | null
+          currency: string
+          delta: number
+          external_reference: string | null
+          id: string
+          note: string | null
+          occurred_at: string
+          organisation_id: string
+          reason: Database["public"]["Enums"]["credit_reason"]
+          recorded_at: string
+          settles_transaction_id: string | null
+          source_purchase_id: string | null
+          unit_price_minor_units: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "credit_transaction"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       offer_audit: {
         Args: { p_audit_id: string; p_expires_in?: string }
         Returns: number
+      }
+      offer_board: {
+        Args: never
+        Returns: {
+          audit_id: string
+          audit_type: Database["public"]["Enums"]["audit_type"]
+          base_minor_units: number
+          expires_at: string
+          offer_id: string
+          outcome: string
+          postcode_outward: string
+          requires_av: boolean
+          shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
+          travel_uplift_minor_units: number
+          window_end_on: string
+          window_start_on: string
+        }[]
       }
       ops_counters: {
         Args: never
@@ -1213,12 +1853,24 @@ export type Database = {
           target_id: string
         }[]
       }
+      payable_audits: {
+        Args: never
+        Returns: {
+          amount_minor_units: number
+          audit_id: string
+          auditor_id: string
+          auditor_name: string
+          completed_at: string
+          gate: Database["public"]["Enums"]["review_gate_mode"]
+          reference: string
+        }[]
+      }
       prefer_auditor: {
         Args: { p_audit_id: string; p_code: string }
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1236,7 +1888,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1251,6 +1903,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1262,6 +1915,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "audit"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      raise_risk: {
+        Args: {
+          p_detail: string
+          p_organisation_id?: string
+          p_severity?: Database["public"]["Enums"]["risk_severity"]
+          p_subject_id: string
+          p_subject_type: Database["public"]["Enums"]["risk_subject"]
+          p_type: Database["public"]["Enums"]["risk_type"]
+        }
+        Returns: {
+          created_at: string
+          detail: string
+          id: string
+          organisation_id: string | null
+          raised_at: string
+          raised_by: Database["public"]["Enums"]["risk_source"]
+          raised_by_id: string | null
+          severity: Database["public"]["Enums"]["risk_severity"]
+          status: Database["public"]["Enums"]["risk_status"]
+          subject_id: string
+          subject_type: Database["public"]["Enums"]["risk_subject"]
+          type: Database["public"]["Enums"]["risk_type"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "risk"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1271,7 +1955,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1289,7 +1973,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1304,6 +1988,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1319,12 +2004,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      release_credit_for: {
+        Args: { p_audit_id: string; p_reason: string }
+        Returns: undefined
+      }
       report_no_team_present: {
         Args: { p_audit_id: string; p_note?: string }
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1342,7 +2031,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1357,6 +2046,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1381,7 +2071,7 @@ export type Database = {
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1399,7 +2089,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1414,6 +2104,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1446,12 +2137,13 @@ export type Database = {
           warning: string
         }[]
       }
+      single_credit_price_minor_units: { Args: never; Returns: number }
       submit_write_up: {
         Args: { p_audit_id: string; p_results: Json }
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1469,7 +2161,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1484,6 +2176,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1499,13 +2192,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      suspend_auditor: {
+        Args: { p_auditor_id: string; p_reason: string }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          av_capable: boolean
+          base_postcode: string | null
+          created_at: string
+          dbs_checked_on: string | null
+          payout_reference: string | null
+          right_to_work_checked_on: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auditor_profile"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       uuid_generate_v7: { Args: never; Returns: string }
       void_audit: {
         Args: { p_audit_id: string; p_reason: string }
         Returns: {
           address_line: string | null
           audit_type: Database["public"]["Enums"]["audit_type"]
-          auditor_fee_pence: number | null
+          auditor_fee_minor_units: number | null
           auditor_id: string | null
           campaign_name: string | null
           cancellation_reason: string | null
@@ -1523,7 +2238,7 @@ export type Database = {
           postcode_area: string | null
           postcode_outward: string | null
           preferred_auditor_id: string | null
-          price_pence: number
+          price_minor_units: number
           reference: string
           released_at: string | null
           released_by: string | null
@@ -1538,6 +2253,7 @@ export type Database = {
           session_started_at: string | null
           shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
           site_name: string | null
+          stage_set_version: number
           started_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           submitted_at: string | null
@@ -1591,6 +2307,7 @@ export type Database = {
         | "not_applicable"
         | "not_observed"
         | "note"
+      client_response: "proceeded" | "withdrew" | "no_response"
       complaint_status: "open" | "acknowledged" | "resolved" | "withdrawn"
       complaint_subject: "about_audit" | "about_fundraiser"
       compliance_category:
@@ -1604,7 +2321,14 @@ export type Database = {
         | "site_conduct"
         | "safeguarding"
         | "record_keeping"
-      credit_reason: "purchase" | "booking" | "refund" | "adjustment" | "expiry"
+      credit_reason:
+        | "purchase"
+        | "reservation"
+        | "refund"
+        | "adjustment"
+        | "expiry"
+        | "release"
+        | "consumption"
       eligibility_flag:
         | "conflict"
         | "familiarity"
@@ -1632,6 +2356,21 @@ export type Database = {
         | "failed"
         | "cancelled"
       residency_zone: "uk" | "eea" | "other"
+      review_gate_mode: "auto_approve" | "notify" | "hold"
+      review_gate_scope: "payment" | "client_release" | "both"
+      review_gate_trigger:
+        | "auditor_first_n_audits"
+        | "auditor_first_of_type"
+        | "client_first_audit"
+        | "audit_type_is_lottery"
+        | "assignment_has_open_risk"
+        | "manual"
+      review_timeout_action: "auto_approve" | "escalate"
+      risk_severity: "low" | "medium" | "high"
+      risk_source: "system" | "user"
+      risk_status: "open" | "advised" | "accepted" | "withdrawn" | "resolved"
+      risk_subject: "audit" | "auditor" | "client" | "assignment"
+      risk_type: "exposure" | "conflict" | "quality" | "data_protection"
       shift_payment_method: "direct_debit" | "contactless"
       user_status: "invited" | "active" | "suspended"
     }
@@ -1794,6 +2533,7 @@ export const Constants = {
       audit_type: ["street", "door_to_door", "private_site", "lottery"],
       auditor_approval_status: ["pending", "approved", "suspended", "rejected"],
       check_outcome: ["pass", "fail", "not_applicable", "not_observed", "note"],
+      client_response: ["proceeded", "withdrew", "no_response"],
       complaint_status: ["open", "acknowledged", "resolved", "withdrawn"],
       complaint_subject: ["about_audit", "about_fundraiser"],
       compliance_category: [
@@ -1808,7 +2548,15 @@ export const Constants = {
         "safeguarding",
         "record_keeping",
       ],
-      credit_reason: ["purchase", "booking", "refund", "adjustment", "expiry"],
+      credit_reason: [
+        "purchase",
+        "reservation",
+        "refund",
+        "adjustment",
+        "expiry",
+        "release",
+        "consumption",
+      ],
       eligibility_flag: [
         "conflict",
         "familiarity",
@@ -1839,6 +2587,22 @@ export const Constants = {
         "cancelled",
       ],
       residency_zone: ["uk", "eea", "other"],
+      review_gate_mode: ["auto_approve", "notify", "hold"],
+      review_gate_scope: ["payment", "client_release", "both"],
+      review_gate_trigger: [
+        "auditor_first_n_audits",
+        "auditor_first_of_type",
+        "client_first_audit",
+        "audit_type_is_lottery",
+        "assignment_has_open_risk",
+        "manual",
+      ],
+      review_timeout_action: ["auto_approve", "escalate"],
+      risk_severity: ["low", "medium", "high"],
+      risk_source: ["system", "user"],
+      risk_status: ["open", "advised", "accepted", "withdrawn", "resolved"],
+      risk_subject: ["audit", "auditor", "client", "assignment"],
+      risk_type: ["exposure", "conflict", "quality", "data_protection"],
       shift_payment_method: ["direct_debit", "contactless"],
       user_status: ["invited", "active", "suspended"],
     },

@@ -13,7 +13,13 @@ like before you open it.
 | Do this | Use | Not this |
 |---|---|---|
 | Read data in the portal | `supabaseServer()` in a Server Component; RLS scopes it | client-side fetch, an API route, a repository class |
+| Read data in the field app | a function in `field/src/lib/queries.ts` + `useLoad` | fetching inside a screen, a caching library |
+| Turn a row into props | an adapter in `field/src/lib/adapters.ts` | shaping inside the screen or the query |
+| Show a row RLS hides for good reason | a `security definer` RPC returning only what the screen may reveal | loosening the policy, a service-role key on a device |
+| Open a client screen | `clientPage()` — session, client, chrome data | repeating the organisation and balance queries |
 | Write across tenants | a server action with `createAdminClient()` | loosening an RLS policy |
+| Expose a server action | its own `'use server'` module, one export | adding `'use server'` to a shared lib |
+| Offer a state-changing control | a `<form>` POST to a server action | a link, a GET route |
 | Generate an id for a field event | `newId()` on the device | server default, autoincrement, composite key |
 | Generate an id anywhere else | `default public.uuid_generate_v7()` | `newId()` round-tripped from the client |
 | Correct a field event | insert a new row; read with `latestResults()` | UPDATE (it is blocked, deliberately) |
@@ -24,8 +30,12 @@ like before you open it.
 | Validate input | a zod schema in `core/entities.ts`, parsed at the boundary | ad-hoc `if` checks, validating twice |
 | Add a closed set of values | `as const` array in `core` + a PG enum, kept in step | a lookup table, a config file, a string |
 | Keep two copies of one fact honest | a comparison test in `packages/db/test/in-step.test.ts` | remembering, or a code generator |
+| Add a sequence someone else owns | a seeded table (`audit_stage_template`) | an `as const` — their edit becomes a code change |
+| Record a field event of a new shape | an `observation_log` row with a `kind` | a new table per event type |
 | Add a check to the catalogue | new `check_definition` row, new `version` | editing an existing row |
-| Represent money | integer pence, `_pence` suffix | float, decimal string, `Money` class |
+| Represent money | integer minor units, never a float | decimal string, `Money` class |
+| Format money | `formatMoney(minorUnits, currency)` | a `£` in a component, a hardcoded `/100` |
+| Quote a price | read `credit_bundle`; amount and currency together | a price constant in app code |
 | Derive a value from a column | a stored generated column | parsing in application code |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
@@ -43,9 +53,8 @@ like before you open it.
 | Set text size or weight | `webTextStyle(role[, size])` / `text(role[, size])`, size from `fontSize` | a number in a component — `pnpm check:tokens` fails the build |
 | Set a font family | `sans` / `mono` from `lib/theme` (portal) or `fontStack` (field) | naming a font in a component, or naming one nothing loads |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
-| Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
-| Link between portal screens | `next/link`, to a route with a `page.tsx` | a bare `<a href>`, or a route the design has not got |
-| Offer an action with no screen yet | `href` returning `null`, so no link renders | pointing at the route the screen will one day have |
+| Style a portal component | `color.*`/`radius.*` inline + the helpers in `portal/src/lib/theme.ts` | a CSS file with its own palette |
+| Link between portal screens | `next/link`, to a route with a `page.tsx` | a bare `<a href>`, or a route nothing serves — `pnpm check:routes` fails the build |
 | Style a field component | the same token objects as RN styles | a parallel RN colour constant |
 | Convey pass/fail | colour **and** an icon or label | colour alone |
 | Size a field tap target | `touchTarget.comfortable` | an arbitrary height |
@@ -54,7 +63,7 @@ like before you open it.
 
 - Database: `snake_case`, **singular** table names (`audit`, not `audits`).
 - TypeScript: `camelCase` values, `PascalCase` types, files named after their export.
-- Timestamps: `*_at`. Dates without time: `*_on`. Money: `*_pence`. Flags: `is_*`.
+- Timestamps: `*_at`. Dates without time: `*_on`. Money: `*_minor_units`. Flags: `is_*`.
 - Migrations: `YYYYMMDDHHMMSS_subject.sql`, one concern per file.
 
 ## Layering
@@ -139,27 +148,6 @@ and every function rather than naming one, and `alter default privileges`
 statements that cover objects nobody has created yet. A revoke without a
 matching default-privileges rule is half a revoke.
 
-### A function that was replaced, and wasn't
-**Symptom:** two `book_audit`s. The rebuilt one refused a window starting inside
-the lead time; the original, still granted, did not.
-**Why it hid:** `create or replace function` replaces a function with the *same*
-argument list. 20260826180000 added a ninth parameter, so it created an
-overload and left the eight-argument version installed — and the migration reads
-exactly like a replacement. It was visible the whole time in
-`types.generated.ts`, where `book_audit` was a union of two signatures, and that
-union read as a generator quirk rather than a fact about the schema.
-**Caught now by:** `surface.test.ts` asserting no overloaded function name in
-`public`. A deliberate overload will fail that test, which is the right moment
-to ask whether both signatures should be reachable.
-
-*The same lesson five times: **a permission model must be stated and exercised
-as the role that actually uses it, and a rule is only real where it is
-enforced.** The first two were about a privilege that did not work. The next
-three are about privileges that worked too well — a grant beside every checked
-function, a revoke that only covered what already existed, and a function that
-outlived the one meant to replace it. Every one of them was invisible because a
-hole looks exactly like a system that works.*
-
 ### Tests that assert absolute counts against a shared database
 **Symptom:** integration tests pass alone and fail after a UX run —
 `expected 2 to be 1`, or "the first complaint" turning out to be someone
@@ -226,6 +214,102 @@ select on <table>`, then `grant select (col, col, …)` by name — after which
 `has_table_privilege(..., 'select')` is false and `has_any_column_privilege` is
 true, so any test written the obvious way needs the second one.
 
+### A fill token used where its text pair belongs
+**Symptom:** the pipeline rail on `/audits/:id` was unreadable — upcoming steps
+at 1.16:1 against the page, the current step's marker at 1.75:1. Not "slightly
+low": invisible on a dim monitor.
+**Why it hid:** every colour came from `design/tokens/tokens.ts`, so it looked
+correct by the rule that matters most here ("no colour that is not a token").
+But the brand ships accents in pairs — `auditing` is signage, `auditingText` is
+the same accent as type — and a token name does not say which it is. Contrast
+also degrades quietly: nothing errors, nothing logs, and it reads fine on the
+laptop it was built on.
+**Caught now by:** `packages/tokens/test/brand.test.ts`, which classifies every
+brand colour as text / surface / hairline / fill and fails if a new token
+arrives unclassified. Fills are asserted to *fail* as text, so the pairing is a
+test rather than a paragraph in the build guide.
+
+### A stale dev server that reads as a broken app
+**Symptom:** the Playwright suite dies after two minutes on `Timed out waiting
+120000ms from config.webServer`, having run nothing. Twice.
+**Why it hid:** the config reused an existing server on port 3000, and a
+long-running `pnpm dev` goes stale — after a `db:reset` or a rename it keeps
+serving routes it compiled earlier and answers 404 on `/sign-in`. Playwright's
+readiness check then never passes, but the error names the *web server config*,
+not the stale process, so the obvious reading is that the app is broken. Both
+times the fix was `kill` on a PID, after minutes of looking at the wrong thing.
+**Caught now by:** the suite runs its own server on its own port (3100) and
+never reuses one. One cold start per run, and the collision cannot happen.
+
+### `create or replace function` with a changed signature makes a second function
+**Symptom:** `function book_audit(unknown, unknown, ...) is not unique`, on a
+call that had worked for weeks from the portal.
+**Why it hid:** adding `p_requires_av` to `book_audit` looked like a rewrite —
+same name, `create or replace`, migration applied cleanly. Postgres identifies
+a function by name *and* argument types, so it created an overload and left the
+old one in place. The portal always passed the new argument, so it always
+resolved unambiguously and nothing failed. The stale version sat there for a
+fortnight, and any call omitting the last argument would have run the OLD body
+— writing the old ledger row and bypassing every rule added since.
+**Caught now by:** two things, because remembering is not one. `drop function`
+with the explicit old signature in the migration that changes one; and
+`surface.test.ts` asserting that no name in `public` has more than one
+signature, which fails whether or not anyone thought about it. A deliberate
+overload will fail that test too, which is the right moment to ask whether both
+signatures should be reachable.
+
+It was also visible the whole time in `types.generated.ts`, where `book_audit`
+was a union of two `Args` shapes — and that read as a generator quirk rather
+than a fact about the schema.
+
+### A `security definer` function granted to `authenticated` is granted to everybody
+**Symptom:** an auditor who gets zero rows for another charity's audit through
+RLS could call `matching_review_gates()` on that same audit id and receive
+`"First audit for this charity."`, `"Auditor's first 3 audits are reviewed.
+This is number 1."` and `"2 open risk(s) recorded against this assignment."`
+— another organisation's trading history, another auditor's track record, and
+risk data. `audit_gate_state()` and `review_gate_reason()` leaked the same way.
+
+**Why it hid:** three separate things each looked like the check:
+
+- The tables were correctly locked down. `review_gate` is admin-only, and RLS
+  covers `audit` and `risk`. But `security definer` runs as the owner, so none
+  of that applies *inside* the function.
+- The functions carried `revoke all ... from public, anon`, which **reads like
+  a permission check and is not one**. It removes the roles nobody was worried
+  about and leaves the one that matters.
+- `authenticated` is a single role shared by every signed-in user — auditor,
+  client, admin alike. Granting EXECUTE to it grants it to everyone with a
+  login. There is no "signed in, therefore entitled" in this schema; entitlement
+  is `app.is_admin()` or a match on `auth.uid()`.
+
+A fourth thing hid it further: the function's tests called it through
+`arrange`, which resets to `postgres`. They passed *because* there was no
+guard, and adding one broke seven of them — which is how the guard proved it
+worked.
+
+**Caught now by:** `packages/db/test/gate-function-access.test.ts`, which asks
+as an auditor and as a client for an audit belonging to someone else. Any new
+`security definer` function needs the same pair of tests.
+
+**Sweep for the rest of them:**
+
+```sql
+select p.proname,
+       case when pg_get_functiondef(p.oid) ilike '%is_admin%'   then 'guarded'
+            when pg_get_functiondef(p.oid) ilike '%auth.uid()%' then 'scoped-to-caller'
+            else 'NO GUARD' end as guard
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.prosecdef
+order by 2, 1;
+```
+
+Every row must read `guarded` or `scoped-to-caller`. When this was first run,
+29 of 32 did and these three did not. **A function that takes an id and does
+not check the caller against it is the shape to look for** — an id parameter is
+an invitation to pass someone else's.
+
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.
@@ -235,6 +319,150 @@ lint, typecheck or unit tests.
 **Caught now by:** `pnpm build` in CI.
 
 ## Decision log
+
+### 2026-08-27 — Merging the boundary work onto S4.3+
+The lockdown was written against an 18-table schema and merged onto a 30-table
+one. Two things are worth recording about how that went, because both will
+happen again.
+
+Migration order is not a detail. These migrations were numbered `2026082623…`,
+which put them *before* the twenty-eight that landed meanwhile — one of them
+sharing a timestamp exactly. A revoke that runs before the tables it is meant to
+cover exist does nothing for them. Renumbered to run last; nothing had been
+pushed to staging, which is the only reason renaming them was allowed.
+
+The inventories earned their keep. `surface.test.ts` named every new table
+carrying inherited DML and every new RPC the blanket revoke had cut off — no
+reading of twenty-eight commits required, and no chance of missing one. The
+grant list also changed shape as a result: rather than re-listing another
+developer's thirty-six functions, the migration now revokes only the seven that
+held an EXECUTE no `grant` statement anywhere in the directory asks for. Those
+seven were enumerated from the database, not guessed.
+
+*Rejected:* rebasing onto main. A merge keeps both histories readable and does
+not rewrite commits that were already pushed.
+
+### 2026-08-27 — Behaviour that varies by configuration travels with the row
+
+`capture_mode` was a Postgres enum with two values, and `permissions()` in core
+was a `switch` over them deciding whether an auditor could tally, take notes or
+drop a marker. Adding a third stage cost a migration, an enum value, a switch
+arm and a deploy — for something the business, not the developer, owns.
+
+It is now `audit_capture_mode`: a row per stage carrying `allows_tallies`,
+`allows_notes` and `allows_markers`. `permissions()` returns what the row says.
+The rule "an interaction stage exposes no tally counter" is a `false` in a
+column.
+
+**The flags live on the stage, not on the 36 `audit_stage_template` rows that
+reference it.** Copying them per step would be 36 chances to disagree, and the
+constraint is a property of the stage.
+
+**Where the tests went.** The unit test that asserted an interaction stage
+permits no tally became circular the moment the value came from a fixture —
+it proved the fixture agreed with itself. The rule moved to the seed, so its
+test moved to `packages/db/test/capture-modes.test.ts`, against the seed. What
+stays in `core` is the *enforcement*: `addTally` refusing a stage that does not
+permit one. Generally: **when a rule becomes configuration, its test follows it
+to the layer that now owns it, and the unit layer keeps only the obedience.**
+
+**Absent flags fail closed** (`allowed()` in `apps/field/src/lib/adapters.ts`).
+SQLite has no boolean, so a cached row carries 0/1, and one cached before the
+flags existed carries nothing. Capturing too little is visible on the next
+shift and gets reported; wrongly permitting a tally during a mystery shop
+corrupts the audit with nobody noticing. Fail towards the failure that is loud.
+
+**The reason lives next to the setting.** `audit_capture_mode.caution` holds
+the explanation of why the interaction stage is restricted, and the admin
+screen shows it beside the toggle. Someone changing this in a year will not
+have read the spec, and a bare switch gives them nothing to weigh. A pinned
+test asserts the text is present, because an empty column here is a silent
+regression.
+
+**Deliberately not done: renaming the concepts.** The business calls
+observation and interaction "stages"; the code calls the nine sequence rows
+"stages" and these "capture modes". Straightening that out means touching
+`observation_log.stage_key`, `audit.stage_set_version`, the whole
+`StagedSession` model and the local SQLite schema — a rename sweep riding along
+inside a feature commit. It is real confusion and worth fixing on its own.
+
+### 2026-08-26 — Portal primitives live in `lib/theme.ts`, not `packages/ui`
+
+`packages/ui` holds a Button and a Card, is imported by zero screens, and
+styles them with `var(--colour-*)` custom properties and the `space`/`fontSize`
+scales. Every real portal screen uses `color.*`/`radius.*` from
+`@picksel/tokens` plus the helpers in `apps/portal/src/lib/theme.ts`. Those are
+two vocabularies for one job, and extracting into `packages/ui` would have made
+a third.
+
+So the repeated pieces went where the code already is: `card` (which already
+existed and was imported by nothing while 27 sites spelled out its three
+properties), plus `pageTitle` and `adminPage`. The PATTERNS row that said to
+style portal components with `var(--colour-*)` was describing `packages/ui`
+rather than the portal, and has been corrected.
+
+`packages/ui` was then deleted — the separate change this entry left open. See
+the entry below.
+
+
+
+### 2026-08-26 — Which test layer owns which question
+
+Four layers, and the rule for picking one is *what would have to be true for
+this to fail*:
+
+| Layer | Where | Answers | Cost |
+|---|---|---|---|
+| Domain | `packages/core/test` | a rule, with no I/O | ms |
+| Component | `apps/*/test/*.test.tsx` | what a screen shows and offers | ms |
+| Integration | `packages/db/test` | a policy, a grant, a constraint | seconds |
+| UX | `apps/portal/e2e` | the app works, as a person, signed in | minutes |
+
+The portal had no component layer, so every visual question went to Playwright:
+single worker, real database, dev server. A full run is ~2.7 minutes and one
+spec is ~20 seconds, which made design iteration cost about twenty seconds a
+look. Fourteen component tests covering the same ground run in 1.5.
+
+What makes it possible: **pages fetch, components render.** A page is an async
+Server Component doing queries and passing props; the JSX worth asserting on
+lives in sync components under it. Nothing in the component layer renders a
+page — a page is only true against a real session and real RLS, which is
+exactly what Playwright is for.
+
+Same tooling and setup file as `apps/field`, deliberately. Rejected: Storybook,
+which is a permanent maintenance surface for feedback the component tests and
+the running app already give a solo developer.
+
+### 2026-08-26 — Currency is data, never baked into the logic
+
+Money stays an integer count of a currency's smallest unit. What changed is
+that nothing in `core` may know *which* currency that is: `formatMoney` takes
+one, derives the divisor from it (yen has no minor unit, so a hardcoded `/100`
+renders ¥500 as ¥5), and a price is an amount **and** a currency travelling
+together. No component prints a `£`.
+
+The market is UK today, but `organisation.residency_zone` already models `eea`
+and `other`. A currency assumed in a helper name, a symbol or a divisor is the
+kind of rewrite that surfaces as wrong numbers on an invoice rather than as a
+failing build.
+
+The schema followed the same day (`20260826230000_currency_generic_money.sql`):
+every `_pence` column is now `_minor_units`, and the two fee functions with
+`pence` in their names were renamed too. `alter … rename` throughout rather
+than add/backfill/drop, so grants, defaults, check constraints and view
+references followed the objects and no row was rewritten. Function bodies are
+text to Postgres, so the three whose plpgsql named a renamed column had to be
+restated — that is the part a rename does *not* do for you.
+
+**Deliberately not done: a currency column.** There is one currency, and a
+column repeating `'GBP'` on every row is a constant with storage, not a record
+of a decision. The decision worth capturing is "what is this charity billed
+in", and it belongs on `organisation` — next to `residency_zone` — when a
+second currency is actually in prospect. The two permanent ledgers
+(`credit_transaction`, `audit_pay_item`) will want their own copy at that point
+rather than inheriting, because evidence must not change meaning when a
+setting does.
+
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
@@ -311,15 +539,13 @@ later is unreadable until it is listed in the migration. `surface.test.ts`
 asserts the withheld set exactly, so forgetting names the column in the build.
 
 ### 2026-08-26 — No shared component package
-`packages/ui` held a Button and a Card, was a dependency and a
-`transpilePackages` entry of the portal, and was imported by nothing after
-twelve screens were built. It was not a partial implementation of the canonical
-pattern — the portal styles inline from token roles, which is what PATTERNS says
-to do — it was a competing one, sitting there as a permanent question about
-which to use. Deleted. *Rejected:* adopting it instead; a web component library
-cannot serve the field app, so it would have been a third styling vocabulary
-rather than a shared one, and the shared vocabulary is `packages/tokens`.
-Recovering it is one `git revert`.
+The deletion the entry above left open. `packages/ui` was a dependency and a
+`transpilePackages` entry of the portal and was imported by nothing after twelve
+screens; an unused option is a permanent question about which vocabulary to use.
+*Rejected:* adopting it instead — a web component library cannot serve the field
+app, so it would have been a third styling vocabulary rather than a shared one,
+and the shared vocabulary is `packages/tokens`. Recovering it is one
+`git revert`.
 
 ### 2026-08-26 — The theme references the design drop rather than copying it
 `packages/tokens/src/theme.ts` mapped every role onto a hex literal with the

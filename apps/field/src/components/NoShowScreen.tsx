@@ -1,4 +1,4 @@
-import { elapsed, type FieldSession } from '@picksel/core';
+import { elapsedSince, type StagedSession } from '@picksel/core';
 import { color, fontSize, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
 import { text } from '@/theme';
@@ -6,7 +6,7 @@ import { text } from '@/theme';
 /** How long an auditor waits before it counts as nobody turning up. */
 export const WAIT_MINUTES = 45;
 
-export function waitRemaining(session: FieldSession, now: Date): number {
+export function waitRemaining(session: StagedSession, now: Date): number {
   const waited = (now.getTime() - session.startedAt.getTime()) / 60_000;
   return Math.max(0, Math.ceil(WAIT_MINUTES - waited));
 }
@@ -26,7 +26,7 @@ export function NoShowScreen({
   onKeepWaiting,
   submitted = false,
 }: {
-  session: FieldSession;
+  session: StagedSession;
   now: Date;
   areaLabel: string;
   onReport: () => void;
@@ -73,10 +73,10 @@ export function NoShowScreen({
           WAITED
         </Text>
         <Text
-          accessibilityLabel={`Waited ${elapsed(session, now)}`}
+          accessibilityLabel={`Waited ${elapsedSince(session.startedAt, session.endedAt ?? now)}`}
           style={{ ...text('display', fontSize.xxl), color: color.onDark }}
         >
-          {elapsed(session, now)}
+          {elapsedSince(session.startedAt, session.endedAt ?? now)}
         </Text>
         <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
           {canReport ? `${WAIT_MINUTES} MINUTES REACHED` : `${remaining} MIN UNTIL YOU CAN REPORT`}

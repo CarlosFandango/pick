@@ -45,7 +45,9 @@ describe('an auditor cannot write their own outcome', () => {
     await withDatabase(async (db) => {
       const message = await db
         .as(ids.auditor)
-        .expectRefused('update audit set auditor_fee_pence = 999999 where id = $1', [ids.auditA]);
+        .expectRefused('update audit set auditor_fee_minor_units = 999999 where id = $1', [
+          ids.auditA,
+        ]);
       expect(message).toMatch(/permission denied/i);
     });
   });
@@ -96,7 +98,7 @@ describe('an auditor cannot write their own outcome', () => {
       const message = await db
         .as(ids.auditor)
         .expectRefused(
-          "insert into audit_pay_item (audit_id, kind, amount_pence) values ($1, 'travel', 50000)",
+          "insert into audit_pay_item (audit_id, kind, amount_minor_units) values ($1, 'travel', 50000)",
           [ids.auditA],
         );
       expect(message).toMatch(/permission denied/i);
@@ -233,7 +235,7 @@ describe('money is not writable by the people it concerns', () => {
          values (current_date, current_date) returning id`,
       );
       const message = await db.as(ids.auditor).expectRefused(
-        `insert into payout_line_item (payout_run_id, auditor_id, amount_pence)
+        `insert into payout_line_item (payout_run_id, auditor_id, amount_minor_units)
          values ($1, $2, 100000)`,
         [run?.id, ids.auditor],
       );

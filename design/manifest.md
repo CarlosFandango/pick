@@ -47,6 +47,25 @@ this file exists to make possible.
 | S3.5 | Credits & invoices (ledger) | Web | /credits |
 | S3.6 | Complaint fork (about audit vs about fundraiser) | Web | /complaint |
 
+## Phase 4 — Ops cockpit (no mockup — designed in code)
+
+There is no Phase 4 `.dc.html`. S4.1 and S4.2 were designed in code and their
+file-header comments are the spec; the same applies below. Screen IDs are still
+the shared vocabulary, so they are allocated here.
+
+| ID | Screen | Platform | Route |
+|---|---|---|---|
+| S4.1 | Ops home — the queue, not a dashboard | Web | /admin |
+| S4.2 | Assignment console — the algorithm shows its work | Web | /admin/assignment/:id |
+| S4.3 | Auditor roster — vetting, coverage, capability | Web | /admin/auditors |
+| S4.4 | Audit situation report | Web | /admin/audits/:id |
+| S4.5 | Clients — roster, balances, credit adjustments | Web | /admin/clients |
+| S4.6 | Complaint — read, acknowledge, resolve | Web | /admin/complaints/:id (triage paths await TND-80) |
+| S4.7 | Payout runs — owed, drafted, approved, paid | Web | /admin/payouts |
+| S4.8 | Risk register — flagged, advised, answered | Web | /admin/risks |
+| S4.9 | Review gates — what holds payment, what holds release | Web | /admin/gates |
+| S4.10 | Audit stages — what each stage permits, and the sequence | Web | /admin/stages (sequence read-only) |
+
 ## Open decisions
 - S3.4: **decided 2026-08-26.** Coded, and the code is stable per charity — a
   charity may recognise the auditor who did well last time and ask for them

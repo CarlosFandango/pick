@@ -1,6 +1,7 @@
 import { pickselLight } from '@picksel/tokens';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { type MyAuditRow, MyAuditsScreen } from '../src/components/MyAuditsScreen';
 
 let seq = 0;
@@ -10,7 +11,7 @@ const audit = (over: Partial<MyAuditRow> = {}): MyAuditRow => {
     id: `a${seq}`,
     title: 'Street · SE15',
     dateLabel: 'Tue 3 Mar',
-    feePence: 11500,
+    feeMinorUnits: 11500,
     status: 'in_review',
     ...over,
   };
@@ -66,5 +67,24 @@ describe('S2.5 my audits', () => {
   it('says something when the list is empty', () => {
     render(<MyAuditsScreen audits={[]} />);
     expect(screen.getByText('Nothing yet. Accepted offers appear here.')).toBeInTheDocument();
+  });
+});
+
+describe('picking up a job', () => {
+  it('makes a row tappable when there is somewhere to go', async () => {
+    // Rows were not tappable at all until the app got navigation (TND-88):
+    // My Audits is where an auditor picks up work and it led nowhere.
+    const onOpen = vi.fn();
+    const user = userEvent.setup();
+    render(<MyAuditsScreen audits={[audit({ title: 'Street · SE15' })]} onOpen={onOpen} />);
+
+    await user.click(screen.getByRole('button', { name: /Street · SE15/ }));
+    expect(onOpen).toHaveBeenCalledOnce();
+  });
+
+  it('is not a button when nothing is handed to it', () => {
+    // A row that looks tappable and does nothing is worse than a plain row.
+    render(<MyAuditsScreen audits={[audit()]} />);
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

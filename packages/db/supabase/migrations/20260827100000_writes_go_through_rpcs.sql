@@ -103,6 +103,37 @@ revoke update, delete on public.evidence_attachment from authenticated;
 -- is an ordinary admin edit with no invariant to hold across two tables, so it
 -- has no RPC to be a hole beside. complaint_admin_write stays.
 
+-- the tables added since --------------------------------------------------
+-- Same rule, applied to what S4.3+ brought in. Every one of these inherited
+-- full DML from the platform's default privileges; the only question per table
+-- is whether a screen writes it directly or an RPC does.
+--
+-- Written by an RPC or by seed, so the table refuses:
+--   assignment_override  raised by the override path
+--   audit_stage_template seeded per audit type; reordering publishes a new
+--                        stage_set_version rather than moving rows an
+--                        in-flight shift is reading
+--   credit_bundle        the price list — a charity reads it, PICK seeds it
+--   risk                 raise_risk
+revoke insert, update, delete on public.assignment_override  from authenticated;
+revoke insert, update, delete on public.audit_stage_template from authenticated;
+revoke insert, update, delete on public.credit_bundle        from authenticated;
+revoke insert, update, delete on public.risk                 from authenticated;
+
+-- Where a separate read policy exists, the write policy goes with the grant.
+-- `assignment_override` and `risk` have only their admin policy, which is also
+-- how PICK reads them, so those stay: the grant is the layer that changes.
+drop policy audit_stage_template_admin_write on public.audit_stage_template;
+drop policy credit_bundle_admin_write        on public.credit_bundle;
+
+-- Edited directly by a PICK admin screen, and rightly: each is a setting with
+-- no invariant spanning two tables, so there is no RPC beside them to be a hole
+-- next to. They keep UPDATE and lose the rest — nothing creates or deletes a
+-- capture mode, a gate or an advisory through the API.
+revoke insert, delete on public.audit_capture_mode from authenticated;
+revoke insert, delete on public.review_gate        from authenticated;
+revoke insert, delete on public.risk_advisory      from authenticated;
+
 -- What remains for `authenticated`, deliberately:
 --   insert  observation_log, check_result, evidence_attachment  (field sync)
 --           complaint                                           (S3.6)
@@ -110,6 +141,7 @@ revoke update, delete on public.evidence_attachment from authenticated;
 --           prep_progress                                       (S1.4)
 --   update  complaint                                           (admin policy)
 --           prep_progress                                       (S1.4)
+--           audit_capture_mode, review_gate, risk_advisory       (admin screens)
 --   delete  complaint                                           (admin policy)
 --           prep_progress                                       (S1.4)
 -- packages/db/test/privileges.test.ts states this as a table and fails if it

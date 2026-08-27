@@ -53,12 +53,13 @@ describe('ops presentation', () => {
     );
   });
 
-  it('offers no link for an action whose screen is not built', () => {
-    // Four of these used to point at routes nobody had built, so the queue
-    // offered an action that produced a 404. Null is the honest answer until
-    // the screen lands: the line still says a human is needed.
-    const unbuilt = KINDS.filter((k) => OPS_PRESENTATION[k].href(item({ kind: k })) === null);
-    expect(unbuilt).toEqual(['no_show', 'complaint', 'vetting', 'stale_write_up']);
+  it('sends every kind to a route the portal serves', () => {
+    // Four of these used to point at screens nobody had built, so the queue
+    // offered an action that produced a 404. S4.3+ built them; pnpm
+    // check:routes is what keeps this true as the queue grows.
+    for (const kind of KINDS) {
+      expect(OPS_PRESENTATION[kind].href(item({ kind }))).toMatch(/^\/admin\//);
+    }
   });
 });
 

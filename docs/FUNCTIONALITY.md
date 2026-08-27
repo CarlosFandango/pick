@@ -4,14 +4,15 @@ What exists, what is coming, what was deliberately left out. **Update this in th
 same commit as the change** — a register that lags is worse than none.
 
 Status: **Built** = working, tested and reachable in the app ·
-**Component** = built and tested, but no route renders it yet ·
 **Partial** = usable, gaps noted · **Planned** = agreed, not started ·
 **Deferred** = deliberately not built, with a reason. Deferred is a real answer
 and should stay populated.
 
-**Component** is not a softer Built. It is the difference between work done and
-work shipped, and the field app is entirely in it: eight screens exist as tested
-components and `apps/field/app/` still has one route that says "Scaffold".
+**Built means reachable**, not merely written and tested. There was briefly a
+**Component** status for the gap — eight field screens existed as tested
+components while `apps/field/app/` held one route saying "Scaffold" — and
+TND-74 closed it by wiring them up. If that gap opens again, the distinction is
+worth naming again rather than calling both Built.
 
 ## Foundations
 
@@ -20,6 +21,10 @@ components and `apps/field/app/` still has one route that says "Scaffold".
 | Turborepo monorepo, pnpm workspaces | Built | root | hoisted node-linker for React Native |
 | CI: lint / typecheck / test | Built | `.github/workflows/ci.yml` | plus a job that applies migrations from scratch |
 | Staging migration deploy | Built | `.github/workflows/deploy-staging.yml` | manual + on migration change; production is promoted by hand |
+| Hosted Supabase: staging | Built | London (eu-west-2), ref in `.env` | linked; all 26 migrations applied, 18 tables live and empty. No seed — `seed.sql` is local-only by design. |
+| Hosted Supabase: production | Planned | London (eu-west-2) | project exists, nothing pushed. Promoted by hand, and not needed until there is something to protect. |
+| CI deploy to staging | Partial | `.github/workflows/deploy-staging.yml` | still skips with a notice: needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. Pushing from a laptop is not a pipeline. |
+| RLS verified against hosted | Not started | — | `pnpm test:rls` has only ever run locally and in CI. Both grant pitfalls came from bootstrap differences, so a hosted run is the point — see TND-86. |
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
@@ -31,39 +36,50 @@ components and `apps/field/app/` still has one route that says "Scaffold".
 |---|---|---|---|
 | Schema | Built | `packages/db/supabase/migrations` | 18 tables, 23 enums, 1 view; counts asserted by `in-step.test.ts`, not by memory |
 | RLS on every table | Built | `20260825090700_rls.sql` | every table, asserted by a sweep rather than a count |
-| Writes go through RPCs | Built | `20260826230000_writes_go_through_rpcs.sql` | direct INSERT/UPDATE/DELETE revoked except field events, complaints, prep |
-| Declared grant surface | Built | `20260826230100_declare_the_whole_surface.sql` | anon holds nothing; the callable function list is explicit |
+| Writes go through RPCs | Built | `20260827100000_writes_go_through_rpcs.sql` | direct INSERT/UPDATE/DELETE revoked except field events, complaints, prep progress, and three admin settings screens |
+| Declared grant surface | Built | `20260827100100_declare_the_whole_surface.sql` | anon holds nothing; the callable function list is explicit |
 | Refusal + inventory suites | Built | `packages/db/test/refusals.test.ts`, `surface.test.ts` | what each role must *not* do, and what the schema exposes |
 | Core/schema parity suite | Built | `packages/db/test/in-step.test.ts` | every enum and domain constant that exists in both places |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 | Built | `seed.sql` | 29 checks, all 10 categories covered |
 | Moment/category split | Built | `core/moments.ts` | category withheld by column grant — no signed-in role can read it |
+| Audit stages, two capture modes | Built | `audit_stage_template`, `core/stages.ts` | TND-83. Seeded per audit type; sequence is data, so Jaz's walkthrough is a seed change |
+| What each stage permits | Built | `audit_capture_mode`, S4.10 `/admin/stages` | TND-83. Was an enum plus a `switch` in core; now a row with `allows_tallies` / `allows_notes` / `allows_markers`, editable by PICK admin. A third stage is an insert |
+| Stage sequence editing | Partial | S4.10 `/admin/stages` | Read-only. Reordering has to publish a new `stage_set_version` rather than move rows an in-flight shift is reading — same argument as TND-84 |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | `overallScore()` for reports, `scoreAudit()` for per-category; critical failures separate |
 | Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
-| Credit ledger | Built | `credit_transaction` + balance view | no purchase flow yet |
-| Payout ledger | Built | `payout_run` + line items | no run builder or CSV export yet |
+| Credit ledger lifecycle | Built | `20260826290100_credit_lifecycle.sql` | reserve at booking, consume at release, release on void/no-show. FIFO by purchase date; each credit carries what it cost |
+| Credit position (5 figures) | Built | `organisation_credit_position` view | purchased / reserved / consumed / released / available, all folds over the ledger |
+| Atomic reservation | Built | `book_audit` locks the organisation row | two bookings against a last credit can no longer both succeed |
+| Credit expiry | Deferred | enum value only | the type exists, nothing writes it — the policy is an open decision |
+| Credit price list | Built | `credit_bundle`, `core/credits.ts` | five bundles, seeded. Price is read, never a constant — a price in code would rewrite past purchases |
+| Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
+| Currency-generic money | Built | `core/money.ts`, `20260826230000_currency_generic_money.sql` | `formatMoney(minorUnits, currency)`; columns are `_minor_units`. No currency column yet — see PATTERNS |
+| Payout ledger + run builder | Built | `20260826320000_payout_runs.sql` | draft → approve → executed. Payable is decided by the payment gate, never by client approval. No CSV export yet |
+| Review gates | Built | `review_gate`, `20260826310000_review_gates.sql` | TND-81. Six fixed triggers; payment and client-release resolve independently; most restrictive wins |
+| Risk register | Built | `risk`, `risk_advisory`, `assignment_override` | TND-82. Conflict hard-blocks; exposure warns and auto-raises a risk. The advisory is a separate record |
 
 ## Screens (design manifest)
 
 | ID | Screen | Status |
 |---|---|---|
 | S1.1 | Book an audit | Built |
-| S1.2 | Assignment (six eligibility sets) | Built — a rule, not a screen |
-| S1.3 | Job offer | Component |
-| S1.4 | Prep | Component |
-| S1.5b | Field session — moment stepper | Component |
-| S1.6 | Write-up | Component |
+| S1.2 | Assignment (six eligibility sets) | Built |
+| S1.3 | Job offer | Built |
+| S1.4 | Prep | Built |
+| S1.5b | Field session — stage stepper, per-stage capture | Built (stage list awaiting Jaz's walkthrough) |
+| S1.6 | Write-up | Built |
 | S1.7 | Review queue | Built |
 | S1.8 | Client report | Built |
 | S1.9 | Client dashboard | Built |
-| S2.1 | Offers list | Component |
-| S2.2 | Accept + conflict | Component (conflict declaration deferred) |
-| S2.3 | Field flag sheet | Component |
-| S2.4 | Write-up returned | Component |
-| S2.5 | My audits | Component |
-| S2.6 | Earnings | Component |
-| S2.7 | No-show flow | Component |
+| S2.1 | Offers list| Built |
+| S2.2 | Accept + conflict| Built (conflict declaration deferred) |
+| S2.3 | Field flag sheet| Built |
+| S2.4 | Write-up returned| Built |
+| S2.5 | My audits| Built |
+| S2.6 | Earnings| Built |
+| S2.7 | No-show flow| Built |
 | S3.1 | Booking deepened (A/V, lead time) | Built |
 | S3.2 | Auditor override picker | Partial — `selectable_auditors` / `prefer_auditor` and their tests exist; `/book/choose-auditor` does not |
 | S3.3 | Audit list + detail | Built |
@@ -72,21 +88,41 @@ components and `apps/field/app/` still has one route that says "Scaffold".
 | S3.6 | Complaint fork | Built |
 | S4.1 | Ops home | Built |
 | S4.2 | Assignment console | Built |
-| S4.3+ | Remaining ops screens (auditors, clients, payouts, complaints admin) | Not started |
+| S4.3 | Auditor roster — vetting, coverage, capability | Built |
+| S4.4 | Audits — list and situation report | Built |
+| S4.5 | Clients — roster, balances, credit adjustments | Built |
+| S4.6 | Complaint — read, acknowledge, resolve | Built (minimal). TND-80 adds triage paths and PICK-authored rework beside it |
+| S4.7 | Payout runs | Built |
+| S4.8 | Risk register | Built |
+| S4.9 | Review gates | Built |
 
-Portal screens are routes: eleven `page.tsx` files, reachable and checked by
-`pnpm check:routes`. Field screens are components with tests and no router
-entry — `apps/field/app/` holds `_layout.tsx` and an `index.tsx` that renders
-"Scaffold. No features yet." Nothing an auditor could install reaches any of
-them, which is what **Component** above means.
+Screens are wired as components and routes with tests at every level. The
+auditor loop closes: an auditor can now sign in, take an offer, prep, run a
+session, report a no-show and submit a write-up, which is what moves an audit
+into review without anyone touching the database.
+
+The write-up groups by moment. Stages 3-9 map 1:1 onto those moments, so what
+TND-83 adds is a summary of the observation stage rather than a rebuild.
+
+Portal screens are eleven routes; the field app is twelve. `pnpm check:routes`
+holds every link in the portal against the `page.tsx` files that exist, so a tab
+or an ops action cannot point at a screen nobody built.
 
 ## Applications
 
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
 | Portal shell + session refresh | Built | `apps/portal` | middleware + `requireRole()`; 11 routes |
+| Back navigation on detail pages | Built | `portal/src/components/BackLink.tsx` | a link to a named place, never `router.back()` |
+| Not-found page | Built | `portal/src/app/not-found.tsx` | session-free; copy does not confirm a record exists |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
-| Field app shell | Partial | `apps/field` | expo-router, one scaffold route; the eight screens are not wired to it |
+| Sign out | Built | `portal/src/lib/sign-out.ts` | form POST from both shells; never a GET link |
+| Field app routes | Built | `apps/field/app` | tabs (offers / my audits / earnings) + offer, prep, session, write-up, no-show |
+| Field app navigation | Built | `app/(tabs)/_layout.tsx` | tab bar, back on detail screens, none on a live session |
+| Device auth | Built | `field/src/lib/session.tsx`, `lib/supabase.ts` | AsyncStorage session; `ready` kept separate from `session` so a cold start does not sign anyone out |
+| Row-to-prop adapters | Built | `field/src/lib/adapters.ts` | the layer that was missing; 18 tests, no network |
+| Local field-event writes | Built | `field/src/lib/events.ts` | device-minted ids, device clock, left queued |
+| Sync trigger | Built | `field/src/lib/sync.ts` | called where signal is likely, never on a timer; never throws |
 | Local SQLite schema + migrator | Built | `field/src/db` | `synced_at is null` **is** the outbox; 9 tests incl. resume-from-partial |
 | Sync push | Built | `field/src/sync/outbox.ts` | 10 tests: batching, failure isolation, payload parsing, idempotence |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
@@ -101,13 +137,12 @@ them, which is what **Component** above means.
 | Gap | Where | Why it matters |
 |---|---|---|
 | No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
-| Portal has no unit tests | `apps/portal` | Server actions are covered only by Playwright, which needs a live stack. The actions are thin and mostly parse-then-call, so a Vitest pass over the zod schemas and branch logic is cheap. |
 
 ## Not built yet
 
-Sign-in screens · audit booking flow · matching algorithm · report generation ·
-notifications · payment capture · payout CSV export · auditor onboarding ·
-scheduled jobs · analytics dashboards
+Portal sign-in design (scaffolding today) · report generation · notifications ·
+payment capture · payout CSV export · auditor onboarding · scheduled jobs ·
+analytics dashboards
 
 ## Deferred, with reasons
 

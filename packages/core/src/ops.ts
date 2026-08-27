@@ -20,15 +20,12 @@ export interface OpsPresentation {
   tone: 'urgent' | 'attention' | 'neutral' | 'info';
   action: string;
   /**
-   * Where the action happens, or null while that screen does not exist.
-   *
-   * Four of these pointed at routes nobody had built — /admin/audits/:id,
-   * /admin/complaints/:id, /admin/auditors — so the queue offered an action
-   * that produced a 404. A queue that lies about what it can do is worse than
-   * one that admits the gap: the line still says something needs a human, and
-   * the missing screen stays visible instead of looking finished.
+   * Where the action happens. Every one of these must be a route the portal
+   * actually serves — four were not, and the queue offered actions that
+   * produced a 404 until S4.3+ built the screens behind them. `pnpm
+   * check:routes` compares these against the page.tsx files that exist.
    */
-  href: (item: OpsItem) => string | null;
+  href: (item: OpsItem) => string;
 }
 
 /**
@@ -55,29 +52,25 @@ export const OPS_PRESENTATION: Record<OpsItemKind, OpsPresentation> = {
     chip: 'NO SHOW',
     tone: 'info',
     action: 'Process',
-    // Waiting on the audit admin screen (S4.3+).
-    href: () => null,
+    href: (item) => `/admin/audits/${item.targetId}`,
   },
   complaint: {
     chip: 'COMPLAINT',
     tone: 'neutral',
     action: 'Open',
-    // Waiting on complaints admin (S4.3+).
-    href: () => null,
+    href: (item) => `/admin/complaints/${item.targetId}`,
   },
   vetting: {
     chip: 'VETTING',
     tone: 'neutral',
     action: 'Vet',
-    // Waiting on the auditors screen (S4.3+).
-    href: () => null,
+    href: () => '/admin/auditors',
   },
   stale_write_up: {
     chip: 'STALE',
     tone: 'neutral',
     action: 'Nudge',
-    // Waiting on the audit admin screen (S4.3+).
-    href: () => null,
+    href: (item) => `/admin/audits/${item.targetId}`,
   },
 };
 

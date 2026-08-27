@@ -1,8 +1,8 @@
 import {
   type EarningLine,
+  formatMoney,
   nextRunLabel,
   pendingLine,
-  poundsFromPence,
   summariseEarnings,
 } from '@picksel/core';
 import { color, fontSize, radius, space } from '@picksel/tokens';
@@ -34,10 +34,10 @@ export function EarningsScreen({ lines, nextRun }: { lines: EarningLine[]; nextR
           {nextRunLabel(nextRun)}
         </Text>
         <Text
-          accessibilityLabel={`Pending ${poundsFromPence(summary.pendingPence)}`}
+          accessibilityLabel={`Pending ${formatMoney(summary.pendingMinorUnits)}`}
           style={{ ...text('display', fontSize.xxl), color: color.onDark, marginTop: 4 }}
         >
-          {poundsFromPence(summary.pendingPence)}
+          {formatMoney(summary.pendingMinorUnits)}
         </Text>
         <Text style={{ ...text('body', fontSize.xs), color: color.onDarkMuted, marginTop: 2 }}>
           {pendingLine(summary)}
@@ -63,8 +63,8 @@ export function EarningsScreen({ lines, nextRun }: { lines: EarningLine[]; nextR
             <View style={{ flex: 1 }}>
               <Text style={{ ...text('title', fontSize.md), color: color.ink }}>{line.title}</Text>
               <Text style={{ ...text('body', fontSize.xs), color: color.muted, marginTop: 2 }}>
-                {line.dateLabel} · {poundsFromPence(line.basePence)} audit
-                {line.travelPence > 0 ? ` + ${poundsFromPence(line.travelPence)} travel` : ''}
+                {line.dateLabel} · {formatMoney(line.baseMinorUnits)} audit
+                {line.travelMinorUnits > 0 ? ` + ${formatMoney(line.travelMinorUnits)} travel` : ''}
               </Text>
             </View>
             <Text

@@ -8,9 +8,18 @@ const AUDIT = '00000000-0000-7000-8000-0000000a0006';
 async function arrangeInReview(db: Db, status = 'in_review') {
   await db.arrange(
     `insert into audit (id, client_organisation_id, auditor_id, status, audit_type, postcode,
-                        window_start_on, window_end_on, auditor_fee_pence)
+                        window_start_on, window_end_on, auditor_fee_minor_units)
      values ($1, $2, $3, $4, 'street', 'SW1A 1AA', current_date, current_date + 3, 11500)`,
     [AUDIT, ids.charityA, ids.auditor, status],
+  );
+
+  // The reservation a real booking would have written. Without it there is no
+  // credit set aside, so nothing can be handed back — which is correct
+  // behaviour, and would make the void and no-show tests below assert nothing.
+  await db.arrange(
+    `insert into credit_transaction (organisation_id, delta, reason, audit_id, unit_price_minor_units)
+     values ($1, -1, 'reservation', $2, 25000)`,
+    [ids.charityA, AUDIT],
   );
 }
 
@@ -31,7 +40,7 @@ describe('review_gate_reason (S1.7)', () => {
         .query<{ review_gate_reason: string }>('select review_gate_reason($1)', [AUDIT]);
       // The reason comes before the actions: a reviewer needs to know why
       // before deciding what.
-      expect(row?.review_gate_reason).toMatch(/first 3 audits are gated.*audit 1 of 3/i);
+      expect(row?.review_gate_reason).toMatch(/first 3 audits are reviewed.*number 1/i);
     });
   });
 
@@ -48,12 +57,19 @@ describe('review_gate_reason (S1.7)', () => {
       const [row] = await db
         .as(ids.admin)
         .query<{ review_gate_reason: string }>('select review_gate_reason($1)', [AUDIT]);
-      expect(row?.review_gate_reason).toMatch(/audit 2 of 3/i);
+      expect(row?.review_gate_reason).toMatch(/number 2/i);
     });
   });
 
-  it('stops gating once the auditor is established', async () => {
+  it('stops gating on track record once the auditor is established', async () => {
     await withDatabase(async (db) => {
+      // Scoped to the one trigger. Since TND-81 the reason is every matching
+      // gate joined together, so an established auditor can still be held for
+      // an unrelated reason — asserting the aggregate string is null would be
+      // asserting that no OTHER gate exists, which is a different claim.
+      await db.arrange(
+        "update review_gate set enabled = false where trigger <> 'auditor_first_n_audits'",
+      );
       await arrangeInReview(db);
       for (let i = 0; i < 3; i += 1) {
         await db.arrange(
@@ -172,11 +188,11 @@ describe('report_no_team_present', () => {
       expect(audit?.status).toBe('no_team_present');
       expect(await balance(db)).toBe(before + 1);
 
-      const [pay] = await db.arrange<{ amount_pence: number }>(
-        "select amount_pence from audit_pay_item where audit_id = $1 and kind = 'no_show'",
+      const [pay] = await db.arrange<{ amount_minor_units: number }>(
+        "select amount_minor_units from audit_pay_item where audit_id = $1 and kind = 'no_show'",
         [AUDIT],
       );
-      expect(Number(pay?.amount_pence)).toBe(11500);
+      expect(Number(pay?.amount_minor_units)).toBe(11500);
     });
   });
 

@@ -1,9 +1,9 @@
 import {
+  formatMoney,
   type OfferListItem,
   type OfferState,
   offerState,
-  offerTotalPence,
-  poundsFromPence,
+  offerTotalMinorUnits,
   sortOffers,
   timeLeftLabel,
   upliftLabel,
@@ -91,12 +91,7 @@ export function OffersScreen({
                     paddingHorizontal: 10,
                   }}
                 >
-                  <Text
-                    style={{
-                      ...text('caption', fontSize.xs),
-                      color: chip.ink ?? color.muted,
-                    }}
-                  >
+                  <Text style={{ ...text('caption', fontSize.xs), color: chip.ink ?? color.muted }}>
                     {chip.label}
                   </Text>
                 </View>
@@ -125,36 +120,22 @@ export function OffersScreen({
               </Text>
 
               {filled ? (
-                <Text
-                  style={{
-                    ...text('body', fontSize.xs),
-                    color: color.muted,
-                    marginTop: 3,
-                  }}
-                >
+                <Text style={{ ...text('body', fontSize.xs), color: color.muted, marginTop: 3 }}>
                   Accepted by another auditor. No action needed.
                 </Text>
               ) : (
                 <>
                   <Text
-                    style={{
-                      ...text('body', fontSize.sm),
-                      color: color.bodyBrown,
-                      marginTop: 3,
-                    }}
+                    style={{ ...text('body', fontSize.sm), color: color.bodyBrown, marginTop: 3 }}
                   >
                     {offer.windowLabel} · {offer.paymentMethodLabel}
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
                     <Text style={{ ...text('display', fontSize.lg), color: color.ink }}>
-                      {poundsFromPence(offerTotalPence(offer))}
+                      {formatMoney(offerTotalMinorUnits(offer))}
                     </Text>
                     <Text
-                      style={{
-                        ...text('body', fontSize.xs),
-                        color: color.muted,
-                        marginLeft: 8,
-                      }}
+                      style={{ ...text('body', fontSize.xs), color: color.muted, marginLeft: 8 }}
                     >
                       {upliftLabel(offer)}
                     </Text>

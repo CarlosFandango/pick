@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   type OfferListItem,
   offerState,
-  offerTotalPence,
+  offerTotalMinorUnits,
   sortOffers,
   timeLeftLabel,
   upliftLabel,
@@ -19,8 +19,8 @@ function offer(over: Partial<OfferListItem> = {}): OfferListItem {
     areaLabel: 'SE15 — Peckham',
     windowLabel: 'Tue 3 – Thu 5 Mar',
     paymentMethodLabel: 'direct debit',
-    basePence: 10000,
-    travelPence: 1500,
+    baseMinorUnits: 10000,
+    travelMinorUnits: 1500,
     expiresAt: new Date('2026-03-03T08:00:00Z'),
     outcome: 'offered',
     ...over,
@@ -67,7 +67,7 @@ describe('timeLeftLabel', () => {
 
 describe('pay on an offer', () => {
   it('totals base and travel', () => {
-    expect(offerTotalPence(offer())).toBe(11500);
+    expect(offerTotalMinorUnits(offer())).toBe(11500);
   });
 
   it('never hides the uplift inside the total', () => {
@@ -75,7 +75,7 @@ describe('pay on an offer', () => {
   });
 
   it('says nothing when there is no uplift', () => {
-    expect(upliftLabel(offer({ travelPence: 0 }))).toBe('');
+    expect(upliftLabel(offer({ travelMinorUnits: 0 }))).toBe('');
   });
 });
 

@@ -39,8 +39,8 @@ grant select (
   postcode_area,
   scheduled_for,
   window_minutes,
-  price_pence,
-  auditor_fee_pence,
+  price_minor_units,
+  auditor_fee_minor_units,
   check_set_version,
   requested_at,
   matched_at,
@@ -66,5 +66,6 @@ grant select (
   returned_moments,
   returned_at,
   review_note,
-  requires_av
+  requires_av,
+  stage_set_version
 ) on public.audit to authenticated;

@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bundleLabel,
+  type CreditBundle,
   type CreditEntry,
   currentBalance,
   deltaLabel,
+  effectiveUnitPrice,
   runningBalance,
+  sortBundles,
   valueLabel,
 } from '../src/credits';
 
@@ -23,7 +27,7 @@ describe('runningBalance', () => {
   it('shows the balance after every movement', () => {
     const ledger = [
       entry({ delta: 4, reason: 'purchase' }),
-      entry({ delta: -1, reason: 'booking' }),
+      entry({ delta: -1, reason: 'reservation' }),
       entry({ delta: 1, reason: 'refund' }),
     ];
     const lines = runningBalance(ledger, currentBalance(ledger));
@@ -33,14 +37,14 @@ describe('runningBalance', () => {
   });
 
   it('is auditable by the person reading it, not something to trust', () => {
-    const ledger = [entry({ delta: 10 }), entry({ delta: -1, reason: 'booking' })];
+    const ledger = [entry({ delta: 10 }), entry({ delta: -1, reason: 'reservation' })];
     const lines = runningBalance(ledger, currentBalance(ledger));
     expect(lines.at(-1)?.balanceAfter).toBe(10);
     expect(lines.at(0)?.balanceAfter).toBe(9);
   });
 
   it('orders by when things happened, not the order they arrived', () => {
-    const later = entry({ delta: -1, reason: 'booking', occurredAt: new Date(2026, 2, 20) });
+    const later = entry({ delta: -1, reason: 'reservation', occurredAt: new Date(2026, 2, 20) });
     const earlier = entry({ delta: 5, occurredAt: new Date(2026, 2, 1) });
 
     const lines = runningBalance([later, earlier], currentBalance([later, earlier]));
@@ -63,13 +67,17 @@ describe('deltaLabel', () => {
 
 describe('valueLabel', () => {
   it('prices a purchase', () => {
-    expect(valueLabel(entry({ delta: 4, reason: 'purchase', unitPricePence: 17500 }))).toBe('£700');
+    expect(valueLabel(entry({ delta: 4, reason: 'purchase', unitPriceMinorUnits: 25_000 }))).toBe(
+      '£1,000',
+    );
   });
 
   it('says nothing for a movement with no money attached', () => {
-    // A booking spends a credit that was already paid for. Showing £175
-    // against it would double-count what the charity spent.
-    expect(valueLabel(entry({ delta: -1, reason: 'booking', unitPricePence: 17500 }))).toBe('');
+    // A booking spends a credit that was already paid for. Pricing it again
+    // here would double-count what the charity spent.
+    expect(
+      valueLabel(entry({ delta: -1, reason: 'reservation', unitPriceMinorUnits: 25_000 })),
+    ).toBe('');
     expect(valueLabel(entry({ delta: 1, reason: 'refund' }))).toBe('');
   });
 });
@@ -81,7 +89,7 @@ describe('a paged ledger', () => {
   // view.
   const page = [
     entry({ id: 'p001', delta: 4, reason: 'purchase', occurredAt: new Date('2026-08-01') }),
-    entry({ id: 'p002', delta: -1, reason: 'booking', occurredAt: new Date('2026-08-02') }),
+    entry({ id: 'p002', delta: -1, reason: 'reservation', occurredAt: new Date('2026-08-02') }),
   ];
 
   it('reads down from the balance it was given, not from zero', () => {
@@ -100,5 +108,52 @@ describe('a paged ledger', () => {
   it('reads down from zero when the caller really does hold the whole ledger', () => {
     const lines = runningBalance(page, currentBalance(page));
     expect(lines.map((l) => l.balanceAfter)).toEqual([3, 4]);
+  });
+});
+
+describe('credit bundles', () => {
+  const bundle = (quantity: number, priceMinorUnits: number): CreditBundle => ({
+    quantity,
+    priceMinorUnits,
+    currency: 'GBP',
+  });
+
+  it('works out what each credit in a bundle cost', () => {
+    // The list from Jaz's roadmap. Every one divides exactly, which is why
+    // effectiveUnitPrice can stay in integer minor units.
+    expect(effectiveUnitPrice(bundle(1, 25_000))).toBe(25_000);
+    expect(effectiveUnitPrice(bundle(2, 45_000))).toBe(22_500);
+    expect(effectiveUnitPrice(bundle(3, 60_000))).toBe(20_000);
+    expect(effectiveUnitPrice(bundle(4, 75_000))).toBe(18_750);
+    expect(effectiveUnitPrice(bundle(8, 150_000))).toBe(18_750);
+  });
+
+  it('gets cheaper per audit as the bundle grows', () => {
+    // The whole point of the price list. If this ever inverts, someone has
+    // mistyped a price and a charity is being punished for buying more.
+    const list = [
+      bundle(1, 25_000),
+      bundle(2, 45_000),
+      bundle(3, 60_000),
+      bundle(4, 75_000),
+      bundle(8, 150_000),
+    ];
+
+    const unitPrices = sortBundles(list).map(effectiveUnitPrice);
+    for (let i = 1; i < unitPrices.length; i++) {
+      expect(unitPrices[i], `bundle ${i} is not cheaper per credit`).toBeLessThanOrEqual(
+        unitPrices[i - 1] as number,
+      );
+    }
+  });
+
+  it('quotes a single credit as one price, not a price each', () => {
+    expect(bundleLabel(bundle(1, 25_000))).toBe('£250');
+    expect(bundleLabel(bundle(4, 75_000))).toBe('£750 · £187.50 each');
+  });
+
+  it('orders by bundle size, which is how a buyer compares them', () => {
+    const list = [bundle(8, 150_000), bundle(1, 25_000), bundle(3, 60_000)];
+    expect(sortBundles(list).map((b) => b.quantity)).toEqual([1, 3, 8]);
   });
 });

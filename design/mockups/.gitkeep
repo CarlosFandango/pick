@@ -1,0 +1,25 @@
+The mockups are not committed here.
+
+They live in the Claude Design project this design drop came from:
+
+    project: "UI mockups and scoping"
+    id:      ac18593f-81b1-4150-bf31-4f0e15863e26
+    url:     https://claude.ai/design/p/ac18593f-81b1-4150-bf31-4f0e15863e26
+
+    PICKsel Phase 1 - Golden Path.dc.html      S1.1 – S1.9
+    PICKsel Phase 2 - Auditors World.dc.html   S2.1 – S2.7
+    PICKsel Phase 3 - Clients World.dc.html    S3.1 – S3.6
+    PICKsel Phase 4 - Running the Network.dc.html
+    PICKsel Phase 5 - Onboarding.dc.html
+
+Claude Code reads them on demand with the claude-design MCP (`read_file`),
+which is the same source design/manifest.md is generated from.
+
+Why not committed: 110 KB of entity-escaped HTML copied through a chat
+context is a spec we build against, and a mangled or stale copy is worse
+than no local copy. Drop the real files in when there is a reason to —
+offline review, or diffing a new drop against the last one — and delete
+this file.
+
+This directory is kept so the paths in design/README.md and design/manifest.md
+resolve to something that explains itself.

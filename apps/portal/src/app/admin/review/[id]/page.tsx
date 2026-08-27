@@ -12,6 +12,7 @@ import {
 import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { AdminChrome } from '@/components/AdminChrome';
+import { BackLink } from '@/components/BackLink';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
@@ -75,7 +76,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       who={session.fullName}
       queuePosition={queueSize ? `REVIEW QUEUE · ${queueSize} HELD` : undefined}
     >
-      <div style={{ display: 'flex', gap: 24, padding: '24px 28px', alignItems: 'flex-start' }}>
+      <div style={{ padding: '24px 28px 0' }}>
+        <BackLink href="/admin" label="Ops home" />
+      </div>
+      <div
+        style={{ display: 'flex', gap: 24, padding: '16px 28px 24px', alignItems: 'flex-start' }}
+      >
         <section
           style={{
             flex: 1.5,

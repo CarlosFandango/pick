@@ -67,13 +67,17 @@ describe('the offer an auditor sees (S1.3)', () => {
       await arrangeOffers(db);
       const [offer] = await db
         .as(ids.auditor)
-        .query<{ travel_uplift_pence: number }>('select travel_uplift_pence from audit_offer');
+        .query<{ travel_uplift_minor_units: number }>(
+          'select travel_uplift_minor_units from audit_offer',
+        );
       // Read as postgres: the assertion is "the base fee is £100", not "an
       // auditor may call this function". The enumerated constants are internal
       // — they run inside security definer functions and are not granted out.
-      const [base] = await db.arrange<{ base: number }>('select base_audit_fee_pence() as base');
+      const [base] = await db.arrange<{ base: number }>(
+        'select base_audit_fee_minor_units() as base',
+      );
       expect(Number(base?.base)).toBe(10000);
-      expect(Number(offer?.travel_uplift_pence)).toBeGreaterThanOrEqual(0);
+      expect(Number(offer?.travel_uplift_minor_units)).toBeGreaterThanOrEqual(0);
     });
   });
 });
@@ -104,21 +108,21 @@ describe('accept_offer', () => {
         .as(ids.auditor)
         .query('select * from accept_offer($1)', [await offerIdFor(db, ids.auditor)]);
 
-      const items = await db.arrange<{ kind: string; amount_pence: number }>(
-        'select kind, amount_pence from audit_pay_item where audit_id = $1 order by kind',
+      const items = await db.arrange<{ kind: string; amount_minor_units: number }>(
+        'select kind, amount_minor_units from audit_pay_item where audit_id = $1 order by kind',
         [AUDIT],
       );
       // Recorded at acceptance so it cannot drift from what they were shown.
       expect(items).toEqual([
-        { kind: 'base', amount_pence: 10000 },
-        { kind: 'travel', amount_pence: 1500 },
+        { kind: 'base', amount_minor_units: 10000 },
+        { kind: 'travel', amount_minor_units: 1500 },
       ]);
 
-      const [audit] = await db.arrange<{ auditor_fee_pence: number }>(
-        'select auditor_fee_pence from audit where id = $1',
+      const [audit] = await db.arrange<{ auditor_fee_minor_units: number }>(
+        'select auditor_fee_minor_units from audit where id = $1',
         [AUDIT],
       );
-      expect(Number(audit?.auditor_fee_pence)).toBe(11500);
+      expect(Number(audit?.auditor_fee_minor_units)).toBe(11500);
     });
   });
 
@@ -233,6 +237,81 @@ describe('decline_offer', () => {
       await db.as(ids.auditor).query('select decline_offer($1)', [offer]);
       const message = await db.as(ids.auditor).expectRefused('select decline_offer($1)', [offer]);
       expect(message).toMatch(/already declined/i);
+    });
+  });
+});
+
+describe('the offer board an auditor actually reads', () => {
+  it('shows an auditor their own offers, with the audit behind them', async () => {
+    // The reason this function exists: audit_read allows auditor_id =
+    // auth.uid(), which is not true before acceptance, so a plain join returns
+    // nothing for exactly the rows the offers screen is for.
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const direct = await db.as(ids.auditor).query('select id from audit where id = $1', [AUDIT]);
+      expect(direct, 'the audit should NOT be directly readable yet').toHaveLength(0);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<{ audit_id: string; postcode_outward: string }>('select * from offer_board()');
+      const mine = board.filter((r) => r.audit_id === AUDIT);
+      expect(mine).toHaveLength(1);
+      expect(mine[0]?.postcode_outward).toBe('SW1A');
+    });
+  });
+
+  it("never shows one auditor another's offer", async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<{ offer_id: string }>('select offer_id from offer_board()');
+      const theirs = await offerIdFor(db, ids.otherAuditor);
+
+      expect(board.map((r) => r.offer_id)).not.toContain(theirs);
+    });
+  });
+
+  it('withholds the pitch detail, so declining reveals nothing', async () => {
+    // An auditor who turns a job down must not come away knowing where the
+    // team will be standing. The offer shows an area.
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const board = await db
+        .as(ids.auditor)
+        .query<Record<string, unknown>>('select * from offer_board()');
+      const columns = Object.keys(board[0] ?? {});
+
+      for (const leak of ['pitch_detail', 'site_name', 'campaign_name', 'postcode']) {
+        expect(columns, `offer_board leaks ${leak}`).not.toContain(leak);
+      }
+    });
+  });
+
+  it('quotes the pay the auditor will be shown before accepting', async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+
+      const [row] = await db
+        .as(ids.auditor)
+        .query<{ base_minor_units: number; travel_uplift_minor_units: number }>(
+          'select base_minor_units, travel_uplift_minor_units from offer_board() where audit_id = $1',
+          [AUDIT],
+        );
+
+      expect(Number(row?.base_minor_units)).toBe(10000);
+      expect(Number(row?.travel_uplift_minor_units)).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  it('shows a client nothing, whatever they ask it for', async () => {
+    await withDatabase(async (db) => {
+      await arrangeOffers(db);
+      const board = await db.as(ids.clientA).query('select * from offer_board()');
+      expect(board).toHaveLength(0);
     });
   });
 });

@@ -70,11 +70,24 @@ describe('enumerated sets are the same in core and in the schema', () => {
     ['complaint_subject', COMPLAINT_ROUTES.map((r) => r.subject)],
   ])('%s', async (enumName, expected) => {
     await withDatabase(async (db) => {
-      // Order matters for audit_moment — it is the sequence of a doorstep
-      // interaction, and scoring, prep and write-up all walk it. Comparing
-      // ordered lists everywhere costs nothing and catches a reordering that
-      // would silently change what `momentOrder` means.
-      expect(await labels(db, enumName)).toEqual([...expected]);
+      // Compared as sets. Order is the domain for exactly one of these —
+      // audit_moment is the sequence of a doorstep interaction and momentOrder
+      // walks it — and that is asserted separately below. Everywhere else PG
+      // order is declaration order plus whatever `alter type ... add value`
+      // appended later, which is not a fact about the domain: credit_reason
+      // gained `release` and `consumption` at the end of the type while core
+      // lists them in lifecycle order, and comparing sequences called that a
+      // drift when nothing had drifted.
+      const inSchema = await labels(db, enumName);
+      expect([...inSchema].sort()).toEqual([...expected].sort());
+    });
+  });
+
+  it('audit_moment is in the order the shift happens, in both places', async () => {
+    await withDatabase(async (db) => {
+      // The one enum whose order is a domain fact: prep, the session stepper
+      // and the write-up all walk it, and momentOrder indexes into core's copy.
+      expect(await labels(db, 'audit_moment')).toEqual([...AUDIT_MOMENTS]);
     });
   });
 
@@ -120,6 +133,7 @@ describe('enumerated sets are the same in core and in the schema', () => {
         'audit_type',
         'auditor_approval_status',
         'check_outcome',
+        'client_response',
         'complaint_status',
         'complaint_subject',
         'compliance_category',
@@ -134,6 +148,15 @@ describe('enumerated sets are the same in core and in the schema', () => {
         'payout_line_status',
         'payout_run_status',
         'residency_zone',
+        'review_gate_mode',
+        'review_gate_scope',
+        'review_gate_trigger',
+        'review_timeout_action',
+        'risk_severity',
+        'risk_source',
+        'risk_status',
+        'risk_subject',
+        'risk_type',
         'shift_payment_method',
         'user_status',
       ];

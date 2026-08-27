@@ -10,6 +10,9 @@ import { defineConfig, devices } from '@playwright/test';
  * They need the local Supabase stack (`pnpm db:start`); the seeded accounts in
  * packages/db/supabase/seed.sql are what they sign in as.
  */
+/** Deliberately not 3000: `pnpm dev` lives there and the two must not collide. */
+const PORT = 3100;
+
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
@@ -19,7 +22,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   timeout: 30_000,
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3000',
+    baseURL: process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -27,9 +30,15 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: 'pnpm dev',
-        url: 'http://127.0.0.1:3000/sign-in',
-        reuseExistingServer: true,
+        command: `next dev --port ${PORT}`,
+        url: `http://127.0.0.1:${PORT}/sign-in`,
+        // Never reuse. A `pnpm dev` left running goes stale — it keeps serving
+        // routes from before a migration or a rename and answers 404, which
+        // fails Playwright's readiness check. The run then dies after two
+        // minutes on "Timed out waiting from config.webServer", which reads as
+        // a broken app rather than a stale process. Its own port and its own
+        // server costs one cold start and removes the whole class.
+        reuseExistingServer: false,
         timeout: 120_000,
       },
 });

@@ -1,6 +1,52 @@
-import { poundsFromPence } from './money';
+import { type CurrencyCode, DEFAULT_CURRENCY, formatMoney } from './money';
 
-export type CreditReason = 'purchase' | 'booking' | 'refund' | 'adjustment' | 'expiry';
+/**
+ * A quantity of credits at a price. One credit books one audit.
+ *
+ * Amount and currency travel together, because an amount on its own is not a
+ * price. The list lives in `credit_bundle` and is read, not hardcoded — a
+ * price that changed in code would rewrite the history of every past purchase.
+ * What was actually charged is on the ledger row.
+ */
+export interface CreditBundle {
+  quantity: number;
+  priceMinorUnits: number;
+  currency: CurrencyCode;
+}
+
+/**
+ * What each credit in a bundle works out at.
+ *
+ * The reason credits are not fungible: a charity holding one single credit and
+ * a bundle of four is holding credits worth different amounts, and revenue per
+ * audit is unknowable unless each one remembers what it cost.
+ */
+export function effectiveUnitPrice(bundle: CreditBundle): number {
+  return Math.round(bundle.priceMinorUnits / bundle.quantity);
+}
+
+/** "£250 · £250.00 each" — a bundle as a charity reads it. */
+export function bundleLabel(bundle: CreditBundle): string {
+  const total = formatMoney(bundle.priceMinorUnits, bundle.currency);
+  const each = formatMoney(effectiveUnitPrice(bundle), bundle.currency);
+  return bundle.quantity === 1 ? total : `${total} · ${each} each`;
+}
+
+/** Cheapest first by unit price, which is the order a buyer compares them in. */
+export function sortBundles(bundles: readonly CreditBundle[]): CreditBundle[] {
+  return [...bundles].sort((a, b) => a.quantity - b.quantity);
+}
+
+export const DEFAULT_BUNDLE_CURRENCY: CurrencyCode = DEFAULT_CURRENCY;
+
+export type CreditReason =
+  | 'purchase'
+  | 'reservation'
+  | 'consumption'
+  | 'release'
+  | 'refund'
+  | 'adjustment'
+  | 'expiry';
 
 export interface CreditEntry {
   id: string;
@@ -8,15 +54,25 @@ export interface CreditEntry {
   reason: CreditReason;
   occurredAt: Date;
   auditReference?: string | null;
-  unitPricePence?: number | null;
+  unitPriceMinorUnits?: number | null;
   note?: string | null;
 }
 
+/**
+ * In the charity's language, not the ledger's.
+ *
+ * A reservation and a consumption are two different facts about the same
+ * credit: it is set aside when the audit is booked and actually spent when the
+ * audit reaches them. A charity reading this should be able to see which of
+ * their credits are committed and which have been used.
+ */
 export const CREDIT_REASON_LABELS: Record<CreditReason, string> = {
   purchase: 'Credits purchased',
-  booking: 'Audit booked',
-  refund: 'Credit returned',
-  adjustment: 'Adjustment',
+  reservation: 'Set aside for an audit',
+  consumption: 'Used — audit delivered',
+  release: 'Returned — audit not delivered',
+  refund: 'Refunded',
+  adjustment: 'Adjustment by PICK',
   expiry: 'Credits expired',
 };
 
@@ -74,6 +130,6 @@ export function deltaLabel(delta: number): string {
 
 /** "£700" for a purchase of 4 at £175. Nothing for a movement with no money. */
 export function valueLabel(entry: CreditEntry): string {
-  if (!entry.unitPricePence || entry.reason !== 'purchase') return '';
-  return poundsFromPence(entry.unitPricePence * entry.delta);
+  if (!entry.unitPriceMinorUnits || entry.reason !== 'purchase') return '';
+  return formatMoney(entry.unitPriceMinorUnits * entry.delta);
 }

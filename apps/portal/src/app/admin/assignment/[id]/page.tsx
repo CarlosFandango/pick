@@ -2,6 +2,7 @@ import { AUDIT_TYPE_LABELS } from '@picksel/core';
 import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { AdminChrome } from '@/components/AdminChrome';
+import { BackLink } from '@/components/BackLink';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, mono } from '@/lib/theme';
@@ -40,6 +41,8 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
       queuePosition={`ASSIGNMENT · ${audit.reference} · ${audit.postcode}`}
     >
       <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <BackLink href="/admin" label="Ops home" />
+
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
           <h1
             style={{

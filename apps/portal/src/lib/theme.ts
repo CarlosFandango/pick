@@ -51,3 +51,54 @@ export const pillButton = {
   cursor: 'pointer',
   fontFamily: sans,
 } as const;
+
+/**
+ * Visible to a screen reader, invisible on screen.
+ *
+ * For state a sighted reader gets from shape or colour and an assistive reader
+ * would otherwise lose entirely. Colour never carries state on its own.
+ */
+export const srOnly = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const;
+
+/** A button that reads as a link: secondary actions the design does not pill. */
+export const textButton = {
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  fontFamily: sans,
+  fontSize: fontSize.xs,
+  fontWeight: fontWeight.semibold,
+  color: color.link,
+  cursor: 'pointer',
+} as const;
+
+/**
+ * A page heading. Seven screens spelled these three properties out inline.
+ *
+ * Margin is deliberately not set: the parent's flex gap owns spacing, so a
+ * heading does not have to know what follows it.
+ */
+export const pageTitle = {
+  fontWeight: fontWeight.extrabold,
+  fontSize: fontSize.xl,
+  letterSpacing: '-0.03em',
+  margin: 0,
+} as const;
+
+/** The admin shell supplies no padding, so every ops page repeats this. */
+export const adminPage = {
+  padding: '22px 28px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+} as const;

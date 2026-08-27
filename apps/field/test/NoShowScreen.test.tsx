@@ -1,11 +1,23 @@
-import { startSession } from '@picksel/core';
+import { type AuditStage, startStagedSession } from '@picksel/core';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { NoShowScreen, WAIT_MINUTES, waitRemaining } from '../src/components/NoShowScreen';
 
 const START = new Date(2026, 2, 3, 11, 0);
-const session = startSession(START);
+const STAGES: AuditStage[] = [
+  {
+    key: 'arrival',
+    label: 'Arrival and setup',
+    sequence: 1,
+    captureMode: 'observation',
+    permissions: { tallies: true, notes: true, markers: true },
+    moment: null,
+    durationHintMinutes: null,
+  },
+];
+
+const session = startStagedSession(STAGES, START);
 const noop = () => undefined;
 
 const at = (minutes: number) => new Date(START.getTime() + minutes * 60_000);

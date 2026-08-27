@@ -34,44 +34,35 @@ alter default privileges in schema public revoke all on sequences from anon;
 alter default privileges in schema public revoke all on functions from anon;
 
 -- functions -----------------------------------------------------------------
--- Take the whole function surface back and hand it out again by name.
+-- Two defaults were handing out EXECUTE that nobody wrote down: Postgres grants
+-- it to PUBLIC on every new function, and the platform's default privileges
+-- grant it to `authenticated` as well. Between them, every internal helper was
+-- callable by every signed-in user.
 --
--- Two separate defaults were feeding it: Postgres grants EXECUTE on a new
--- function to PUBLIC, and the platform's default privileges were granting it
--- to `authenticated` as well. Between them, every internal helper was callable
--- by every signed-in user — the enumerated constants, and `auditor_code_for`,
--- which exists to make an auditor unidentifiable. None of them is called from
--- outside the database: they run inside `security definer` functions, which
--- execute as the owner and do not consult the caller's grants at all.
-revoke execute on all functions in schema public from public, anon, authenticated;
+-- PUBLIC and anon lose it wholesale — no function in this schema is meant for
+-- either. `authenticated` keeps every grant a migration made deliberately, and
+-- loses the seven it only ever had by inheritance. Those seven were enumerated
+-- from the database rather than guessed: they are the functions holding an
+-- EXECUTE that no `grant` statement anywhere in this directory asks for.
+revoke execute on all functions in schema public from public, anon;
 
 alter default privileges in schema public revoke execute on functions from public;
 alter default privileges in schema public revoke all on functions from anon, authenticated;
 
--- The callable surface, stated once. A new RPC is not reachable until it
--- appears here, which is the intended cost: forgetting the grant now fails
--- loudly for its caller instead of quietly working for everyone.
-grant execute on function public.book_audit(uuid, public.audit_type, public.shift_payment_method, text, date, date, text, text, boolean) to authenticated;
-grant execute on function public.eligible_auditors(uuid) to authenticated;
-grant execute on function public.offer_audit(uuid, interval) to authenticated;
-grant execute on function public.assignment_console(uuid) to authenticated;
-grant execute on function public.selectable_auditors(uuid, text, public.audit_type, boolean) to authenticated;
-grant execute on function public.prefer_auditor(uuid, text) to authenticated;
-grant execute on function public.accept_offer(uuid) to authenticated;
-grant execute on function public.decline_offer(uuid, text) to authenticated;
-grant execute on function public.submit_write_up(uuid, jsonb) to authenticated;
-grant execute on function public.return_write_up(uuid, public.audit_moment[], text) to authenticated;
-grant execute on function public.review_gate_reason(uuid) to authenticated;
-grant execute on function public.release_audit(uuid) to authenticated;
-grant execute on function public.void_audit(uuid, text) to authenticated;
-grant execute on function public.report_no_team_present(uuid, text) to authenticated;
-grant execute on function public.ops_queue() to authenticated;
-grant execute on function public.ops_counters() to authenticated;
+-- The enumerated constants. Every one runs inside a `security definer`
+-- function, which executes as its owner and does not consult the caller's
+-- grants, so none of them needs to be reachable from outside the database.
+revoke execute on function public.base_audit_fee_minor_units() from authenticated;
+revoke execute on function public.booking_lead_days() from authenticated;
+revoke execute on function public.default_travel_uplift_minor_units() from authenticated;
+revoke execute on function public.exposure_window_days() from authenticated;
+revoke execute on function public.review_gate_audits() from authenticated;
+revoke execute on function public.write_up_due_hours() from authenticated;
 
--- Not an RPC, and not an oversight: uuid_generate_v7 is a column default on
--- nearly every table, and a column default is evaluated as the role doing the
--- INSERT. Without this, inserting a complaint or a field event fails.
-grant execute on function public.uuid_generate_v7() to authenticated;
+-- And the one whose whole job is to make an auditor unidentifiable. Handing a
+-- client a function that turns an auditor id into a code invites feeding it
+-- ids; `audit_auditor_code` takes an audit instead and checks who is asking.
+revoke execute on function public.auditor_code_for(uuid, uuid) from authenticated;
 
 -- schema app ----------------------------------------------------------------
 -- Pin search_path on every helper, not just the ones that are security

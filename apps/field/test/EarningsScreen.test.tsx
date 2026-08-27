@@ -10,8 +10,8 @@ const line = (over: Partial<EarningLine> = {}): EarningLine => {
     auditId: `a${seq}`,
     title: 'Street · SE15',
     dateLabel: 'Tue 3 Mar',
-    basePence: 10000,
-    travelPence: 1500,
+    baseMinorUnits: 10000,
+    travelMinorUnits: 1500,
     state: 'pending',
     ...over,
   };
@@ -21,7 +21,9 @@ const NEXT_RUN = new Date('2026-03-06T00:00:00Z');
 
 describe('S2.6 earnings', () => {
   it('leads with what is owed and when it arrives', () => {
-    render(<EarningsScreen lines={[line(), line({ travelPence: 2200 })]} nextRun={NEXT_RUN} />);
+    render(
+      <EarningsScreen lines={[line(), line({ travelMinorUnits: 2200 })]} nextRun={NEXT_RUN} />,
+    );
 
     expect(screen.getByText('PENDING — NEXT RUN FRI 6 MAR')).toBeInTheDocument();
     expect(screen.getByLabelText('Pending £237')).toBeInTheDocument();
@@ -36,14 +38,14 @@ describe('S2.6 earnings', () => {
   });
 
   it('leaves travel off a line that had none', () => {
-    render(<EarningsScreen lines={[line({ travelPence: 0 })]} nextRun={NEXT_RUN} />);
+    render(<EarningsScreen lines={[line({ travelMinorUnits: 0 })]} nextRun={NEXT_RUN} />);
     expect(screen.getByText('Tue 3 Mar · £100 audit')).toBeInTheDocument();
   });
 
   it('separates paid from pending', () => {
     render(
       <EarningsScreen
-        lines={[line(), line({ state: 'paid', travelPence: 0 })]}
+        lines={[line(), line({ state: 'paid', travelMinorUnits: 0 })]}
         nextRun={NEXT_RUN}
       />,
     );

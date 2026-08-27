@@ -1,20 +1,20 @@
-import { poundsFromPence } from './money';
+import { formatMoney } from './money';
 
 export interface EarningLine {
   auditId: string;
   title: string;
   dateLabel: string;
-  basePence: number;
-  travelPence: number;
+  baseMinorUnits: number;
+  travelMinorUnits: number;
   state: 'pending' | 'paid';
   payoutReference?: string | null;
 }
 
 export interface EarningsSummary {
-  pendingPence: number;
+  pendingMinorUnits: number;
   pendingCount: number;
-  pendingTravelPence: number;
-  paidPence: number;
+  pendingTravelMinorUnits: number;
+  paidMinorUnits: number;
 }
 
 export function summariseEarnings(lines: readonly EarningLine[]): EarningsSummary {
@@ -22,13 +22,13 @@ export function summariseEarnings(lines: readonly EarningLine[]): EarningsSummar
   const paid = lines.filter((l) => l.state === 'paid');
 
   const total = (rows: readonly EarningLine[]) =>
-    rows.reduce((sum, row) => sum + row.basePence + row.travelPence, 0);
+    rows.reduce((sum, row) => sum + row.baseMinorUnits + row.travelMinorUnits, 0);
 
   return {
-    pendingPence: total(pending),
+    pendingMinorUnits: total(pending),
     pendingCount: pending.length,
-    pendingTravelPence: pending.reduce((sum, row) => sum + row.travelPence, 0),
-    paidPence: total(paid),
+    pendingTravelMinorUnits: pending.reduce((sum, row) => sum + row.travelMinorUnits, 0),
+    paidMinorUnits: total(paid),
   };
 }
 
@@ -41,8 +41,8 @@ export function summariseEarnings(lines: readonly EarningLine[]): EarningsSummar
 export function pendingLine(summary: EarningsSummary): string {
   const audits = summary.pendingCount === 1 ? 'audit' : 'audits';
   const parts = [`${summary.pendingCount} ${audits}`];
-  if (summary.pendingTravelPence > 0) {
-    parts.push(`incl. ${poundsFromPence(summary.pendingTravelPence)} travel uplift`);
+  if (summary.pendingTravelMinorUnits > 0) {
+    parts.push(`incl. ${formatMoney(summary.pendingTravelMinorUnits)} travel uplift`);
   }
   return parts.join(' · ');
 }
