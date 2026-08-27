@@ -41,7 +41,7 @@ like before you open it.
 | Share code between apps | `packages/core` | a shared component package — RN cannot render web components |
 | Colour, spacing, type size | a role or scale from `@picksel/tokens` | a hex literal, a magic number |
 | Set text size or weight | `webTextStyle(role)` / `text(role)` | `fontSize:` in a component |
-| Set a font family | `fontStack`, via the text role | naming a font in a component |
+| Set a font family | `sans` / `mono` from `lib/theme` (portal) or `fontStack` (field) | naming a font in a component, or naming one nothing loads |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
 | Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
 | Link between portal screens | `next/link`, to a route with a `page.tsx` | a bare `<a href>`, or a route the design has not got |
@@ -239,6 +239,26 @@ lint, typecheck or unit tests.
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
 
+### 2026-08-26 — The portal serves the brand faces; the field app does not yet
+`design/tokens/tokens.ts` names Archivo and IBM Plex Mono, and BUILD-GUIDE says
+the drop wins where it disagrees with something invented here. The portal was
+naming both in CSS and loading neither, so both silently fell back — while
+`layout.tsx` set the body from `fontStack` and got a different answer. Two
+answers to "what font is this", one of them fictional.
+
+Both are now served by `next/font/local` from committed woff2 files, bound to
+CSS variables that `lib/theme.ts` composes with the shared fallback stack.
+*Rejected:* `next/font/google`, which downloads at build time and so makes every
+build depend on a CDN being reachable — a build that fails because Google Fonts
+is unavailable is a bad failure, and it is not reproducible from a checkout.
+80 KB, latin only, OFL, licences committed beside the files.
+
+The field app still renders the system stack: wiring `expo-font` is real work
+and it has one scaffold route today. That divergence is named in
+`fonts/README.md` and in the typography module rather than left to be
+discovered. `theme.test.ts` pins the two family names to the drop, so a new drop
+cannot change the brand face and leave the loader behind.
+
 ### 2026-08-26 — S3.4 decided: a charity may recognise an auditor, within its own audits
 One code, `auditor_code_for(auditor, charity)`, on the report and in the S3.2
 picker alike. Being able to ask for the auditor who did well last time is a real
@@ -370,13 +390,14 @@ in expo-sqlite and the whole React Native runtime, which Vitest cannot parse.
 parse failure would still be there.
 
 ### 2026-08-25 — System font stack, split per platform
-`fontStack` gives each family a `web` CSS list plus single `ios`/`android` names,
-because React Native silently falls back to the default face if handed a
-comma-separated stack. Text is set through semantic roles (`title`, `body`,
-`code`), so neither app names a size. *Rejected:* bundling Inter — identical
-rendering everywhere, at the cost of font files in the binary, `expo-font`
-loading, a flash of unstyled text on the web and a licence to track. Revisit when
-brand needs a specific face.
+**Superseded on the web by the 2026-08-26 entry above; still current for the
+field app.** `fontStack` gives each family a `web` CSS list plus single
+`ios`/`android` names, because React Native silently falls back to the default
+face if handed a comma-separated stack. Text is set through semantic roles
+(`title`, `body`, `code`), so neither app names a size. *Rejected:* bundling
+Inter — identical rendering everywhere, at the cost of font files in the binary,
+`expo-font` loading, a flash of unstyled text on the web and a licence to track.
+Revisit when brand needs a specific face.
 
 ### 2026-08-25 — Shared design tokens, platform-specific components
 `packages/tokens` holds colour roles, spacing, type scale and touch targets with

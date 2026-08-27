@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { color } from '../src/brand';
+import { color, font } from '../src/brand';
 import { themeToCssText, themeToCssVariables } from '../src/css';
 import { space, touchTarget } from '../src/primitives';
 import { pickselDark, pickselLight, type Theme, type ThemeColors, themes } from '../src/theme';
+import { fontStack } from '../src/typography';
 
 const ALL_THEMES: Theme[] = [pickselLight, pickselDark];
 
@@ -153,5 +154,24 @@ describe('the design drop is the only source of colour', () => {
     // A theme could satisfy the test above while being entirely one colour.
     const distinct = new Set(Object.values(pickselLight.colors));
     expect(distinct.size).toBeGreaterThan(8);
+  });
+});
+
+describe('the brand faces', () => {
+  it('names the two the design drop specifies', () => {
+    // apps/portal/src/app/layout.tsx serves these two by name, from committed
+    // woff2 files. If the drop ever names different faces, that loader has to
+    // change with it — otherwise the portal is back to declaring one family and
+    // rendering another, which is what this test exists to stop.
+    expect(font.sans).toBe('Archivo');
+    expect(font.mono).toBe('IBM Plex Mono');
+  });
+
+  it('keeps a real fallback behind each of them', () => {
+    // The field app has no webfont loader, so it renders these. A stack that is
+    // only the brand face degrades to the browser default rather than to
+    // something chosen.
+    expect(fontStack.sans.web).toMatch(/system-ui/);
+    expect(fontStack.mono.web).toMatch(/ui-monospace|monospace/);
   });
 });

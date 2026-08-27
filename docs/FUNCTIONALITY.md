@@ -91,7 +91,7 @@ them, which is what **Component** above means.
 | Sync push | Built | `field/src/sync/outbox.ts` | 10 tests: batching, failure isolation, payload parsing, idempotence |
 | Supabase clients (web/server/native) | Built | `packages/api` | admin client is server-only |
 | Design tokens + themes | Built | `packages/tokens` | light/dark, WCAG AA contrast |
-| Typography scale + fonts | Built | `packages/tokens/src/typography.ts` | 5 semantic roles; web and native verified identical by test |
+| Typography scale + fonts | Built | `packages/tokens/src/typography.ts` | 5 semantic roles; portal serves Archivo + IBM Plex Mono, field app still on the system stack |
 | Rebranding via theme object | Built | `packages/tokens/src/theme.ts` | roles reference the drop; a copied hex fails `check:tokens` |
 | Portal theming | Built | `portal/src/app/layout.tsx` | CSS custom properties generated from tokens |
 | Field theming | Built | `field/src/theme.ts` | same tokens as RN styles, follows system scheme |

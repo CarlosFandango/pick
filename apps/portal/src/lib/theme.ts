@@ -1,4 +1,4 @@
-import { color, font, radius } from '@picksel/tokens';
+import { color, font, fontStack, radius } from '@picksel/tokens';
 
 /**
  * Web styling helpers over the PICK tokens.
@@ -8,18 +8,27 @@ import { color, font, radius } from '@picksel/tokens';
  */
 export const t = { color, font, radius };
 
+/**
+ * The brand faces, then the shared fallback stack.
+ *
+ * The CSS variables are bound by next/font in `app/layout.tsx`, which is what
+ * actually serves Archivo and IBM Plex Mono. These used to name both families
+ * directly and nothing loaded either, so both silently fell back — while
+ * `layout.tsx` set the body from `fontStack` and got a different answer. One
+ * source now: the variable if the face loaded, the shared stack if it did not.
+ */
+export const sans = `var(--font-sans), ${fontStack.sans.web}`;
+export const mono = `var(--font-mono), ${fontStack.mono.web}`;
+
 /** Mono, caps, letterspaced — the design's register for metadata labels. */
 export const metaLabel = {
-  fontFamily: `'${font.mono}', ui-monospace, monospace`,
+  fontFamily: mono,
   fontWeight: font.monoWeight,
   fontSize: 10,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: color.muted,
 } as const;
-
-export const sans = `'${font.sans}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`;
-export const mono = `'${font.mono}', ui-monospace, SFMono-Regular, Menlo, monospace`;
 
 /** 1px oat hairline. The design has no shadows and no gradients. */
 export const hairline = `1px solid ${color.oat}`;
