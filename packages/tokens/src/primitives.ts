@@ -1,3 +1,5 @@
+import { font } from './brand';
+
 /**
  * Primitive scales. Values only — no meaning attached yet.
  *
@@ -39,11 +41,19 @@ export const fontSize = {
   xxl: 32,
 } as const;
 
+/**
+ * `bold` and `extrabold` are the brand's own two — the design drop calls them
+ * headingWeight and displayWeight — rather than numbers chosen here. Components
+ * were reaching past this scale for a literal 800 fourteen times, which is the
+ * weight the drop specifies for display type and the one weight this scale did
+ * not have.
+ */
 export const fontWeight = {
   regular: '400',
   medium: '500',
   semibold: '600',
-  bold: '700',
+  bold: font.headingWeight,
+  extrabold: font.displayWeight,
 } as const;
 
 export const lineHeight = {

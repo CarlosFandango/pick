@@ -1,4 +1,4 @@
-import { color } from '@picksel/tokens';
+import { color, fontSize, fontWeight } from '@picksel/tokens';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { hairline, mono, sans } from '@/lib/theme';
@@ -42,8 +42,23 @@ export function Chrome({
           borderBottom: hairline,
         }}
       >
-        <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.1em' }}>PICKSEL</div>
-        <nav style={{ display: 'flex', gap: 22, fontSize: 13, fontWeight: 600 }}>
+        <div
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.md,
+            letterSpacing: '0.1em',
+          }}
+        >
+          PICKSEL
+        </div>
+        <nav
+          style={{
+            display: 'flex',
+            gap: 22,
+            fontSize: fontSize.sm,
+            fontWeight: fontWeight.semibold,
+          }}
+        >
           {tabs.map((tab) => (
             <Link
               key={tab.key}
@@ -64,14 +79,14 @@ export function Chrome({
           <span
             style={{
               fontFamily: mono,
-              fontSize: 10.5,
+              fontSize: fontSize.xs,
               letterSpacing: '0.1em',
               color: color.bodyBrown,
             }}
           >
             CREDITS <b style={{ color: color.ink }}>{credits}</b>
           </span>
-          <span style={{ fontSize: 12.5, color: color.muted }}>{organisationName}</span>
+          <span style={{ fontSize: fontSize.xs, color: color.muted }}>{organisationName}</span>
         </div>
       </header>
       {children}

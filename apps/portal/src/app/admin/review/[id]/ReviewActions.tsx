@@ -1,7 +1,7 @@
 'use client';
 
 import { AUDIT_MOMENTS, MOMENT_LABELS } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
 import { type ReviewState, releaseAudit, returnToAuditor, voidAudit } from './actions';
@@ -43,7 +43,7 @@ export function ReviewActions({
           }}
         >
           <div style={{ ...metaLabel, marginBottom: 6 }}>Why it&rsquo;s held</div>
-          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: color.bodyBrown }}>
+          <p style={{ margin: 0, fontSize: fontSize.sm, lineHeight: 1.55, color: color.bodyBrown }}>
             {gateReason}
           </p>
         </div>
@@ -55,7 +55,7 @@ export function ReviewActions({
           border: hairline,
           borderRadius: radius.tile,
           padding: 16,
-          fontSize: 12.5,
+          fontSize: fontSize.xs,
           lineHeight: 1.7,
           color: color.bodyBrown,
         }}
@@ -66,7 +66,7 @@ export function ReviewActions({
       </div>
 
       {error ? (
-        <p role="alert" style={{ margin: 0, fontSize: 13, color: color.creativeText }}>
+        <p role="alert" style={{ margin: 0, fontSize: fontSize.sm, color: color.creativeText }}>
           {error}
         </p>
       ) : null}
@@ -100,7 +100,7 @@ export function ReviewActions({
           <input type="hidden" name="auditId" value={auditId} />
           <div style={metaLabel}>Which moments need rework?</div>
           {AUDIT_MOMENTS.map((moment) => (
-            <label key={moment} style={{ display: 'flex', gap: 8, fontSize: 13 }}>
+            <label key={moment} style={{ display: 'flex', gap: 8, fontSize: fontSize.sm }}>
               <input type="checkbox" name="moment" value={moment} />
               {MOMENT_LABELS[moment]}
             </label>
@@ -117,7 +117,7 @@ export function ReviewActions({
           <input type="hidden" name="auditId" value={auditId} />
           <div style={metaLabel}>Why is this audit unusable?</div>
           <textarea name="reason" required placeholder="Reason" style={inputStyle} />
-          <p style={{ margin: 0, fontSize: 12, color: color.muted }}>
+          <p style={{ margin: 0, fontSize: fontSize.xs, color: color.muted }}>
             The client&rsquo;s credit is returned automatically.
           </p>
           <button type="submit" style={{ ...pillButton, background: color.creativeText }}>
@@ -135,8 +135,8 @@ const linkButton = (colour: string) =>
     border: 'none',
     borderBottom: `1.5px solid ${colour}`,
     color: colour,
-    fontWeight: 600,
-    fontSize: 13,
+    fontWeight: fontWeight.semibold,
+    fontSize: fontSize.sm,
     padding: '0 0 2px',
     cursor: 'pointer',
     fontFamily: sans,
@@ -156,7 +156,7 @@ const inputStyle = {
   border: hairline,
   borderRadius: radius.tile,
   padding: 10,
-  fontSize: 13,
+  fontSize: fontSize.sm,
   fontFamily: sans,
   minHeight: 60,
 } as const;

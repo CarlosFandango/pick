@@ -8,7 +8,7 @@ import {
   timeLeftLabel,
   upliftLabel,
 } from '@picksel/core';
-import { color, radius, space, touchTarget } from '@picksel/tokens';
+import { color, fontSize, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -43,7 +43,7 @@ export function OffersScreen({
       <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 24, color: color.ink }}
+          style={{ ...text('display', fontSize.xl), color: color.ink }}
         >
           Offers
         </Text>
@@ -92,7 +92,10 @@ export function OffersScreen({
                   }}
                 >
                   <Text
-                    style={{ ...text('caption'), fontSize: 9.5, color: chip.ink ?? color.muted }}
+                    style={{
+                      ...text('caption', fontSize.xs),
+                      color: chip.ink ?? color.muted,
+                    }}
                   >
                     {chip.label}
                   </Text>
@@ -122,22 +125,36 @@ export function OffersScreen({
               </Text>
 
               {filled ? (
-                <Text style={{ ...text('body'), fontSize: 12.5, color: color.muted, marginTop: 3 }}>
+                <Text
+                  style={{
+                    ...text('body', fontSize.xs),
+                    color: color.muted,
+                    marginTop: 3,
+                  }}
+                >
                   Accepted by another auditor. No action needed.
                 </Text>
               ) : (
                 <>
                   <Text
-                    style={{ ...text('body'), fontSize: 13, color: color.bodyBrown, marginTop: 3 }}
+                    style={{
+                      ...text('body', fontSize.sm),
+                      color: color.bodyBrown,
+                      marginTop: 3,
+                    }}
                   >
                     {offer.windowLabel} · {offer.paymentMethodLabel}
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
-                    <Text style={{ ...text('display'), fontSize: 20, color: color.ink }}>
+                    <Text style={{ ...text('display', fontSize.lg), color: color.ink }}>
                       {poundsFromPence(offerTotalPence(offer))}
                     </Text>
                     <Text
-                      style={{ ...text('body'), fontSize: 12, color: color.muted, marginLeft: 8 }}
+                      style={{
+                        ...text('body', fontSize.xs),
+                        color: color.muted,
+                        marginLeft: 8,
+                      }}
                     >
                       {upliftLabel(offer)}
                     </Text>

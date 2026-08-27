@@ -6,7 +6,7 @@ import {
   type PrepCard,
   type PrepPlan,
 } from '@picksel/core';
-import { color, radius, space } from '@picksel/tokens';
+import { color, fontSize, radius, space } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -37,7 +37,7 @@ export function PrepScreen({
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm, marginTop: 8 }}>
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 22, color: color.ink }}
+          style={{ ...text('display', fontSize.lg), color: color.ink }}
         >
           Know the shift
         </Text>
@@ -96,7 +96,7 @@ function MomentRow({
         <Text style={{ ...text('caption'), color: color.muted, width: 20 }}>
           {String(index).padStart(2, '0')}
         </Text>
-        <Text style={{ ...text('title'), fontSize: 14, color: color.ink }}>
+        <Text style={{ ...text('title', fontSize.sm), color: color.ink }}>
           {MOMENT_LABELS[progress.moment]}
         </Text>
         <Text
@@ -116,7 +116,7 @@ function MomentRow({
           <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.2 }}>
             CARD {cardPosition(progress, card)} OF {progress.total}
           </Text>
-          <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>{card.prompt}</Text>
+          <Text style={{ ...text('title', fontSize.md), color: color.ink }}>{card.prompt}</Text>
 
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
             <Pressable

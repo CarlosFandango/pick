@@ -7,7 +7,7 @@ import {
   MINIMUM_WINDOW_DAYS,
   SHIFT_PAYMENT_LABELS,
 } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
 import { type BookingState, bookAudit } from './actions';
@@ -39,7 +39,7 @@ function Tile({
         borderRadius: radius.tile,
         padding: selected ? 11 : 12,
         fontWeight: selected ? 700 : 600,
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: selected ? color.ink : color.bodyBrown,
         fontFamily: sans,
         textAlign: 'left',
@@ -66,7 +66,7 @@ const inputStyle = {
   background: color.paper,
   borderRadius: radius.tile,
   padding: '11px 14px',
-  fontSize: 13,
+  fontSize: fontSize.sm,
   fontFamily: sans,
   color: color.ink,
 } as const;
@@ -91,7 +91,14 @@ export function BookingForm({ credits }: { credits: number }) {
         maxWidth: 640,
       }}
     >
-      <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: 0 }}>
+      <h1
+        style={{
+          fontWeight: fontWeight.extrabold,
+          fontSize: fontSize.xl,
+          letterSpacing: '-0.03em',
+          margin: 0,
+        }}
+      >
         Book an audit
       </h1>
 
@@ -124,7 +131,7 @@ export function BookingForm({ credits }: { credits: number }) {
             />
           ))}
         </div>
-        <div style={{ fontSize: 11.5, color: color.muted, marginTop: 6 }}>
+        <div style={{ fontSize: fontSize.xs, color: color.muted, marginTop: 6 }}>
           Sets the checklist variant the auditor uses.
         </div>
       </div>
@@ -145,10 +152,12 @@ export function BookingForm({ credits }: { credits: number }) {
         >
           <input type="checkbox" name="requiresAv" style={{ width: 18, height: 18 }} />
           <span>
-            <span style={{ display: 'block', fontWeight: 700, fontSize: 13.5 }}>
+            <span style={{ display: 'block', fontWeight: fontWeight.bold, fontSize: fontSize.sm }}>
               Require A/V where lawful
             </span>
-            <span style={{ display: 'block', fontSize: 12, color: color.muted, marginTop: 2 }}>
+            <span
+              style={{ display: 'block', fontSize: fontSize.xs, color: color.muted, marginTop: 2 }}
+            >
               Only auditors with A/V capability are eligible — expect a smaller pool and possibly a
               later date.
             </span>
@@ -175,7 +184,7 @@ export function BookingForm({ credits }: { credits: number }) {
             </span>
             <input type="date" name="windowEndOn" required min={earliest} style={inputStyle} />
           </div>
-          <div style={{ fontSize: 11.5, color: color.muted, marginTop: 6 }}>
+          <div style={{ fontSize: fontSize.xs, color: color.muted, marginTop: 6 }}>
             At least {MINIMUM_WINDOW_DAYS} days, starting {BOOKING_LEAD_DAYS}+ days from today — so
             an auditor can be matched without revealing the shift date.
           </div>
@@ -187,7 +196,7 @@ export function BookingForm({ credits }: { credits: number }) {
           role="alert"
           style={{
             margin: 0,
-            fontSize: 13,
+            fontSize: fontSize.sm,
             color: color.creativeText,
             border: `1px solid ${color.creativeText}`,
             borderRadius: radius.tile,
@@ -209,7 +218,7 @@ export function BookingForm({ credits }: { credits: number }) {
           gap: 18,
         }}
       >
-        <div style={{ fontSize: 13, color: color.bodyBrown }}>
+        <div style={{ fontSize: fontSize.sm, color: color.bodyBrown }}>
           {noCredits ? (
             'No credits available. Top up before booking.'
           ) : (

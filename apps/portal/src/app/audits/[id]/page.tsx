@@ -5,7 +5,7 @@ import {
   parseAuditStatus,
   SHIFT_PAYMENT_LABELS,
 } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Chrome } from '@/components/Chrome';
@@ -63,11 +63,16 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
         <div>
           <div style={metaLabel}>{audit.reference}</div>
           <h1
-            style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '8px 0 0' }}
+            style={{
+              fontWeight: fontWeight.extrabold,
+              fontSize: fontSize.xl,
+              letterSpacing: '-0.03em',
+              margin: '8px 0 0',
+            }}
           >
             {AUDIT_TYPE_LABELS[audit.audit_type]} · {audit.postcode}
           </h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: color.muted }}>
+          <p style={{ margin: '4px 0 0', fontSize: fontSize.sm, color: color.muted }}>
             {audit.window_start_on} → {audit.window_end_on} ·{' '}
             {SHIFT_PAYMENT_LABELS[audit.shift_payment_method]}
             {audit.requires_av ? ' · A/V required' : ''}
@@ -99,7 +104,12 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
             </Link>
           ) : (
             <span
-              style={{ marginLeft: 'auto', fontSize: 13, color: color.muted, fontFamily: mono }}
+              style={{
+                marginLeft: 'auto',
+                fontSize: fontSize.sm,
+                color: color.muted,
+                fontFamily: mono,
+              }}
             >
               NO REPORT YET
             </span>

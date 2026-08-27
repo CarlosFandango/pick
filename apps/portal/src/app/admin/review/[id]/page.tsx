@@ -9,7 +9,7 @@ import {
   type ReviewResult,
   reviewSummary,
 } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { AdminChrome } from '@/components/AdminChrome';
 import { requireRole } from '@/lib/auth';
@@ -92,7 +92,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             Write-up · {audit.reference} · {audit.postcode} {AUDIT_TYPE_LABELS[audit.audit_type]}
           </div>
 
-          <div style={{ fontFamily: mono, fontSize: 10.5, color: color.bodyBrown }}>
+          <div style={{ fontFamily: mono, fontSize: fontSize.xs, color: color.bodyBrown }}>
             {countsLine(summary) || 'No results filed'}
           </div>
 
@@ -103,7 +103,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
-              fontSize: 13,
+              fontSize: fontSize.sm,
             }}
           >
             {summary.exceptions.map((exception) => (
@@ -113,7 +113,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                 </span>
                 <span
                   style={{
-                    fontWeight: 700,
+                    fontWeight: fontWeight.bold,
                     flex: 'none',
                     color: exception.verdict === 'fail' ? color.creativeText : color.auditingText,
                   }}
@@ -127,7 +127,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             {summary.passCount > 0 ? (
               <div style={{ display: 'flex', gap: 12, color: color.muted }}>
                 <span style={{ ...metaLabel, width: 78, flex: 'none' }}>ALL OTHER</span>
-                <span style={{ fontWeight: 700, color: color.teal, flex: 'none' }}>PASS</span>
+                <span style={{ fontWeight: fontWeight.bold, color: color.teal, flex: 'none' }}>
+                  PASS
+                </span>
                 <span>{passesLine(summary)}</span>
               </div>
             ) : null}

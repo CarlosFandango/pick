@@ -7,7 +7,7 @@ import {
   MOMENT_LABELS,
   momentRows,
 } from '@picksel/core';
-import { color, radius, space, touchTarget } from '@picksel/tokens';
+import { color, fontSize, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -118,7 +118,7 @@ export function FieldSessionScreen({
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...text('title'), fontSize: 15, color: color.onDark }}>
+          <Text style={{ ...text('title', fontSize.md), color: color.onDark }}>
             {finished ? 'END SESSION' : 'NEXT MOMENT'}
           </Text>
         </Pressable>
@@ -185,7 +185,7 @@ export function FlagSheet({
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...text('title'), fontSize: 16, color: color.onDark }}>
+          <Text style={{ ...text('title', fontSize.md), color: color.onDark }}>
             {severity.label}
           </Text>
           <Text style={{ ...text('caption'), color: color.fieldMuted }}>{severity.hint}</Text>

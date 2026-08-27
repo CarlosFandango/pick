@@ -9,7 +9,7 @@ import {
   type WriteUpCheck,
   type WriteUpMoment,
 } from '@picksel/core';
-import { color, radius, space, touchTarget } from '@picksel/tokens';
+import { color, fontSize, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -71,7 +71,7 @@ export function WriteUpScreen({
 
       <Text
         accessibilityRole="header"
-        style={{ ...text('display'), fontSize: 22, color: color.ink, marginTop: 12 }}
+        style={{ ...text('display', fontSize.lg), color: color.ink, marginTop: 12 }}
       >
         {title}
       </Text>
@@ -105,8 +105,7 @@ export function WriteUpScreen({
       >
         <Text
           style={{
-            ...text('title'),
-            fontSize: 15,
+            ...text('title', fontSize.md),
             color: writeUp.canSubmit ? color.bone : color.paper,
           }}
         >
@@ -147,7 +146,7 @@ function MomentBlock({
         <Text style={{ ...text('caption'), color: color.muted }}>
           {String(moment.index).padStart(2, '0')}
         </Text>
-        <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>
+        <Text style={{ ...text('title', fontSize.md), color: color.ink }}>
           {MOMENT_LABELS[moment.moment]}
         </Text>
         <Text
@@ -235,7 +234,7 @@ function MomentBlock({
                     backgroundColor: color.bone,
                     borderRadius: 4,
                     padding: 12,
-                    fontSize: 12.5,
+                    ...text('caption', fontSize.xs),
                     color: color.bodyBrown,
                   }}
                 />

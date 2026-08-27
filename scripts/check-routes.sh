@@ -42,11 +42,14 @@ patterns=$(
 # rather than globbed so a storage path elsewhere in core is not mistaken for a
 # route.
 #
+# Sources only, and -I: `apps/portal/src` also holds the committed woff2 files,
+# and grepping those for route-shaped strings turns binary noise into failures.
+#
 # Template holes become one segment; query strings and hashes are dropped, so
 # `/audits?booked=PS-1` is a link to /audits.
 targets=$(
-  git grep -hoE "[\"'\`]/[A-Za-z][^\"'\`]*" \
-    -- 'apps/portal/src' 'packages/core/src/ops.ts' 2>/dev/null \
+  git grep -IhoE "[\"'\`]/[A-Za-z][^\"'\`]*" \
+    -- 'apps/portal/src/**/*.ts' 'apps/portal/src/**/*.tsx' 'packages/core/src/ops.ts' 2>/dev/null \
     | sed -e 's|^.||' \
     | sed -e 's|\${[^}]*}|SEGMENT|g' -e 's|[?#].*$||' \
     | sort -u

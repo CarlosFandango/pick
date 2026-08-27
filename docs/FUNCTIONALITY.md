@@ -23,7 +23,7 @@ components and `apps/field/app/` still has one route that says "Scaffold".
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
-| Token/secret/route tripwires | Built | `scripts/check-*.sh` | run first in CI; a leaked key, a colour literal or a link to a missing page fails the build |
+| Token/secret/route tripwires | Built | `scripts/check-*.sh` | run first in CI; a leaked key, a colour literal, a hand-picked font size or a link to a missing page fails the build |
 
 ## Domain
 
@@ -102,7 +102,6 @@ them, which is what **Component** above means.
 |---|---|---|
 | No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
 | Portal has no unit tests | `apps/portal` | Server actions are covered only by Playwright, which needs a live stack. The actions are thin and mostly parse-then-call, so a Vitest pass over the zod schemas and branch logic is cheap. |
-| The type scale is not enforced | `apps/portal`, `apps/field` | 16 distinct font sizes against a six-step scale; `webTextStyle()` is called once, on `<body>`. `check:tokens` covers colour only, because enforcing type means first agreeing what the scale should contain. |
 
 ## Not built yet
 

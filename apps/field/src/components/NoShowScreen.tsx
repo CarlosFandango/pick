@@ -1,5 +1,5 @@
 import { elapsed, type FieldSession } from '@picksel/core';
-import { color, radius, space, touchTarget } from '@picksel/tokens';
+import { color, fontSize, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -50,7 +50,7 @@ export function NoShowScreen({
       >
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 26, color: color.onDark }}
+          style={{ ...text('display', fontSize.xl), color: color.onDark }}
         >
           Logged. Thank you.
         </Text>
@@ -74,7 +74,7 @@ export function NoShowScreen({
         </Text>
         <Text
           accessibilityLabel={`Waited ${elapsed(session, now)}`}
-          style={{ ...text('display'), fontSize: 56, color: color.onDark }}
+          style={{ ...text('display', fontSize.xxl), color: color.onDark }}
         >
           {elapsed(session, now)}
         </Text>
@@ -99,8 +99,7 @@ export function NoShowScreen({
         >
           <Text
             style={{
-              ...text('title'),
-              fontSize: 15,
+              ...text('title', fontSize.md),
               color: canReport ? color.onDark : color.fieldDim,
             }}
           >

@@ -6,10 +6,10 @@
 # beside check-secrets.sh, for the same reason: cheap, greppable, and it fails
 # the build rather than a review.
 #
-# Scoped to colour today. Colour is the one where a single literal survives a
-# rebrand and quietly renders the old brand, and where the fix is always the
-# same — reference a role. The type scale is a wider job with a decision in it
-# (the portal renders sizes the scale does not contain) and is not enforced yet.
+# Two rules, both of which a component can break while typechecking perfectly:
+# a colour literal survives a rebrand and quietly renders the old brand, and a
+# font size picked by hand puts the two apps out of step with each other and
+# with the mockups. Both fixes are the same shape — reference the token.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -29,6 +29,19 @@ offenders=$(git grep -InE "'#[0-9a-fA-F]{3,8}'|\"#[0-9a-fA-F]{3,8}\"|\`#[0-9a-fA
 if [ -n "$offenders" ]; then
   report "colour literal outside the design tokens — use a role from @picksel/tokens"
   echo "$offenders" | sed 's/^/    /' >&2
+fi
+
+# The type scale is six steps. Sixteen distinct sizes were in use, none of them
+# from it, and `webTextStyle()` was called once in the whole portal — so the
+# guarantee that "neither app picks a number, so neither can drift" was not
+# holding in either app.
+sizes=$(git grep -InE "(fontSize|fontWeight): [0-9]" \
+  -- 'apps/**/*.ts' 'apps/**/*.tsx' 'packages/**/*.ts' 'packages/**/*.tsx' 2>/dev/null \
+  | grep -vE "$allowed" || true)
+
+if [ -n "$sizes" ]; then
+  report "font size or weight picked by hand — use fontSize/fontWeight from @picksel/tokens"
+  echo "$sizes" | sed 's/^/    /' >&2
 fi
 
 if [ "$fail" -eq 0 ]; then echo "  ok"; fi

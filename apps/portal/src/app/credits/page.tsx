@@ -5,7 +5,7 @@ import {
   runningBalance,
   valueLabel,
 } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -69,10 +69,17 @@ export default async function CreditsPage() {
   return (
     <Chrome active="credits" organisationName={organisation?.name ?? '—'} credits={credits}>
       <div style={{ padding: '26px 32px', maxWidth: 820 }}>
-        <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
+        <h1
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.xl,
+            letterSpacing: '-0.03em',
+            margin: '0 0 4px',
+          }}
+        >
           Credits
         </h1>
-        <p style={{ margin: '0 0 20px', fontSize: 13, color: color.muted }}>
+        <p style={{ margin: '0 0 20px', fontSize: fontSize.sm, color: color.muted }}>
           One credit books one audit, at £175.
         </p>
 
@@ -87,20 +94,27 @@ export default async function CreditsPage() {
           }}
         >
           <div style={metaLabel}>Balance</div>
-          <div style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em', marginTop: 4 }}>
+          <div
+            style={{
+              fontWeight: fontWeight.extrabold,
+              fontSize: fontSize.xxl,
+              letterSpacing: '-0.03em',
+              marginTop: 4,
+            }}
+          >
             {credits}
           </div>
         </div>
 
         {lines.length === 0 ? (
-          <p style={{ fontSize: 13, color: color.muted }}>No credit movements yet.</p>
+          <p style={{ fontSize: fontSize.sm, color: color.muted }}>No credit movements yet.</p>
         ) : (
           <table
             style={{
               width: '100%',
               borderCollapse: 'separate',
               borderSpacing: '0 8px',
-              fontSize: 13,
+              fontSize: fontSize.sm,
               textAlign: 'left',
             }}
           >
@@ -150,7 +164,7 @@ export default async function CreditsPage() {
                       </span>
                     ) : null}
                     {line.note ? (
-                      <span style={{ display: 'block', fontSize: 12, color: color.muted }}>
+                      <span style={{ display: 'block', fontSize: fontSize.xs, color: color.muted }}>
                         {line.note}
                       </span>
                     ) : null}
@@ -163,7 +177,7 @@ export default async function CreditsPage() {
                       ...cell,
                       textAlign: 'right',
                       fontFamily: mono,
-                      fontWeight: 700,
+                      fontWeight: fontWeight.bold,
                       color: line.delta > 0 ? color.teal : color.bodyBrown,
                     }}
                   >

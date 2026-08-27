@@ -1,5 +1,5 @@
 import { OPS_PRESENTATION, type OpsItem, waitingFor } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { AdminChrome } from '@/components/AdminChrome';
 import { requireRole } from '@/lib/auth';
@@ -77,7 +77,11 @@ export default async function OpsHomePage() {
               <div style={{ ...metaLabel, color: tile.lead ? color.auditingText : color.muted }}>
                 {tile.label}
               </div>
-              <div style={{ fontWeight: 800, fontSize: 30, marginTop: 2 }}>{tile.value}</div>
+              <div
+                style={{ fontWeight: fontWeight.extrabold, fontSize: fontSize.xxl, marginTop: 2 }}
+              >
+                {tile.value}
+              </div>
             </div>
           ))}
         </div>
@@ -93,7 +97,7 @@ export default async function OpsHomePage() {
           <h2 style={{ ...metaLabel, margin: '0 0 10px' }}>Needs a human — worst first</h2>
 
           {items.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 13, color: color.muted }}>
+            <p style={{ margin: 0, fontSize: fontSize.sm, color: color.muted }}>
               Nothing waiting. The network is running itself.
             </p>
           ) : (
@@ -111,7 +115,7 @@ export default async function OpsHomePage() {
                       alignItems: 'center',
                       padding: '11px 0',
                       borderBottom: i < items.length - 1 ? hairline : 'none',
-                      fontSize: 13,
+                      fontSize: fontSize.sm,
                     }}
                   >
                     <span
@@ -121,7 +125,7 @@ export default async function OpsHomePage() {
                         borderRadius: radius.pill,
                         padding: '4px 10px',
                         fontFamily: mono,
-                        fontSize: 9.5,
+                        fontSize: fontSize.xs,
                         letterSpacing: '0.1em',
                         color: tone?.ink,
                         flex: 'none',
@@ -143,7 +147,11 @@ export default async function OpsHomePage() {
                       return href ? (
                         <Link
                           href={href}
-                          style={{ fontWeight: 700, color: color.link, textDecoration: 'none' }}
+                          style={{
+                            fontWeight: fontWeight.bold,
+                            color: color.link,
+                            textDecoration: 'none',
+                          }}
                         >
                           {presentation.action} →
                         </Link>

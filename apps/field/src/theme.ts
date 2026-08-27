@@ -26,7 +26,13 @@ const PLATFORM: FontPlatform = Platform.OS === 'android' ? 'android' : 'ios';
  *
  * Always use this rather than picking a fontSize: it is what keeps the field
  * app and the portal rendering the same scale from the same definition.
+ *
+ * `size` takes a step from the shared `fontSize` scale when a component wants a
+ * role's family and weight at a different size — and matters here in a way it
+ * does not on the web, because React Native leading is absolute. Setting
+ * `fontSize` on top of a role, which is what these screens used to do, keeps the
+ * role's leading and renders small text on tall lines.
  */
-export function text(role: TextRole): ResolvedTextStyle {
-  return nativeTextStyle(role, PLATFORM);
+export function text(role: TextRole, size?: number): ResolvedTextStyle {
+  return nativeTextStyle(role, PLATFORM, size);
 }

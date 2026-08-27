@@ -1,5 +1,5 @@
 import { AUDIT_TYPE_LABELS, CLIENT_STATUS, parseAuditStatus } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
@@ -44,7 +44,14 @@ export default async function AuditsPage({
       credits={balance?.balance ?? 0}
     >
       <div style={{ padding: '26px 32px', maxWidth: 880 }}>
-        <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
+        <h1
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.xl,
+            letterSpacing: '-0.03em',
+            margin: '0 0 20px',
+          }}
+        >
           Audits
         </h1>
 
@@ -57,7 +64,7 @@ export default async function AuditsPage({
               borderTop: `5px solid ${color.teal}`,
               borderRadius: radius.tile,
               padding: '14px 18px',
-              fontSize: 13,
+              fontSize: fontSize.sm,
             }}
           >
             Booked as <b style={{ fontFamily: mono }}>{booked}</b>. We will assign an auditor and
@@ -83,12 +90,12 @@ export default async function AuditsPage({
                   gap: 18,
                 }}
               >
-                <span style={{ fontFamily: mono, fontSize: 12 }}>{audit.reference}</span>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                <span style={{ fontFamily: mono, fontSize: fontSize.xs }}>{audit.reference}</span>
+                <span style={{ fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}>
                   {AUDIT_TYPE_LABELS[audit.audit_type]}
                 </span>
-                <span style={{ fontSize: 13, color: color.muted }}>{audit.postcode}</span>
-                <span style={{ fontSize: 12.5, color: color.muted }}>
+                <span style={{ fontSize: fontSize.sm, color: color.muted }}>{audit.postcode}</span>
+                <span style={{ fontSize: fontSize.xs, color: color.muted }}>
                   {audit.window_start_on} → {audit.window_end_on}
                 </span>
                 <span style={{ ...metaLabel, marginLeft: 'auto', color: color.bodyBrown }}>
@@ -98,7 +105,7 @@ export default async function AuditsPage({
             ))}
           </div>
         ) : (
-          <p style={{ fontSize: 13, color: color.muted }}>No audits booked yet.</p>
+          <p style={{ fontSize: fontSize.sm, color: color.muted }}>No audits booked yet.</p>
         )}
       </div>
     </Chrome>

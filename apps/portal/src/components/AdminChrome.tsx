@@ -1,4 +1,4 @@
-import { color } from '@picksel/tokens';
+import { color, fontSize, fontWeight } from '@picksel/tokens';
 import type { ReactNode } from 'react';
 import { mono, sans } from '@/lib/theme';
 
@@ -24,12 +24,20 @@ export function AdminChrome({
           color: color.onDark,
         }}
       >
-        <span style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.1em' }}>PICKSEL ADMIN</span>
+        <span
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.sm,
+            letterSpacing: '0.1em',
+          }}
+        >
+          PICKSEL ADMIN
+        </span>
         {queuePosition ? (
           <span
             style={{
               fontFamily: mono,
-              fontSize: 10,
+              fontSize: fontSize.xs,
               letterSpacing: '0.12em',
               color: color.onDarkMuted,
             }}
@@ -37,7 +45,9 @@ export function AdminChrome({
             {queuePosition}
           </span>
         ) : null}
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: color.onDarkMuted }}>{who}</span>
+        <span style={{ marginLeft: 'auto', fontSize: fontSize.xs, color: color.onDarkMuted }}>
+          {who}
+        </span>
       </header>
       {children}
     </div>

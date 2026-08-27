@@ -1,5 +1,5 @@
 import { AUDIT_TYPE_LABELS } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { AdminChrome } from '@/components/AdminChrome';
 import { requireRole } from '@/lib/auth';
@@ -41,13 +41,27 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
     >
       <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <h1 style={{ fontWeight: 800, fontSize: 22, letterSpacing: '-0.03em', margin: 0 }}>
+          <h1
+            style={{
+              fontWeight: fontWeight.extrabold,
+              fontSize: fontSize.lg,
+              letterSpacing: '-0.03em',
+              margin: 0,
+            }}
+          >
             {AUDIT_TYPE_LABELS[audit.audit_type]} · {audit.postcode}
           </h1>
           <span style={{ ...metaLabel }}>
             {eligible.length} eligible of {rows.length} active
           </span>
-          <span style={{ marginLeft: 'auto', fontFamily: mono, fontSize: 11, color: color.muted }}>
+          <span
+            style={{
+              marginLeft: 'auto',
+              fontFamily: mono,
+              fontSize: fontSize.xs,
+              color: color.muted,
+            }}
+          >
             WINDOW {audit.window_start_on} → {audit.window_end_on}
             {audit.requires_av ? ' · A/V REQUIRED' : ''}
           </span>
@@ -77,7 +91,7 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
                   alignItems: 'flex-start',
                   padding: '11px 0',
                   borderBottom: i < rows.length - 1 ? hairline : 'none',
-                  fontSize: 13,
+                  fontSize: fontSize.sm,
                   opacity: row.eligible ? 1 : 0.75,
                 }}
               >
@@ -88,7 +102,7 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
                     borderRadius: radius.pill,
                     padding: '4px 10px',
                     fontFamily: mono,
-                    fontSize: 9.5,
+                    fontSize: fontSize.xs,
                     letterSpacing: '0.1em',
                     color: row.eligible ? color.bone : color.muted,
                     flex: 'none',
@@ -98,7 +112,7 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
                 </span>
 
                 <span style={{ flex: 1 }}>
-                  <span style={{ fontFamily: mono, fontSize: 11 }}>
+                  <span style={{ fontFamily: mono, fontSize: fontSize.xs }}>
                     {row.auditor_id.slice(-6).toUpperCase()}
                   </span>
                   {row.reasons.length > 0 ? (

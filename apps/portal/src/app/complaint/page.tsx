@@ -1,5 +1,5 @@
 import { COMPLAINT_ROUTES } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { Chrome } from '@/components/Chrome';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
@@ -43,10 +43,17 @@ export default async function ComplaintPage() {
       credits={balance?.balance ?? 0}
     >
       <div style={{ padding: '26px 32px', maxWidth: 720 }}>
-        <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
+        <h1
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.xl,
+            letterSpacing: '-0.03em',
+            margin: '0 0 4px',
+          }}
+        >
           Raise a concern
         </h1>
-        <p style={{ margin: '0 0 20px', fontSize: 13, color: color.muted }}>
+        <p style={{ margin: '0 0 20px', fontSize: fontSize.sm, color: color.muted }}>
           Two different things, handled two different ways. Pick the one that fits.
         </p>
 
@@ -62,11 +69,13 @@ export default async function ComplaintPage() {
                 padding: 18,
               }}
             >
-              <div style={{ fontWeight: 700, fontSize: 15 }}>{route.title}</div>
+              <div style={{ fontWeight: fontWeight.bold, fontSize: fontSize.md }}>
+                {route.title}
+              </div>
               <p
                 style={{
                   margin: '4px 0 0',
-                  fontSize: 13,
+                  fontSize: fontSize.sm,
                   color: color.bodyBrown,
                   lineHeight: 1.55,
                 }}
@@ -79,7 +88,7 @@ export default async function ComplaintPage() {
                   ...metaLabel,
                   textTransform: 'none',
                   letterSpacing: 0,
-                  fontSize: 12,
+                  fontSize: fontSize.xs,
                 }}
               >
                 {route.outcome}

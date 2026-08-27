@@ -1,4 +1,4 @@
-import { color, radius, space } from '@picksel/tokens';
+import { color, fontSize, radius, space } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { type PayLine, payBreakdown, poundsFromPence, totalPence } from '@/format/money';
 import { expiresIn, offerArea, windowLabel } from '@/format/offer';
@@ -46,7 +46,11 @@ export function OfferScreen({
 
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 26, color: color.ink, marginTop: space.sm }}
+          style={{
+            ...text('display', fontSize.xl),
+            color: color.ink,
+            marginTop: space.sm,
+          }}
         >
           {offer.auditTypeLabel}
         </Text>
@@ -94,7 +98,11 @@ export function OfferScreen({
           </Text>
           <Text
             accessibilityLabel={`Total pay ${poundsFromPence(total)}`}
-            style={{ ...text('display'), fontSize: 34, color: color.onDark, marginTop: 6 }}
+            style={{
+              ...text('display', fontSize.xxl),
+              color: color.onDark,
+              marginTop: 6,
+            }}
           >
             {poundsFromPence(total)}
           </Text>
@@ -119,7 +127,7 @@ export function OfferScreen({
               opacity: busy ? 0.5 : 1,
             }}
           >
-            <Text style={{ ...text('title'), fontSize: 15, color: color.bone }}>Accept offer</Text>
+            <Text style={{ ...text('title', fontSize.md), color: color.bone }}>Accept offer</Text>
           </Pressable>
 
           <Pressable
@@ -152,8 +160,7 @@ function Chip({ label, fill, ink }: { label: string; fill?: string; ink?: string
     >
       <Text
         style={{
-          ...text('caption'),
-          fontSize: 9.5,
+          ...text('caption', fontSize.xs),
           letterSpacing: 1,
           color: ink ?? color.bodyBrown,
         }}
@@ -170,9 +177,7 @@ function Fact({ label, value, hint }: { label: string; value: string; hint: stri
       <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.2 }}>
         {label.toUpperCase()}
       </Text>
-      <Text style={{ ...text('title'), fontSize: 16, color: color.ink, marginTop: 3 }}>
-        {value}
-      </Text>
+      <Text style={{ ...text('title', fontSize.md), color: color.ink, marginTop: 3 }}>{value}</Text>
       <Text style={{ ...text('caption'), color: color.muted, marginTop: 2 }}>{hint}</Text>
     </View>
   );

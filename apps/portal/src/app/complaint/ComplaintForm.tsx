@@ -1,7 +1,7 @@
 'use client';
 
 import { COMPLAINT_ROUTES, type ComplaintSubject, routeFor } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
 import { type ComplaintState, raiseComplaint } from './actions';
@@ -35,7 +35,7 @@ export function ComplaintForm({
                 borderRadius: radius.tile,
                 padding: subject === option.subject ? 11 : 12,
                 fontWeight: subject === option.subject ? 700 : 600,
-                fontSize: 13,
+                fontSize: fontSize.sm,
                 fontFamily: sans,
                 textAlign: 'left',
                 cursor: 'pointer',
@@ -68,12 +68,14 @@ export function ComplaintForm({
       </label>
 
       {state.error ? (
-        <p role="alert" style={{ margin: 0, fontSize: 13, color: color.creativeText }}>
+        <p role="alert" style={{ margin: 0, fontSize: fontSize.sm, color: color.creativeText }}>
           {state.error}
         </p>
       ) : null}
       {state.raised ? (
-        <p style={{ margin: 0, fontSize: 13, color: color.teal }}>Raised. {route.outcome}</p>
+        <p style={{ margin: 0, fontSize: fontSize.sm, color: color.teal }}>
+          Raised. {route.outcome}
+        </p>
       ) : null}
 
       <button type="submit" disabled={pending} style={{ ...pillButton, alignSelf: 'flex-start' }}>
@@ -88,7 +90,7 @@ const inputStyle = {
   background: color.paper,
   borderRadius: radius.tile,
   padding: '11px 14px',
-  fontSize: 13,
+  fontSize: fontSize.sm,
   fontFamily: sans,
   color: color.ink,
 } as const;

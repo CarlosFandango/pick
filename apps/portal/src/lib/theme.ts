@@ -1,4 +1,4 @@
-import { color, font, fontStack, radius } from '@picksel/tokens';
+import { color, font, fontSize, fontStack, fontWeight, radius } from '@picksel/tokens';
 
 /**
  * Web styling helpers over the PICK tokens.
@@ -24,7 +24,7 @@ export const mono = `var(--font-mono), ${fontStack.mono.web}`;
 export const metaLabel = {
   fontFamily: mono,
   fontWeight: font.monoWeight,
-  fontSize: 10,
+  fontSize: fontSize.xs,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: color.muted,
@@ -45,8 +45,8 @@ export const pillButton = {
   color: color.bone,
   borderRadius: radius.pill,
   padding: '13px 26px',
-  fontWeight: 700,
-  fontSize: 14,
+  fontWeight: fontWeight.bold,
+  fontSize: fontSize.sm,
   border: 'none',
   cursor: 'pointer',
   fontFamily: sans,

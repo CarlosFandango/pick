@@ -40,7 +40,7 @@ like before you open it.
 | Repeat DDL across tables | write it out per table | loop over a table-name array |
 | Share code between apps | `packages/core` | a shared component package — RN cannot render web components |
 | Colour, spacing, type size | a role or scale from `@picksel/tokens` | a hex literal, a magic number |
-| Set text size or weight | `webTextStyle(role)` / `text(role)` | `fontSize:` in a component |
+| Set text size or weight | `webTextStyle(role[, size])` / `text(role[, size])`, size from `fontSize` | a number in a component — `pnpm check:tokens` fails the build |
 | Set a font family | `sans` / `mono` from `lib/theme` (portal) or `fontStack` (field) | naming a font in a component, or naming one nothing loads |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
 | Style a portal component | token scales inline + `var(--colour-*)` | a CSS file with its own palette |
@@ -238,6 +238,35 @@ lint, typecheck or unit tests.
 
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
+
+### 2026-08-26 — Every size comes from the six-step scale
+Sixteen distinct font sizes were in use across the two apps — 9.5, 10, 10.5, 11,
+11.5, 12, 12.5, 13, 13.5, 14, 15, 16, 20, 22, 24, 26, 30, 34, 40, 56 — against a
+scale of 12/14/16/20/24/32, and `webTextStyle()` was called exactly once in the
+portal, on `<body>`. The stated guarantee that "neither app picks a number, so
+neither can drift from the other" was not holding in either app.
+
+All of them are snapped onto the six steps, by an explicit table rather than
+nearest-neighbour, because the ties were doing real work: 13 and 15 sit exactly
+between two steps, and rounding body copy *down* is the wrong direction.
+`fontWeight` gains `extrabold`, which is the drop's own `displayWeight` and the
+one weight components were reaching past the scale for, fourteen times.
+
+`webTextStyle(role, size?)` and `text(role, size?)` take a step from the scale,
+for a role's family and weight at a different size. That override matters more
+in the field app than in the portal: CSS inherits a unitless multiplier so a
+changed font-size re-leads itself, while React Native leading is absolute — so
+the screens that set `fontSize` on top of a role were rendering small text on
+tall lines and nothing said so.
+
+*Rejected:* adding roles at 13 and 10 to fit the sizes already in use. It would
+have been a smaller diff and no visual change, at the cost of a scale shaped by
+whatever got typed first.
+
+*Cost, accepted and worth a second look:* the field app's two hero numbers — the
+no-show wait timer at 56 and pending earnings at 40 — are now 32, the top of the
+scale. Those are glanced at outdoors, one-handed, and 32 may be too small. If it
+is, the answer is a named step above `xxl`, not a number in a component.
 
 ### 2026-08-26 — The portal serves the brand faces; the field app does not yet
 `design/tokens/tokens.ts` names Archivo and IBM Plex Mono, and BUILD-GUIDE says

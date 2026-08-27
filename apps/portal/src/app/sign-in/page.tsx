@@ -1,4 +1,4 @@
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { redirect } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
@@ -54,8 +54,23 @@ export default async function SignInPage({
           gap: 16,
         }}
       >
-        <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.1em' }}>PICKSEL</div>
-        <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: 0 }}>
+        <div
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.md,
+            letterSpacing: '0.1em',
+          }}
+        >
+          PICKSEL
+        </div>
+        <h1
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.xl,
+            letterSpacing: '-0.03em',
+            margin: 0,
+          }}
+        >
           Sign in
         </h1>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -69,7 +84,7 @@ export default async function SignInPage({
               border: hairline,
               borderRadius: radius.tile,
               padding: '11px 14px',
-              fontSize: 13,
+              fontSize: fontSize.sm,
               fontFamily: sans,
             }}
           />
@@ -85,13 +100,13 @@ export default async function SignInPage({
               border: hairline,
               borderRadius: radius.tile,
               padding: '11px 14px',
-              fontSize: 13,
+              fontSize: fontSize.sm,
               fontFamily: sans,
             }}
           />
         </label>
         {error ? (
-          <p role="alert" style={{ margin: 0, fontSize: 13, color: color.creativeText }}>
+          <p role="alert" style={{ margin: 0, fontSize: fontSize.sm, color: color.creativeText }}>
             Those details did not match an account.
           </p>
         ) : null}

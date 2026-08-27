@@ -1,6 +1,6 @@
 'use client';
 
-import { color } from '@picksel/tokens';
+import { color, fontSize } from '@picksel/tokens';
 import { useActionState } from 'react';
 import { pillButton } from '@/lib/theme';
 import { type OfferState, offerToEligible } from './actions';
@@ -16,12 +16,12 @@ export function OfferButton({ auditId }: { auditId: string }) {
         {pending ? 'Offering…' : 'Offer to everyone eligible'}
       </button>
       {state.error ? (
-        <span role="alert" style={{ fontSize: 13, color: color.creativeText }}>
+        <span role="alert" style={{ fontSize: fontSize.sm, color: color.creativeText }}>
           {state.error}
         </span>
       ) : null}
       {typeof state.offered === 'number' ? (
-        <span style={{ fontSize: 13, color: color.teal }}>
+        <span style={{ fontSize: fontSize.sm, color: color.teal }}>
           Offered to {state.offered} auditor{state.offered === 1 ? '' : 's'}.
         </span>
       ) : null}

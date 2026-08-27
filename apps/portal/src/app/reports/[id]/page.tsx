@@ -11,7 +11,7 @@ import {
   type ReviewResult,
   reviewSummary,
 } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, fontWeight, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { Chrome } from '@/components/Chrome';
 import { requireSession } from '@/lib/auth';
@@ -104,11 +104,16 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
           {audit.reference} · {audit.postcode} · {AUDIT_TYPE_LABELS[audit.audit_type]}
         </div>
         <h1
-          style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '8px 0 4px' }}
+          style={{
+            fontWeight: fontWeight.extrabold,
+            fontSize: fontSize.xl,
+            letterSpacing: '-0.03em',
+            margin: '8px 0 4px',
+          }}
         >
           Audit report
         </h1>
-        <p style={{ margin: 0, fontSize: 13, color: color.muted }}>
+        <p style={{ margin: 0, fontSize: fontSize.sm, color: color.muted }}>
           {auditorLabel(DEFAULT_REPORT_SETTINGS, { code: auditorCode })}
         </p>
 
@@ -120,7 +125,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
               border: hairline,
               borderRadius: radius.tile,
               padding: '14px 18px',
-              fontSize: 13,
+              fontSize: fontSize.sm,
               color: color.bodyBrown,
             }}
           >
@@ -140,16 +145,22 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
             >
               <div style={metaLabel}>Result</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 6 }}>
-                <span style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em' }}>
+                <span
+                  style={{
+                    fontWeight: fontWeight.extrabold,
+                    fontSize: fontSize.xxl,
+                    letterSpacing: '-0.03em',
+                  }}
+                >
                   {score.overall.percentage === null ? '—' : `${score.overall.percentage}%`}
                 </span>
-                <span style={{ fontFamily: mono, fontSize: 11, color: color.bodyBrown }}>
+                <span style={{ fontFamily: mono, fontSize: fontSize.xs, color: color.bodyBrown }}>
                   {countsLine(summary)}
                 </span>
               </div>
 
               {score.criticalFailures.length > 0 ? (
-                <p style={{ margin: '10px 0 0', fontSize: 13, color: color.creativeText }}>
+                <p style={{ margin: '10px 0 0', fontSize: fontSize.sm, color: color.creativeText }}>
                   Critical: {score.criticalFailures.join(', ')} — read these before the total.
                 </p>
               ) : null}
@@ -158,7 +169,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
             <section style={{ marginTop: 14 }}>
               <div style={{ ...metaLabel, marginBottom: 8 }}>What we found</div>
               {summary.exceptions.length === 0 ? (
-                <p style={{ fontSize: 13, color: color.bodyBrown }}>
+                <p style={{ fontSize: fontSize.sm, color: color.bodyBrown }}>
                   Nothing outside the code of practice was observed on this shift.
                 </p>
               ) : (
@@ -173,7 +184,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
                         padding: '12px 16px',
                         display: 'flex',
                         gap: 12,
-                        fontSize: 13,
+                        fontSize: fontSize.sm,
                       }}
                     >
                       <span style={{ ...metaLabel, width: 78, flex: 'none' }}>
@@ -181,7 +192,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
                       </span>
                       <span
                         style={{
-                          fontWeight: 700,
+                          fontWeight: fontWeight.bold,
                           flex: 'none',
                           color:
                             exception.verdict === 'fail' ? color.creativeText : color.auditingText,

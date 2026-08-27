@@ -5,7 +5,7 @@ import {
   poundsFromPence,
   type StatusTone,
 } from '@picksel/core';
-import { color, radius, space } from '@picksel/tokens';
+import { color, fontSize, radius, space } from '@picksel/tokens';
 import { ScrollView, Text, View } from 'react-native';
 import { text } from '@/theme';
 
@@ -31,7 +31,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
     <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
       <Text
         accessibilityRole="header"
-        style={{ ...text('display'), fontSize: 24, color: color.ink }}
+        style={{ ...text('display', fontSize.xl), color: color.ink }}
       >
         My audits
       </Text>
@@ -63,10 +63,16 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
               }}
             >
               <View style={{ flex: 1 }}>
-                <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>
+                <Text style={{ ...text('title', fontSize.md), color: color.ink }}>
                   {audit.title}
                 </Text>
-                <Text style={{ ...text('body'), fontSize: 12, color: color.muted, marginTop: 2 }}>
+                <Text
+                  style={{
+                    ...text('body', fontSize.xs),
+                    color: color.muted,
+                    marginTop: 2,
+                  }}
+                >
                   {auditSubtitle([
                     audit.dateLabel,
                     audit.feePence === null ? null : poundsFromPence(audit.feePence),
@@ -85,7 +91,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
                   paddingHorizontal: 10,
                 }}
               >
-                <Text style={{ ...text('caption'), fontSize: 9.5, color: tone.ink }}>
+                <Text style={{ ...text('caption', fontSize.xs), color: tone.ink }}>
                   {chip.label}
                 </Text>
               </View>
@@ -103,7 +109,7 @@ export function MyAuditsScreen({ audits }: { audits: MyAuditRow[] }) {
           padding: 14,
         }}
       >
-        <Text style={{ ...text('body'), fontSize: 12, color: color.muted }}>
+        <Text style={{ ...text('body', fontSize.xs), color: color.muted }}>
           No team present counts as a completed job — paid in full, never against your record.
         </Text>
       </View>

@@ -90,12 +90,17 @@ export interface ResolvedTextStyle {
 /**
  * Web: `lineHeight` stays a unitless multiplier, which is what CSS wants.
  * Returns a plain object usable directly as a React inline style.
+ *
+ * `size` overrides the role's own step for the cases where a component wants a
+ * role's family and weight at a different step of the scale — a heading one
+ * size down, a figure one size up. It must still come from `fontSize`; the
+ * point of the scale is that nobody picks a number.
  */
-export function webTextStyle(role: TextRole): ResolvedTextStyle {
+export function webTextStyle(role: TextRole, size: number = textStyle[role].size) {
   const t = textStyle[role];
   return {
     fontFamily: fontStack[t.family].web,
-    fontSize: t.size,
+    fontSize: size,
     fontWeight: t.weight,
     lineHeight: t.leading,
   };
@@ -105,13 +110,22 @@ export function webTextStyle(role: TextRole): ResolvedTextStyle {
  * React Native: `lineHeight` is an absolute pixel value, so the multiplier is
  * resolved against the size here. Same numbers, different unit convention —
  * the one place the two platforms genuinely disagree.
+ *
+ * Which is also why the `size` override matters more here than on the web. CSS
+ * inherits a unitless multiplier, so changing a font-size re-leads itself; React
+ * Native does not, so a component that set `fontSize` on top of a role kept the
+ * role's absolute leading and quietly rendered 24pt text on 38pt lines.
  */
-export function nativeTextStyle(role: TextRole, platform: FontPlatform): ResolvedTextStyle {
+export function nativeTextStyle(
+  role: TextRole,
+  platform: FontPlatform,
+  size: number = textStyle[role].size,
+): ResolvedTextStyle {
   const t = textStyle[role];
   return {
     fontFamily: fontStack[t.family][platform],
-    fontSize: t.size,
+    fontSize: size,
     fontWeight: t.weight,
-    lineHeight: Math.round(t.size * t.leading),
+    lineHeight: Math.round(size * t.leading),
   };
 }

@@ -1,6 +1,6 @@
 import type { AuditStatus } from '@picksel/core';
 import { branchExplanation, pipelineSteps } from '@picksel/core';
-import { color, radius } from '@picksel/tokens';
+import { color, fontSize, radius } from '@picksel/tokens';
 import { hairline, metaLabel } from '@/lib/theme';
 
 /** S3.3 — where the audit has got to, or why it left the rail. */
@@ -17,7 +17,7 @@ export function PipelineRail({ status }: { status: AuditStatus }) {
           borderTop: `5px solid ${color.navy}`,
           borderRadius: radius.tile,
           padding: '14px 18px',
-          fontSize: 13,
+          fontSize: fontSize.sm,
           lineHeight: 1.55,
           color: color.bodyBrown,
         }}
