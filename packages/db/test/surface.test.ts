@@ -47,6 +47,7 @@ const WRITABLE: Record<string, ReadonlyArray<'insert' | 'update' | 'delete'>> = 
 const RPCS = [
   'accept_offer',
   'assignment_console',
+  'audit_auditor_code',
   'book_audit',
   'decline_offer',
   'eligible_auditors',
@@ -129,7 +130,15 @@ describe('table privileges are what this file says they are', () => {
       );
       // A column-level REVOKE is silently a no-op while a table-level grant
       // exists, so this asserts the outcome rather than the statement.
-      expect(rows).toEqual([{ tablename: 'check_definition', column_name: 'compliance_category' }]);
+      expect(rows).toEqual([
+        // The auditor's global uuid, and the one a client sets from a code —
+        // reading either back defeats the per-charity coding of S3.4.
+        { tablename: 'audit', column_name: 'auditor_id' },
+        { tablename: 'audit', column_name: 'preferred_auditor_id' },
+        // An auditor who knows a question is "the vulnerability one" answers it
+        // differently.
+        { tablename: 'check_definition', column_name: 'compliance_category' },
+      ]);
     });
   });
 

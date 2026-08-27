@@ -26,7 +26,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   const { data: audit } = await supabase
     .from('audit')
     .select(
-      'id, reference, status, audit_type, postcode, submitted_at, session_started_at, session_ended_at, client_organisation_id, auditor_id',
+      'id, reference, status, audit_type, postcode, submitted_at, session_started_at, session_ended_at, client_organisation_id',
     )
     .eq('id', id)
     .maybeSingle();

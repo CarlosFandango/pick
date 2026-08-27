@@ -239,6 +239,28 @@ lint, typecheck or unit tests.
 Newest first. Record the alternative that was rejected — that is the part that
 stops the decision being relitigated.
 
+### 2026-08-26 — S3.4 decided: a charity may recognise an auditor, within its own audits
+One code, `auditor_code_for(auditor, charity)`, on the report and in the S3.2
+picker alike. Being able to ask for the auditor who did well last time is a real
+thing a charity wants, and mixing the charity into the hash keeps the code
+meaningless to any other charity and never reversible into an identity. The
+report reads it through `audit_auditor_code(audit)` rather than calling
+`auditor_code_for` directly: handing a client a function that turns auditor ids
+into codes invites feeding it ids.
+
+`audit.auditor_id` and `preferred_auditor_id` are withheld from `authenticated`
+by column grant, because both are the same uuid for every charity and so are
+exactly the cross-charity handle the per-charity code exists not to be.
+
+*Rejected:* the previous report scheme, which coded from the audit reference so
+the same auditor read differently in every report. It was the opposite intention
+— and it never held anyway, because the uuid was on the row the whole time. Two
+deliberate schemes with opposite goals is worse than either.
+
+*Cost, accepted:* `audit` is now granted column by column, so a column added
+later is unreadable until it is listed in the migration. `surface.test.ts`
+asserts the withheld set exactly, so forgetting names the column in the build.
+
 ### 2026-08-26 — No shared component package
 `packages/ui` held a Button and a Card, was a dependency and a
 `transpilePackages` entry of the portal, and was imported by nothing after

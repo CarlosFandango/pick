@@ -43,10 +43,13 @@ this file exists to make possible.
 | S3.1 | Booking deepened (A/V toggle, window rules, 0-credit edge) | Web | /book |
 | S3.2 | Auditor override picker (conflict=blocked, familiarity=warn) | Web | /book/choose-auditor |
 | S3.3 | Audit list + detail (pipeline rail, no-show case) | Web | /audits, /audits/:id |
-| S3.4 | Report header — named vs coded auditor (DECISION PENDING) | Web | /reports/:id |
+| S3.4 | Report header — named vs coded auditor (decided: coded) | Web | /reports/:id |
 | S3.5 | Credits & invoices (ledger) | Web | /credits |
 | S3.6 | Complaint fork (about audit vs about fundraiser) | Web | /complaint |
 
 ## Open decisions
-- S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.
+- S3.4: **decided 2026-08-26.** Coded, and the code is stable per charity — a
+  charity may recognise the auditor who did well last time and ask for them
+  again, while two charities see different codes for the same person. Naming
+  remains additive and off by default. See the decision log in docs/PATTERNS.md.
 - S1.5: field density — build 5B + S2.3 flag sheet; 5C parked.

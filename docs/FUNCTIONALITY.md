@@ -67,7 +67,7 @@ components and `apps/field/app/` still has one route that says "Scaffold".
 | S3.1 | Booking deepened (A/V, lead time) | Built |
 | S3.2 | Auditor override picker | Partial — `selectable_auditors` / `prefer_auditor` and their tests exist; `/book/choose-auditor` does not |
 | S3.3 | Audit list + detail | Built |
-| S3.4 | Report header — coded auditor | Built (naming is a flag, default off) |
+| S3.4 | Report header — coded auditor | Built — decided 2026-08-26: one code, correlatable within a charity; naming is still a flag, default off |
 | S3.5 | Credits ledger | Built |
 | S3.6 | Complaint fork | Built |
 | S4.1 | Ops home | Built |
@@ -101,8 +101,6 @@ them, which is what **Component** above means.
 | Gap | Where | Why it matters |
 |---|---|---|
 | No tests for role gating | `portal/src/lib/auth.ts` | Thin, and RLS is the real boundary — needs a Supabase client double to be worth doing. |
-| Two auditor codes, with opposite intentions | `core/reporting.ts`, `auditor_code_for()` | The report codes from the audit reference so a charity *cannot* correlate an auditor across reports; the S3.2 picker codes from auditor+charity so they *can*, deliberately, to re-pick someone they rate. Both cannot be right. S3.4 is marked DECISION PENDING in the manifest, so this is a product call, not a bug to fix quietly. |
-| `audit.auditor_id` is readable by the client | `audit_read` policy | Verified: a client sees the raw UUID and cannot resolve it to any profile, so no name leaks — but the id is stable, which already defeats the report's stated non-correlation property regardless of which code wins above. Column privileges cannot express "hidden from clients only", so the fix is the shape used elsewhere here: a `security definer` read for the client-facing audit screens. |
 | Portal has no unit tests | `apps/portal` | Server actions are covered only by Playwright, which needs a live stack. The actions are thin and mostly parse-then-call, so a Vitest pass over the zod schemas and branch logic is cheap. |
 | The type scale is not enforced | `apps/portal`, `apps/field` | 16 distinct font sizes against a six-step scale; `webTextStyle()` is called once, on `<body>`. `check:tokens` covers colour only, because enforcing type means first agreeing what the scale should contain. |
 

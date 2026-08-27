@@ -1102,6 +1102,10 @@ export type Database = {
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }[]
       }
+      audit_auditor_code: {
+        Args: { p_audit_id: string }
+        Returns: string
+      }
       auditor_code_for: {
         Args: { p_auditor_id: string; p_organisation_id: string }
         Returns: string

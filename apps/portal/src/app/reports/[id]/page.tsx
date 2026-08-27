@@ -1,6 +1,5 @@
 import {
   AUDIT_TYPE_LABELS,
-  auditorCode,
   auditorLabel,
   countsLine,
   DEFAULT_REPORT_SETTINGS,
@@ -40,22 +39,27 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   const released = audit.status === 'released';
 
-  const [{ data: results }, { data: organisation }, { data: balance }] = await Promise.all([
-    released
-      ? supabase
-          .from('check_result')
-          .select(
-            'id, check_definition_id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code)',
-          )
-          .eq('audit_id', id)
-      : Promise.resolve({ data: null }),
-    supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
-    supabase
-      .from('organisation_credit_balance')
-      .select('balance')
-      .eq('organisation_id', session.organisationId ?? '')
-      .maybeSingle(),
-  ]);
+  const [{ data: results }, { data: organisation }, { data: auditorCode }, { data: balance }] =
+    await Promise.all([
+      released
+        ? supabase
+            .from('check_result')
+            .select(
+              'id, check_definition_id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code)',
+            )
+            .eq('audit_id', id)
+        : Promise.resolve({ data: null }),
+      supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
+      // The same code S3.2 shows the client, so an auditor they rated on one
+      // audit is recognisable on the next. Read through a function that takes an
+      // audit, not an auditor id: a client is never handed an identity.
+      supabase.rpc('audit_auditor_code', { p_audit_id: id }),
+      supabase
+        .from('organisation_credit_balance')
+        .select('balance')
+        .eq('organisation_id', session.organisationId ?? '')
+        .maybeSingle(),
+    ]);
 
   // check_result is append-only, so a correction is another row for the same
   // check. Which one counts is a domain rule with a tie-break in it — latest
@@ -105,7 +109,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
           Audit report
         </h1>
         <p style={{ margin: 0, fontSize: 13, color: color.muted }}>
-          {auditorLabel(DEFAULT_REPORT_SETTINGS, { code: auditorCode(audit.reference) })}
+          {auditorLabel(DEFAULT_REPORT_SETTINGS, { code: auditorCode })}
         </p>
 
         {!released ? (

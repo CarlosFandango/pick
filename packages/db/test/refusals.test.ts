@@ -322,6 +322,128 @@ describe('the compliance category never reaches an auditor', () => {
   });
 });
 
+describe('a charity recognises an auditor, but only its own', () => {
+  // S3.4, decided 2026-08-26: the code is an md5 of auditor and charity
+  // together, so a charity can ask for the auditor who did well last time. The
+  // charity half is what stops two charities working out they are discussing
+  // the same person — which only holds while the raw uuid is out of reach.
+  it('gives the same charity the same code for the same auditor', async () => {
+    await withDatabase(async (db) => {
+      await db.arrange(
+        `insert into audit (id, client_organisation_id, auditor_id, status, postcode)
+         values ('00000000-0000-7000-8000-0000000a000b', $1, $2, 'released', 'SW1A 1AA')`,
+        [ids.charityA, ids.auditor],
+      );
+
+      // As the client, not as postgres: the function answers only for people
+      // entitled to the audit, so reading it as a superuser returns nothing and
+      // an assertion comparing two nothings passes for the wrong reason.
+      const [first] = await db
+        .as(ids.clientA)
+        .query<{ code: string }>('select audit_auditor_code($1) as code', [ids.auditA]);
+      const [second] = await db
+        .as(ids.clientA)
+        .query<{ code: string }>('select audit_auditor_code($1) as code', [
+          '00000000-0000-7000-8000-0000000a000b',
+        ]);
+
+      expect(first?.code).toMatch(/^[0-9A-F]{6}$/);
+      expect(first?.code).toBe(second?.code);
+    });
+  });
+
+  it('gives another charity a different code for that same auditor', async () => {
+    await withDatabase(async (db) => {
+      await db.arrange(
+        `insert into audit (id, client_organisation_id, auditor_id, status, postcode)
+         values ('00000000-0000-7000-8000-0000000a000c', $1, $2, 'released', 'EH1 1AA')`,
+        [ids.charityB, ids.auditor],
+      );
+
+      const [mine] = await db
+        .as(ids.clientA)
+        .query<{ code: string }>('select audit_auditor_code($1) as code', [ids.auditA]);
+      const [theirs] = await db
+        .as(ids.clientB)
+        .query<{ code: string }>('select audit_auditor_code($1) as code', [
+          '00000000-0000-7000-8000-0000000a000c',
+        ]);
+
+      expect(mine?.code).toBeTruthy();
+      expect(theirs?.code).toBeTruthy();
+      // Same auditor, two charities, two codes. This is the property that lets
+      // a charity re-pick someone without two charities being able to compare
+      // notes about an individual.
+      expect(mine?.code).not.toBe(theirs?.code);
+    });
+  });
+
+  it('will not read the code for an audit that is not yours', async () => {
+    await withDatabase(async (db) => {
+      const rows = await db
+        .as(ids.clientB)
+        .query<{ code: string | null }>('select audit_auditor_code($1) as code', [ids.auditA]);
+      expect(rows[0]?.code ?? null).toBeNull();
+    });
+  });
+
+  it('withholds the auditor uuid from the client that owns the audit', async () => {
+    await withDatabase(async (db) => {
+      // The code is per-charity; the uuid is not. Reading it back would be the
+      // cross-charity handle the coding exists to avoid.
+      const message = await db
+        .as(ids.clientA)
+        .expectRefused('select auditor_id from audit where id = $1', [ids.auditA]);
+      expect(message).toMatch(/permission denied/i);
+
+      const starred = await db.as(ids.clientA).expectRefused('select * from audit');
+      expect(starred).toMatch(/permission denied/i);
+    });
+  });
+
+  it('does not hand the uuid back through an RPC either', async () => {
+    await withDatabase(async (db) => {
+      // A security definer function returns a composite, and column privileges
+      // do not apply to it — so the columns are checked here rather than
+      // assumed. prefer_auditor is the one a client calls with a code.
+      await db.arrange(
+        `insert into audit (id, client_organisation_id, status, audit_type, postcode,
+                            window_start_on, window_end_on)
+         values ('00000000-0000-7000-8000-0000000a000d', $1, 'booked', 'street', 'SW1A 1AA',
+                 current_date + 7, current_date + 10)`,
+        [ids.charityA],
+      );
+      for (const auditor of [ids.auditor]) {
+        await db.arrange(
+          "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+          [auditor],
+        );
+        await db.arrange(
+          "insert into auditor_capability (auditor_id, audit_type) values ($1, 'street') on conflict do nothing",
+          [auditor],
+        );
+      }
+      const [pool] = await db
+        .as(ids.clientA)
+        .query<{ code: string }>("select * from selectable_auditors($1, 'SW', 'street')", [
+          ids.charityA,
+        ]);
+
+      const [row] = await db
+        .as(ids.clientA)
+        .query<Record<string, unknown>>('select * from prefer_auditor($1, $2)', [
+          '00000000-0000-7000-8000-0000000a000d',
+          pool?.code,
+        ]);
+
+      // The row comes back whole. What matters is that neither id is populated
+      // with anything the client did not already have: the audit is unassigned,
+      // and the preference they just set is theirs.
+      expect(row?.auditor_id).toBeNull();
+    });
+  });
+});
+
 describe('anon is refused at the privilege level, on every table', () => {
   // Not "returns no rows" — refused. Every policy is `to authenticated`, so an
   // anonymous caller matching no policy would get an empty list either way,
