@@ -176,6 +176,53 @@ fortnight, and any call omitting the last argument would have run the OLD body
 migration that changes one. When a function's parameters change, the old
 signature has to be named and dropped — replacing it is not what happened.
 
+### A `security definer` function granted to `authenticated` is granted to everybody
+**Symptom:** an auditor who gets zero rows for another charity's audit through
+RLS could call `matching_review_gates()` on that same audit id and receive
+`"First audit for this charity."`, `"Auditor's first 3 audits are reviewed.
+This is number 1."` and `"2 open risk(s) recorded against this assignment."`
+— another organisation's trading history, another auditor's track record, and
+risk data. `audit_gate_state()` and `review_gate_reason()` leaked the same way.
+
+**Why it hid:** three separate things each looked like the check:
+
+- The tables were correctly locked down. `review_gate` is admin-only, and RLS
+  covers `audit` and `risk`. But `security definer` runs as the owner, so none
+  of that applies *inside* the function.
+- The functions carried `revoke all ... from public, anon`, which **reads like
+  a permission check and is not one**. It removes the roles nobody was worried
+  about and leaves the one that matters.
+- `authenticated` is a single role shared by every signed-in user — auditor,
+  client, admin alike. Granting EXECUTE to it grants it to everyone with a
+  login. There is no "signed in, therefore entitled" in this schema; entitlement
+  is `app.is_admin()` or a match on `auth.uid()`.
+
+A fourth thing hid it further: the function's tests called it through
+`arrange`, which resets to `postgres`. They passed *because* there was no
+guard, and adding one broke seven of them — which is how the guard proved it
+worked.
+
+**Caught now by:** `packages/db/test/gate-function-access.test.ts`, which asks
+as an auditor and as a client for an audit belonging to someone else. Any new
+`security definer` function needs the same pair of tests.
+
+**Sweep for the rest of them:**
+
+```sql
+select p.proname,
+       case when pg_get_functiondef(p.oid) ilike '%is_admin%'   then 'guarded'
+            when pg_get_functiondef(p.oid) ilike '%auth.uid()%' then 'scoped-to-caller'
+            else 'NO GUARD' end as guard
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.prosecdef
+order by 2, 1;
+```
+
+Every row must read `guarded` or `scoped-to-caller`. When this was first run,
+29 of 32 did and these three did not. **A function that takes an id and does
+not check the caller against it is the shape to look for** — an id parameter is
+an invitation to pass someone else's.
+
 ### Green typecheck, broken build
 **Symptom:** `tsc` clean; `next build` fails on `Can't resolve './primitives.js'`,
 then on `Cannot read properties of null (reading 'useRef')`.

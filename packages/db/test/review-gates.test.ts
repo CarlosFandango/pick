@@ -14,11 +14,28 @@ async function arrangeAudit(db: Db, over: { type?: string; auditor?: string } = 
   );
 }
 
+/**
+ * Called as admin, not through `arrange`.
+ *
+ * `arrange` resets to `postgres`, where `app.is_admin()` is false — so these
+ * used to pass only because the functions had no guard at all. Reading gate
+ * state is an admin action and the test has to ask as one, or it is not
+ * testing the thing the review screen does.
+ */
+const gates = (db: Db) =>
+  db
+    .as(ids.admin)
+    .query<{ trigger: string; reason: string }>(
+      'select trigger, reason from matching_review_gates($1)',
+      [AUDIT],
+    );
+
 const gateState = async (db: Db) => {
-  const [row] = await db.arrange<{ payment: string; client_release: string }>(
-    'select * from audit_gate_state($1)',
-    [AUDIT],
-  );
+  const [row] = await db
+    .as(ids.admin)
+    .query<{ payment: string; client_release: string }>('select * from audit_gate_state($1)', [
+      AUDIT,
+    ]);
   return row;
 };
 
@@ -105,10 +122,7 @@ describe('the triggers themselves', () => {
       );
       await arrangeAudit(db);
 
-      const rows = await db.arrange<{ trigger: string; reason: string }>(
-        'select trigger, reason from matching_review_gates($1)',
-        [AUDIT],
-      );
+      const rows = await gates(db);
       expect(rows.map((r) => r.trigger)).toContain('auditor_first_n_audits');
       expect(rows[0]?.reason).toMatch(/first 3 audits/);
     });
@@ -127,7 +141,7 @@ describe('the triggers themselves', () => {
         [AUDIT, ids.charityA],
       );
 
-      expect(await db.arrange('select * from matching_review_gates($1)', [AUDIT])).toHaveLength(0);
+      expect(await gates(db)).toHaveLength(0);
     });
   });
 
@@ -139,10 +153,7 @@ describe('the triggers themselves', () => {
       );
       await arrangeAudit(db, { type: 'lottery' });
 
-      const rows = await db.arrange<{ trigger: string }>(
-        'select trigger from matching_review_gates($1)',
-        [AUDIT],
-      );
+      const rows = await gates(db);
       expect(rows.map((r) => r.trigger)).toEqual(['audit_type_is_lottery']);
     });
   });
@@ -160,10 +171,7 @@ describe('the triggers themselves', () => {
         [AUDIT, ids.charityA],
       );
 
-      const rows = await db.arrange<{ trigger: string }>(
-        'select trigger from matching_review_gates($1)',
-        [AUDIT],
-      );
+      const rows = await gates(db);
       expect(rows.map((r) => r.trigger)).toContain('assignment_has_open_risk');
     });
   });
@@ -181,7 +189,7 @@ describe('the triggers themselves', () => {
         [AUDIT],
       );
 
-      expect(await db.arrange('select * from matching_review_gates($1)', [AUDIT])).toHaveLength(0);
+      expect(await gates(db)).toHaveLength(0);
     });
   });
 });
