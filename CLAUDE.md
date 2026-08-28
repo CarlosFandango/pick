@@ -62,14 +62,10 @@ register that lags is worse than no register, because it is trusted and wrong.
 
 ### One way to do each thing
 
-`docs/PATTERNS.md` has a table of canonical approaches. Follow it. Before
-introducing a *second* pattern for something already listed there, write down in
-that file why the existing one cannot work — in the same commit. "It felt
-cleaner", "this is more idiomatic" and "I prefer it" are not reasons.
-
-Predictability beats local elegance. Four ways to fetch data cost more than one
-slightly imperfect way, because every reader has to learn all four and decide
-which applies. When in doubt, copy the nearest existing example.
+Follow the table in `docs/PATTERNS.md`. Before introducing a *second* pattern for
+something already listed there, write down in that file why the existing one
+cannot work — in the same commit. "It felt cleaner", "this is more idiomatic" and
+"I prefer it" are not reasons. When in doubt, copy the nearest existing example.
 
 ## Make change cheap
 
@@ -212,32 +208,18 @@ it. Logic shared between the apps lives in `core`; the shared *look* lives in
 spacing, type scale, radii, touch targets. It has no dependencies and imports
 nothing platform-specific — the moment it imports React or CSS, one app loses it.
 
-Both apps consume it and render it their own way: the portal emits CSS custom
-properties via `themeToCssVariables()`, the field app reads the same objects into
-React Native styles. A single component library across HTML and React Native
-would need an abstraction costing more than it saves; a shared *vocabulary*
-delivers the consistent experience and makes rebranding one object, not a sweep
-through two codebases.
+The portal renders it as CSS variables, the field app as React Native styles.
+Why a shared vocabulary and not a shared component library, why the split font
+stack, why luminance-separated `success`/`danger`: **[docs/DECISIONS.md](docs/DECISIONS.md)**.
 
-Rules that keep it working:
-
-- Components reference **roles** (`danger`, `surface`, `title`, `body`), never raw
-  hex or numbers. A literal `#0B5FFF`, `padding: 12` or `fontSize: 20` in a
-  component is a bug.
-- Text uses the semantic scale — `webTextStyle('title')` / `text('title')` — not
-  a size. Neither app picks a number, so neither can drift from the other.
-- Fonts are the platform system stack, split per platform because React Native
-  takes one family name and CSS takes a list. Same typeface where the platform
-  has one. A bundled webfont would render identically everywhere but costs font
-  files, `expo-font` loading, FOUT and a licence; revisit only when brand
-  requires a specific face.
-- The portal resets `h1..h6`/`p` margins and sizes. Browser defaults would
-  silently override the shared scale and put the two apps out of step.
-- A new brand is a new object satisfying `Theme`. The type makes a missing role a
-  compile error; `theme.test.ts` checks contrast so a rebrand cannot ship
-  unreadable text.
-- `success`/`danger` are separated in luminance, not just hue — red/green is the
-  common colour-blindness pair and this is a pass/fail product.
+- Components reference **roles** (`danger`, `surface`, `title`, `body`). A literal
+  `#0B5FFF`, `padding: 12` or `fontSize: 20` in a component is a bug.
+- Text uses the semantic scale — `webTextStyle('title')` / `text('title')` — never
+  a size, so neither app can drift from the other.
+- The portal resets `h1..h6`/`p` margins and sizes; browser defaults would
+  otherwise silently override the shared scale.
+- A new brand is a new object satisfying `Theme`. A missing role is a compile
+  error; `theme.test.ts` fails a rebrand that ships unreadable text.
 - **Colour alone never conveys state.** Always pair it with an icon or label. No
   token test can enforce this; it is on whoever writes the component.
 - Field-app touch targets use `touchTarget.comfortable`. Auditors tap one-handed,
@@ -268,13 +250,12 @@ testable code rather than in a policy.
 
 ### Identifiers: UUIDv7, minted on the device
 
-Field events get their id on the device, before the row exists anywhere. This is
-what makes sync idempotent: re-sending a batch is `on conflict do nothing`. There
-is no server-side dedup, no merge, no last-writer-wins — **do not add one**.
+Field events get their id on the device, before the row exists anywhere, which
+makes sync idempotent: re-sending a batch is `on conflict do nothing`. There is
+no server-side dedup, no merge, no last-writer-wins — **do not add one**.
 
-The client generator (`newId()` in `core`) is monotonic within a millisecond. The
-SQL one (`uuid_generate_v7()`) is not. That is why field events are minted on the
-device, and why "latest wins" tie-breaks on id only for device-minted rows.
+`newId()` in `core` is monotonic within a millisecond; `uuid_generate_v7()` is
+not, so "latest wins" tie-breaks on id only for device-minted rows.
 
 ### Append-only tables
 
@@ -336,11 +317,10 @@ Two ledgers, both permanent, neither with a balance column to drift out of sync:
   rows. A unique partial index makes an audit impossible to pay twice, across
   every run. **The rails are swappable; the ledger is permanent.**
 
-Money is an integer count of a currency's smallest unit. Never a float, and
-never tied to a currency: `formatMoney(minorUnits, currency)` derives its
-divisor from the currency, a price carries its currency with it, and no
-component prints a `£`. The market is UK today; `residency_zone` already says
-it will not stay that way.
+Money is an integer count of a currency's smallest unit — never a float, and
+never tied to a currency: `formatMoney(minorUnits, currency)` derives its divisor,
+a price carries its currency, and no component prints a `£`. Why, and why there
+is deliberately no currency column: **[docs/DECISIONS.md](docs/DECISIONS.md)**.
 
 ### Residency
 
@@ -357,10 +337,9 @@ retention consequences that are a product decision, not an implementation detail
 
 ### Postcode matching
 
-v1 matches on outward-code **area** letters (`SW`, `M`, `EH`) — coarse and
-deliberately so. `audit.postcode_area` is a stored generated column, so matching
-is a join and there is no parsing logic in application code. Districts, radii or
-travel time can come when demand shows the coarse version failing.
+v1 matches on outward-code **area** letters (`SW`, `M`, `EH`), coarse on purpose.
+`audit.postcode_area` is a stored generated column, so matching is a join and
+there is no parsing logic in application code.
 
 ---
 
