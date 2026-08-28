@@ -1682,8 +1682,12 @@ CREATE OR REPLACE FUNCTION "public"."ops_queue"() RETURNS TABLE("kind" "public".
          format('%s auditor application%s waiting',
                 count(*), case when count(*) = 1 then '' else 's' end),
          null::uuid, min(ap.created_at)
-  from public.auditor_profile ap, caller
+  from public.auditor_profile ap
+  join public.user_profile u on u.id = ap.user_id, caller
   where caller.ok and ap.approval_status = 'pending'
+    -- Somebody who has not opened their invitation has not applied. Counting
+    -- them sends an admin to a queue with nothing in it they can act on.
+    and u.status <> 'invited'
   group by caller.ok
   having count(*) > 0
 

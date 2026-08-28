@@ -10,6 +10,9 @@ const queue = (db: Db, as: string) =>
       'select * from ops_queue()',
     );
 
+/** Somebody PICK invited who has not opened the link. */
+const INVITED = '00000000-0000-7000-8000-00000000e0aa';
+
 describe('ops_queue (S4.1)', () => {
   it('is admin-only — it is the whole network on one screen', async () => {
     await withDatabase(async (db) => {
@@ -79,7 +82,48 @@ describe('ops_queue (S4.1)', () => {
       const vetting = (await queue(db, ids.admin)).filter((i) => i.kind === 'vetting');
       // A cockpit for two people: one line saying "2 waiting", not two lines.
       expect(vetting).toHaveLength(1);
-      expect(vetting[0]?.summary).toMatch(/1 auditor application waiting/);
+
+      // Counted from the database rather than hardcoded. The fixture runs in a
+      // transaction but the database around it does not, and the dev seed has
+      // its own pending auditors — a literal here fails whenever somebody
+      // makes the local data more realistic, which is the wrong thing to
+      // punish.
+      const [{ waiting }] = await db.arrange<{ waiting: string }>(
+        `select count(*)::text as waiting from auditor_profile ap
+         join user_profile u on u.id = ap.user_id
+         where ap.approval_status = 'pending' and u.status <> 'invited'`,
+      );
+      expect(vetting[0]?.summary).toBe(
+        `${waiting} auditor application${waiting === '1' ? '' : 's'} waiting`,
+      );
+    });
+  });
+
+  it('does not count an unopened invitation as an application', async () => {
+    // An invited auditor has a pending profile from the moment the link is
+    // sent. They have not applied, cannot be vetted, and must not put a number
+    // on a queue that says somebody has something to do.
+    await withDatabase(async (db) => {
+      const before = (await queue(db, ids.admin)).find((i) => i.kind === 'vetting')?.summary ?? '';
+
+      await db.arrange(
+        `insert into auth.users (id, email, instance_id, aud, role)
+         values ($1, 'invitee@pick.test', '00000000-0000-0000-0000-000000000000',
+                 'authenticated', 'authenticated')`,
+        [INVITED],
+      );
+      await db.arrange(
+        `insert into user_profile (id, role, full_name, email, status)
+         values ($1, 'auditor', '', 'invitee@pick.test', 'invited')`,
+        [INVITED],
+      );
+      await db.arrange(
+        "insert into auditor_profile (user_id, approval_status) values ($1, 'pending')",
+        [INVITED],
+      );
+
+      const after = (await queue(db, ids.admin)).find((i) => i.kind === 'vetting')?.summary ?? '';
+      expect(after).toBe(before);
     });
   });
 
