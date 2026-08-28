@@ -31,9 +31,24 @@ jobs:
           if [ -n "$missing" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Staging deploy not configured. Missing secrets:$missing. Skipping."
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          # Present but malformed is a different failure from absent, and it
+          # must be loud. A wrong-shaped token dies four steps later inside
+          # `supabase link`, saying only "Invalid access token format" with no
+          # clue which secret or which repository — which is how this workflow
+          # ran red on every push for a day and a half while staging quietly
+          # fell 13 migrations behind.
+          case "${{ secrets.SUPABASE_ACCESS_TOKEN }}" in
+            sbp_*) ;;
+            *)
+              echo "::error::SUPABASE_ACCESS_TOKEN is set but is not a Supabase personal access token (expected an sbp_… value; an anon key or project JWT will not work). Mint one at https://supabase.com/dashboard/account/tokens and set it with: gh secret set SUPABASE_ACCESS_TOKEN"
+              exit 1
+              ;;
+          esac
+
+          echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
         if: steps.guard.outputs.ready == 'true'

@@ -142,3 +142,36 @@ then on `Cannot read properties of null (reading 'useRef')`.
 copies of React in one tree only misbehave at prerender. Neither is visible to
 lint, typecheck or unit tests.
 **Caught now by:** `pnpm build` in CI.
+
+## Staging silently 13 migrations behind, with all three secrets set
+**Symptom:** `deploy-staging.yml` red on every push since 26 Aug, each run dying
+in ~10s. `gh secret list` showed all three secrets present, so the guard passed
+and the register said staging was current. It was not — it was last pushed by
+hand at migration 26, with 13 landed since.
+
+**Why it hid:** three things stacked.
+
+- The failure text was `Invalid access token format. Must be like sbp_0102...1920`
+  — emitted by `supabase link`, four steps after the guard, naming no secret and
+  no repository. `SUPABASE_ACCESS_TOKEN` held something that was not a personal
+  access token.
+- The guard checked **presence, not shape**. Present-but-wrong sailed through a
+  check written for not-yet-configured.
+- Nothing depends on this workflow. A red deploy blocks no PR and fails no
+  check, so its only reader is someone who goes looking — and the reason to go
+  looking is the suspicion it is broken.
+
+The guard's own comment says *a workflow that is always red teaches people to
+ignore red*. That is exactly what happened, by a route the comment did not
+anticipate: not a missing secret, a malformed one.
+
+**Caught now by:** the guard validating the `sbp_` prefix and failing with a
+message that names the secret and the command to fix it. Absent still skips with
+a notice; malformed is a hard error.
+
+**The general shape:** a credential check that tests for a non-empty string is
+half a check. Secrets have formats — assert the format, and say which secret and
+how to fix it, because the error surfacing four steps later will not.
+
+**Worth asking of any deploy workflow nobody watches:** what tells us it failed?
+If the answer is "someone notices", it will be days.
