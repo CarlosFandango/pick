@@ -14,7 +14,7 @@ reason. Deferred is a real answer and should stay populated.
 | Turborepo monorepo, pnpm workspaces | Built | root | hoisted node-linker for React Native |
 | CI: lint / typecheck / test | Built | `.github/workflows/ci.yml` | plus a job that applies migrations from scratch |
 | Staging migration deploy | Built | `.github/workflows/deploy-staging.yml` | manual + on migration change; production is promoted by hand |
-| Hosted Supabase: staging | Built | London (eu-west-2), ref in `.env` | linked; all 26 migrations applied, 18 tables live and empty. No seed — `seed.sql` is local-only by design. |
+| Hosted Supabase: staging | Partial | London (eu-west-2), ref in `.env` | linked, but last pushed by hand at 26 migrations. 13 have landed since, so staging is behind `main` until TND-86 wires the deploy. No seed — `seed.sql` is local-only by design. |
 | Hosted Supabase: production | Planned | London (eu-west-2) | project exists, nothing pushed. Promoted by hand, and not needed until there is something to protect. |
 | CI deploy to staging | Partial | `.github/workflows/deploy-staging.yml` | still skips with a notice: needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. Pushing from a laptop is not a pipeline. |
 | RLS verified against hosted | Not started | — | `pnpm test:rls` has only ever run locally and in CI. Both grant pitfalls came from bootstrap differences, so a hosted run is the point — see TND-86. |
@@ -29,7 +29,7 @@ reason. Deferred is a real answer and should stay populated.
 
 | Capability | Status | Lives in | Notes |
 |---|---|---|---|
-| Schema: 12 tables, 15 enums, 1 view | Built | `packages/db/supabase/migrations` | verified on PG17 |
+| Schema: 25 tables, 33 enums, 2 views | Built | `packages/db/supabase/migrations` | 39 migrations, verified on PG17. Counts are from `schema.generated.sql` — regenerate and recount rather than incrementing by hand |
 | RLS on every table | Built | `20260825090700_rls.sql` | 12/12 enabled; 25 tests impersonating real roles, run in CI |
 | Append-only enforcement | Built | `20260825090600_append_only.sql` | REVOKE + statement trigger |
 | Check catalogue v1 (29 checks) | Built | `seed.sql` | all 10 categories covered |
@@ -48,7 +48,7 @@ reason. Deferred is a real answer and should stay populated.
 | Feature flags | Built | `core/features.ts` | `avEvidence` off; enforced in the action, not just hidden |
 | Currency-generic money | Built | `core/money.ts`, `20260826230000_currency_generic_money.sql` | `formatMoney(minorUnits, currency)`; columns are `_minor_units`. No currency column yet — see PATTERNS |
 | Payout ledger + run builder | Built | `20260826320000_payout_runs.sql` | draft → approve → executed. Payable is decided by the payment gate, never by client approval. No CSV export yet |
-| Review gates | Built | `review_gate`, `20260826310000_review_gates.sql` | TND-81. Six fixed triggers; payment and client-release resolve independently; most restrictive wins |
+| Review gates | Partial | `review_gate`, `20260826310000_review_gates.sql` | TND-81. Six fixed triggers; payment and client-release resolve independently; most restrictive wins. **`timeout_days`/`on_timeout` are stored and displayed but nothing applies them** — there is no scheduler, so a hold lasts until a human opens the queue. No first-class review-outcome event either; the outcome lands in the mutable `audit.review_note` |
 | Risk register | Built | `risk`, `risk_advisory`, `assignment_override` | TND-82. Conflict hard-blocks; exposure warns and auto-raises a risk. The advisory is a separate record |
 
 ## Screens (design manifest)
@@ -72,7 +72,7 @@ reason. Deferred is a real answer and should stay populated.
 | S2.6 | Earnings | Built |
 | S2.7 | No-show flow | Built |
 | S3.1 | Booking deepened (A/V, lead time) | Built |
-| S3.2 | Auditor override picker | Built |
+| S3.2 | Auditor override picker | **Not built** — `app/book/choose-auditor/` is an empty directory, so the manifest route 404s and nothing calls `prefer_auditor()`. The conflict hard-block is enforced and tested in the database; no client can reach it or be told why it cannot be waived (TND-82) |
 | S3.3 | Audit list + detail | Built |
 | S3.4 | Report header — coded auditor | Built (naming is a flag, default off) |
 | S3.5 | Credits ledger | Built |
@@ -87,7 +87,9 @@ reason. Deferred is a real answer and should stay populated.
 | S4.8 | Risk register | Built |
 | S4.9 | Review gates | Built |
 
-Screens are wired as components and routes with tests at every level. The
+Screens are wired as components and routes with tests at every level, with one
+exception: S3.2 above. A row here saying Built means a route a user can reach —
+not a rule enforced in the database behind a route that does not exist. The
 auditor loop closes: an auditor can now sign in, take an offer, prep, run a
 session, report a no-show and submit a write-up, which is what moves an audit
 into review without anyone touching the database.
