@@ -85,6 +85,8 @@ production is promoted deliberately, by hand.
 |---|---|
 | [CLAUDE.md](./CLAUDE.md) | Architectural decisions and the reasoning behind them. Read before adding anything. |
 | [docs/FUNCTIONALITY.md](./docs/FUNCTIONALITY.md) | What is built, planned, and deliberately deferred — and where it lives. |
-| [docs/PATTERNS.md](./docs/PATTERNS.md) | The canonical way to do each recurring thing, plus the decision log. |
+| [docs/PATTERNS.md](./docs/PATTERNS.md) | The canonical way to do each recurring thing. |
+| [docs/PITFALLS.md](./docs/PITFALLS.md) | Mistakes that were expensive to find and will recur. |
+| [docs/DECISIONS.md](./docs/DECISIONS.md) | What was chosen, what was rejected, and why. |
 
-All three are updated in the same commit as the change they describe.
+All of them are updated in the same commit as the change they describe.

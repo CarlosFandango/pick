@@ -44,16 +44,21 @@ Three things this licenses, and one it does not:
   business. Where they disagree with something invented here, **they win** — and
   the invented thing gets migrated, not mapped around.
 
-## Two documents that must not go stale
+## Four registers that must not go stale
 
-- **[docs/FUNCTIONALITY.md](docs/FUNCTIONALITY.md)** — what is built, partial,
-  planned and deliberately deferred, and where each thing lives. Read it before
-  proposing work; it is the fastest way to see whether something already exists.
-- **[docs/PATTERNS.md](docs/PATTERNS.md)** — the canonical way to do each
-  recurring thing, plus a decision log recording what was rejected and why.
+Each answers one question, so you can open the one you need instead of reading
+all four. **Grep them; do not read them end to end.**
 
-Both are updated **in the same commit as the change they describe**. A register
-that lags is worse than no register, because it is trusted and wrong.
+- **[docs/FUNCTIONALITY.md](docs/FUNCTIONALITY.md)** — does this already exist?
+  Search it before proposing work.
+- **[docs/PATTERNS.md](docs/PATTERNS.md)** — how do we do X? A table of canonical
+  approaches. The short one; worth reading whole.
+- **[docs/PITFALLS.md](docs/PITFALLS.md)** — why is this behaving impossibly?
+- **[docs/DECISIONS.md](docs/DECISIONS.md)** — why was it done this way, and what
+  was rejected?
+
+All four are updated **in the same commit as the change they describe**. A
+register that lags is worse than no register, because it is trusted and wrong.
 
 ### One way to do each thing
 
@@ -174,7 +179,7 @@ When a change touches auth, policies, grants or anything reaching
 
 When a problem takes a long time to find — and either it has bitten more than
 once, or it burned real time and looks like it will recur — add it to
-**Pitfalls** in `docs/PATTERNS.md` in the same commit as the fix. Record the
+`docs/PITFALLS.md` in the same commit as the fix. Record the
 symptom, the reason it was hard to see, and the check that would have caught it
 sooner. That last part is what makes it useful; without it you are keeping a
 diary.
