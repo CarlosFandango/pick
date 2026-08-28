@@ -6,6 +6,7 @@ import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { adminPage, metaLabel, pageTitle } from '@/lib/theme';
 import { AuditorActions } from './AuditorActions';
+import { InviteAuditor } from './InviteAuditor';
 
 /**
  * S4.3 — the auditor roster.
@@ -26,7 +27,13 @@ export default async function AuditorsPage() {
 
   const { data: roster } = await supabase.rpc('auditor_roster');
   const rows = roster ?? [];
-  const pending = rows.filter((r) => r.approval_status === 'pending').length;
+
+  // Two different things, and the queue only counts one of them. Somebody who
+  // has not opened their invitation cannot be vetted, so counting them would
+  // make the ops queue point at work that does not exist yet.
+  const invited = rows.filter((r) => r.user_status === 'invited');
+  const onNetwork = rows.filter((r) => r.user_status !== 'invited');
+  const pending = onNetwork.filter((r) => r.approval_status === 'pending').length;
 
   return (
     <AdminChrome who={session.fullName} queuePosition={`${pending} AWAITING VETTING`}>
@@ -36,12 +43,26 @@ export default async function AuditorsPage() {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
           <h1 style={pageTitle}>Auditors</h1>
           <span style={metaLabel}>
-            {rows.length} on the network · {pending} awaiting vetting
+            {onNetwork.length} on the network · {pending} awaiting vetting
+            {invited.length > 0 ? ` · ${invited.length} not yet accepted` : ''}
           </span>
         </div>
 
+        <InviteAuditor />
+
+        {invited.length > 0 ? (
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={metaLabel}>Invited — not yet accepted</span>
+            {invited.map((a) => (
+              <p key={a.auditor_id} style={{ margin: 0, fontSize: 13 }}>
+                {a.full_name || 'Awaiting their details'}
+              </p>
+            ))}
+          </section>
+        ) : null}
+
         <AuditorRoster
-          auditors={rows.map((a) => ({
+          auditors={onNetwork.map((a) => ({
             auditorId: a.auditor_id,
             fullName: a.full_name,
             approvalStatus: a.approval_status,

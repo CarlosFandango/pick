@@ -61,6 +61,13 @@ the shared vocabulary, so they are allocated here.
 | S4.9 | Review gates — what holds payment, what holds release | Web | /admin/gates |
 | S4.10 | Audit stages — what each stage permits, and the sequence | Web | /admin/stages (sequence read-only) |
 
+## S5 — Onboarding
+
+| ID | Screen | Platform | Route |
+|---|---|---|---|
+| S5.1 | Invite an auditor (link shown once, no email) | Web | /admin/auditors |
+| S5.2 | Welcome — password, coverage, methodologies | Web | /welcome |
+
 ## Open decisions
 - S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.
 - S1.5: field density — build 5B + S2.3 flag sheet; 5C parked.

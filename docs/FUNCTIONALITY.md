@@ -86,6 +86,8 @@ reason. Deferred is a real answer and should stay populated.
 | S4.7 | Payout runs | Built |
 | S4.8 | Risk register | Built |
 | S4.9 | Review gates | Built |
+| S5.1 | Invite an auditor | Built |
+| S5.2 | Welcome — accept an invitation | Built |
 
 Screens are wired as components and routes with tests at every level, with one
 exception: S3.2 above. A row here saying Built means a route a user can reach —
@@ -105,6 +107,8 @@ TND-83 adds is a summary of the observation stage rather than a rebuild.
 | Back navigation on detail pages | Built | `portal/src/components/BackLink.tsx` | a link to a named place, never `router.back()` |
 | Not-found page | Built | `portal/src/app/not-found.tsx` | session-free; copy does not confirm a record exists |
 | Role gating helper | Built | `portal/src/lib/auth.ts` | gate only — RLS is the real boundary |
+| Auditor onboarding (invite) | Built | S5.1/S5.2, `complete_auditor_profile` | TND-92. PICK invites, the link is shown once and never stored, the invitee sets their own password and coverage. Accepting never touches `approval_status` — vetting stays PICK's |
+| Auth callback | Built | `portal/src/app/auth/callback/route.ts` | exchanges an invite code for a session; password sign-in never issues one |
 | Sign out | Built | `portal/src/lib/sign-out.ts` | form POST from both shells; never a GET link |
 | Field app routes | Built | `apps/field/app` | tabs (offers / my audits / earnings) + offer, prep, session, write-up, no-show |
 | Field app navigation | Built | `app/(tabs)/_layout.tsx` | tab bar, back on detail screens, none on a live session |
@@ -131,7 +135,7 @@ TND-83 adds is a summary of the observation stage rather than a rebuild.
 ## Not built yet
 
 Portal sign-in design (scaffolding today) · report generation · notifications ·
-payment capture · payout CSV export · auditor onboarding · scheduled jobs ·
+payment capture · payout CSV export · public auditor sign-up · scheduled jobs ·
 analytics dashboards
 
 ## Deferred, with reasons
@@ -144,3 +148,5 @@ analytics dashboards
 | Balance/score cached columns | `sum(delta)` and on-the-fly scoring are fast at this size and cannot drift. | A query is measurably too slow |
 | Postcode districts / travel radius | Area letters are coarse but sufficient to test the model. | Matching visibly fails |
 | Column-level update rules on profiles | Writes go through server actions where they are testable. | Users need self-service editing |
+| Public auditor sign-up (`/auditors/apply`) | Invite-only is smaller and matches how recruitment actually happens — one conversation at a time. The application form and `complete_auditor_profile` are already shared, so the public route is a second front door, not a second model. | Recruiting outgrows hand-sent invitations |
+| Emailing the invitation | `generateLink` returns a URL the admin sends however they already talk to that person. SMTP is a deployment concern with nothing to test against locally. | Invitations outgrow copy and paste |

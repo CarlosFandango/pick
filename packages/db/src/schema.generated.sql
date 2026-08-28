@@ -1000,7 +1000,7 @@ $$;
 ALTER FUNCTION "public"."auditor_code_for"("p_auditor_id" "uuid", "p_organisation_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "approval_status" "public"."auditor_approval_status", "approved_at" timestamp with time zone, "base_postcode" "text", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
+CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -1008,6 +1008,7 @@ CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id
     p.user_id,
     u.full_name,
     p.approval_status,
+    u.status,
     p.approved_at,
     p.base_postcode,
     p.av_capable,
@@ -1022,8 +1023,12 @@ CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id
   join public.user_profile u on u.id = p.user_id
   where app.is_admin()
   order by
-    case p.approval_status when 'pending' then 0 else 1 end,
-    u.full_name
+    -- Vettable first, invitations last: the queue is a list of things to do,
+    -- and an unaccepted invitation is not one of them.
+    (case when u.status = 'invited' then 2
+          when p.approval_status = 'pending' then 0
+          else 1 end),
+    u.full_name;
 $$;
 
 

@@ -200,3 +200,53 @@ describe('what an auditor has to tell us', () => {
     });
   });
 });
+
+describe('the roster tells vetting from waiting', () => {
+  it('does not count an unopened invitation as somebody to vet', async () => {
+    // The ops queue points at this number. Counting invitations would send
+    // someone to a queue with nothing in it they can act on.
+    await withDatabase(async (db) => {
+      await invite(db);
+
+      const roster = await db
+        .as(ids.admin)
+        .query<{ auditor_id: string; user_status: string; approval_status: string }>(
+          'select auditor_id, user_status, approval_status from auditor_roster()',
+        );
+
+      const waiting = roster.find((r) => r.auditor_id === INVITEE);
+      expect(waiting?.user_status).toBe('invited');
+      expect(waiting?.approval_status).toBe('pending');
+
+      const vettable = roster.filter(
+        (r) => r.user_status !== 'invited' && r.approval_status === 'pending',
+      );
+      expect(vettable.map((r) => r.auditor_id)).not.toContain(INVITEE);
+    });
+  });
+
+  it('moves them into the vetting queue once they accept', async () => {
+    await withDatabase(async (db) => {
+      await invite(db);
+      await db.as(INVITEE).query(COMPLETE, DETAILS);
+
+      const roster = await db
+        .as(ids.admin)
+        .query<{ auditor_id: string; user_status: string; approval_status: string }>(
+          'select auditor_id, user_status, approval_status from auditor_roster()',
+        );
+
+      const now = roster.find((r) => r.auditor_id === INVITEE);
+      expect(now?.user_status).toBe('active');
+      expect(now?.approval_status).toBe('pending');
+    });
+  });
+
+  it('shows the roster to nobody but PICK', async () => {
+    await withDatabase(async (db) => {
+      await invite(db);
+      expect(await db.as(INVITEE).query('select * from auditor_roster()')).toHaveLength(0);
+      expect(await db.as(ids.clientA).query('select * from auditor_roster()')).toHaveLength(0);
+    });
+  });
+});

@@ -18,6 +18,8 @@ like before you open it.
 | Show a row RLS hides for good reason | a `security definer` RPC returning only what the screen may reveal | loosening the policy, a service-role key on a device |
 | Open a client screen | `clientPage()` — session, client, chrome data | repeating the organisation and balance queries |
 | Write across tenants | a server action with `createAdminClient()` | loosening an RLS policy |
+| Create an account for someone | `createAdminClient()` + `generateLink`, in a server action | letting a device or a policy do it |
+| Let someone act on themselves once | a `security definer` function taking **no id**, gated on their own state | an id parameter plus a check that it is theirs |
 | Expose a server action | its own `'use server'` module, one export | adding `'use server'` to a shared lib |
 | Offer a state-changing control | a `<form>` POST to a server action | a link, a GET route |
 | Generate an id for a field event | `newId()` on the device | server default, autoincrement, composite key |

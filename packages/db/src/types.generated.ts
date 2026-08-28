@@ -1635,6 +1635,7 @@ export type Database = {
           base_postcode: string
           full_name: string
           open_conflicts: number
+          user_status: Database["public"]["Enums"]["user_status"]
         }[]
       }
       base_audit_fee_minor_units: { Args: never; Returns: number }

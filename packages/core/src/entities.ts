@@ -166,6 +166,35 @@ export const evidenceAttachment = z.object({
   captured_at: z.string().datetime({ offset: true }).nullable().default(null),
 });
 
+/**
+ * What an auditor tells us when they accept an invitation.
+ *
+ * Coverage is postcode **area** letters only — matching joins on them, so a
+ * district here would match nothing and the auditor would simply never be
+ * offered work. Uppercased on the way in, because the column is uppercase and
+ * a lowercase entry would silently fail to match.
+ *
+ * The same shape a public sign-up route would submit, which is why it lives
+ * here rather than in the portal.
+ */
+export const auditorApplication = z.object({
+  full_name: z.string().trim().min(1, 'We need a name to put on the roster'),
+  base_postcode: z.string().trim().min(2, 'Where do you set out from?'),
+  areas: z
+    .array(
+      z
+        .string()
+        .trim()
+        .toUpperCase()
+        .regex(/^[A-Z]{1,2}$/, 'Use the area letters only, like SW or EH'),
+    )
+    .min(1, 'An auditor covers at least one postcode area'),
+  audit_types: z.array(auditType).min(1, 'An auditor runs at least one kind of audit'),
+  av_capable: z.boolean().default(false),
+});
+
+export type AuditorApplication = z.infer<typeof auditorApplication>;
+
 export type CheckDefinition = z.infer<typeof checkDefinition>;
 export type CheckResult = z.infer<typeof checkResult>;
 export type ObservationLog = z.infer<typeof observationLog>;
