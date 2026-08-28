@@ -1,6 +1,6 @@
 'use client';
 
-import { AUDIT_MOMENTS, MOMENT_LABELS } from '@picksel/core';
+import { AUDIT_MOMENTS, formatMoment, MOMENT_LABELS } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
@@ -62,7 +62,7 @@ export function ReviewActions({
       >
         <div style={{ ...metaLabel, marginBottom: 6 }}>Audit</div>
         Booked by {organisationName}
-        {submittedAt ? <> · submitted {new Date(submittedAt).toLocaleString('en-GB')}</> : null}
+        {submittedAt ? <> · submitted {formatMoment(new Date(submittedAt))}</> : null}
       </div>
 
       {error ? (

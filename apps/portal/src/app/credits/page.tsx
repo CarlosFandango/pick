@@ -4,6 +4,7 @@ import {
   type CreditEntry,
   currentBalance,
   deltaLabel,
+  formatDay,
   runningBalance,
   valueLabel,
 } from '@picksel/core';
@@ -11,7 +12,7 @@ import { color, radius } from '@picksel/tokens';
 import { BuyCredits } from '@/components/BuyCredits';
 import { Chrome } from '@/components/Chrome';
 import { clientPage } from '@/lib/client-page';
-import { hairline, metaLabel, mono } from '@/lib/theme';
+import { clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
 
 const cell = {
   padding: '12px 16px',
@@ -76,7 +77,7 @@ export default async function CreditsPage() {
 
   return (
     <Chrome active="credits" organisationName={organisationName} credits={balance}>
-      <div style={{ padding: '26px 32px', maxWidth: 820 }}>
+      <div style={clientColumn}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
           Credits
         </h1>
@@ -162,7 +163,7 @@ export default async function CreditsPage() {
                       color: color.muted,
                     }}
                   >
-                    {line.occurredAt.toLocaleDateString('en-GB')}
+                    {formatDay(line.occurredAt)}
                   </td>
                   <td style={cell}>
                     {CREDIT_REASON_LABELS[line.reason]}

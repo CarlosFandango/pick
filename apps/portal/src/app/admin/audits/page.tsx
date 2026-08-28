@@ -54,9 +54,7 @@ export default async function AdminAuditsPage() {
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
           <h1 style={pageTitle}>Audits</h1>
-          <span style={metaLabel}>
-            {rows.length} most recent · {unassigned} still need an auditor
-          </span>
+          <span style={metaLabel}>{rows.length} most recent</span>
         </div>
 
         <AuditsTable audits={rows} />

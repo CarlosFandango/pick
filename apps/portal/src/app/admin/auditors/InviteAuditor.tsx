@@ -2,7 +2,7 @@
 
 import { color, radius } from '@picksel/tokens';
 import { useActionState } from 'react';
-import { hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
+import { bodyText, hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
 import { type InviteState, inviteAuditor } from './invite';
 
 /**
@@ -29,7 +29,7 @@ export function InviteAuditor() {
     >
       <div>
         <h2 style={{ fontFamily: sans, fontSize: 15, margin: 0 }}>Invite an auditor</h2>
-        <p style={{ ...metaLabel, textTransform: 'none', margin: '4px 0 0' }}>
+        <p style={{ ...bodyText, margin: '4px 0 0' }}>
           They choose their own password, then tell us where they work and what they can run. You
           approve them afterwards — accepting an invitation does not put anyone on the roster.
         </p>
@@ -77,7 +77,7 @@ export function InviteAuditor() {
             gap: 6,
           }}
         >
-          <p style={{ ...metaLabel, textTransform: 'none', margin: 0 }}>
+          <p style={{ ...bodyText, margin: 0 }}>
             Send this to {state.email}. It is shown once and is not stored — if it is lost, invite
             them again.
           </p>

@@ -1,3 +1,4 @@
+import { formatDay } from './dates';
 import { formatMoney } from './money';
 
 export interface EarningLine {
@@ -50,9 +51,6 @@ export function pendingLine(summary: EarningsSummary): string {
 /** "PENDING — NEXT RUN FRI 6 MAR" */
 export function nextRunLabel(nextRun: Date | null): string {
   if (!nextRun) return 'PENDING';
-  const when = nextRun
-    .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-    .toUpperCase()
-    .replace(',', '');
+  const when = formatDay(nextRun).toUpperCase();
   return `PENDING — NEXT RUN ${when}`;
 }

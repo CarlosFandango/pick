@@ -2,7 +2,7 @@ import { color, radius } from '@picksel/tokens';
 import { redirect } from 'next/navigation';
 import { AuditorApplicationForm } from '@/components/AuditorApplicationForm';
 import { supabaseServer } from '@/lib/supabase';
-import { hairline, metaLabel, pageTitle, sans } from '@/lib/theme';
+import { bodyText, hairline, metaLabel, pageTitle, sans } from '@/lib/theme';
 import { completeProfile } from './actions';
 
 /**
@@ -57,7 +57,7 @@ export default async function WelcomePage() {
         }}
       >
         <h1 style={pageTitle}>Welcome to PICK</h1>
-        <p style={{ ...metaLabel, textTransform: 'none', marginBottom: 26 }}>
+        <p style={{ ...bodyText, marginBottom: 26 }}>
           A few things about where you work, so we only send you audits you can actually reach.
         </p>
 

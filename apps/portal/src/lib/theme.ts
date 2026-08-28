@@ -18,6 +18,27 @@ export const metaLabel = {
   color: color.muted,
 } as const;
 
+/**
+ * A sentence.
+ *
+ * `metaLabel` is a label style — 10px monospace, letter-spaced, uppercase —
+ * and it is right for AVAILABLE, STATUS, NEEDS A HUMAN. It was also being used
+ * for prose, because there was nothing else to reach for, and a paragraph set
+ * in it reads as terminal output rather than as writing.
+ *
+ * The tell was `{ ...metaLabel, textTransform: 'none' }` appearing at a dozen
+ * call sites: undoing half a style is how you find out you wanted a different
+ * one (TND-102).
+ *
+ * Rule of thumb: if it ends in a full stop, it is not a label.
+ */
+export const bodyText = {
+  fontFamily: `'${font.sans}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`,
+  fontSize: 13.5,
+  lineHeight: 1.55,
+  color: color.bodyBrown,
+} as const;
+
 export const sans = `'${font.sans}', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`;
 export const mono = `'${font.mono}', ui-monospace, SFMono-Regular, Menlo, monospace`;
 
@@ -87,6 +108,26 @@ export const pageTitle = {
 } as const;
 
 /** The admin shell supplies no padding, so every ops page repeats this. */
+/**
+ * A client page's measure.
+ *
+ * Every client screen already declared a max width and none of them centred
+ * it, so the report and the ledger rendered as a column hard against the left
+ * edge of a 1440px window with 45% of the screen empty — which reads as a page
+ * that failed to load rather than as a deliberate column (TND-101).
+ *
+ * The measure itself is right: the report is prose, and prose set 1400px wide
+ * is unreadable. `margin: 0 auto` was the whole fix.
+ *
+ * One definition, because five pages each stating their own width is five
+ * places to disagree — and they already did: 720, 820, 880.
+ */
+export const clientColumn = {
+  padding: '26px 32px',
+  maxWidth: 880,
+  margin: '0 auto',
+} as const;
+
 export const adminPage = {
   padding: '22px 28px',
   display: 'flex',

@@ -1,4 +1,4 @@
-import { AUDIT_TYPE_LABELS, type AuditStatus, CLIENT_STATUS } from '@picksel/core';
+import { AUDIT_TYPE_LABELS, type AuditStatus, CLIENT_STATUS, formatDateRange } from '@picksel/core';
 import { color } from '@picksel/tokens';
 import Link from 'next/link';
 import { StatusPill } from '@/components/StatusPill';
@@ -29,7 +29,12 @@ export function AuditsTable({ audits }: { audits: readonly AdminAuditRow[] }) {
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <caption style={{ ...metaLabel, textAlign: 'left', paddingBottom: 8 }}>
-        Every audit, newest first
+        {/*
+          Says what the order is, rather than "newest first" — which the eye
+          reads as "happening soonest" and then checks against a Window column
+          that is not sorted at all (TND-103).
+        */}
+        Every audit, most recently booked first
       </caption>
       <thead>
         <tr>
@@ -52,7 +57,7 @@ export function AuditsTable({ audits }: { audits: readonly AdminAuditRow[] }) {
             <td style={cell}>{audit.auditTypeLabel}</td>
             <td style={{ ...cell, fontFamily: mono, fontSize: 12 }}>{audit.postcode}</td>
             <td style={{ ...cell, color: color.bodyBrown, whiteSpace: 'nowrap' }}>
-              {audit.windowStartOn} → {audit.windowEndOn}
+              {formatDateRange(new Date(audit.windowStartOn), new Date(audit.windowEndOn))}
             </td>
             <td style={cell}>
               <StatusPill chip={CLIENT_STATUS[audit.status]} />

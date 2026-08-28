@@ -1,5 +1,5 @@
 import type { CheckDefinition, CheckOutcome } from './entities';
-import { COMPLIANCE_CATEGORIES, type ComplianceCategory } from './moments';
+import { type AuditMoment, COMPLIANCE_CATEGORIES, type ComplianceCategory } from './moments';
 
 /** The subset of a CheckResult row that scoring needs. */
 export interface ScorableResult {
@@ -24,8 +24,10 @@ export interface CategoryScore extends Tally {
 export interface AuditScore {
   overall: Tally;
   categories: CategoryScore[];
-  /** Codes of failed critical checks. A charity needs these before the total. */
+  /** Codes of failed critical checks. Ours — for review, never for a client. */
   criticalFailures: string[];
+  /** Where those failures happened. What a client is told instead of codes. */
+  criticalMoments: AuditMoment[];
   /** Recorded but unscored — see the NOTE verdict. */
   notes: number;
 }
@@ -88,6 +90,11 @@ export function scoreAudit(
   let possible = 0;
   let notes = 0;
   const criticalFailures: string[] = [];
+  // The moments those failures happened in, for the client report. A charity
+  // reads "Opening and Ask", not "OPN-02, ASK-01" — the codes are ours, and a
+  // catalogue key doing the work of a sentence on the most important line of
+  // the deliverable is how a fundraising director stops reading (TND-100).
+  const criticalMoments: AuditMoment[] = [];
 
   for (const result of latestResults(results)) {
     const definition = byId.get(result.check_definition_id);
@@ -114,6 +121,9 @@ export function scoreAudit(
     } else if (definition.is_critical) {
       criticalFailures.push(definition.code);
       bucket.critical.push(definition.code);
+      if (!criticalMoments.includes(definition.moment)) {
+        criticalMoments.push(definition.moment);
+      }
     }
   }
 
@@ -127,6 +137,7 @@ export function scoreAudit(
     overall: tally(earned, possible),
     categories,
     criticalFailures,
+    criticalMoments,
     notes,
   };
 }

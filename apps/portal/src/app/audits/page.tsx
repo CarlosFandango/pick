@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Chrome } from '@/components/Chrome';
 import { StatusPill } from '@/components/StatusPill';
 import { clientPage } from '@/lib/client-page';
-import { hairline, metaLabel, mono } from '@/lib/theme';
+import { clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
 
 /** One table cell: the list is real tabular data, so it is a real table. */
 const cell = {
@@ -33,7 +33,7 @@ export default async function AuditsPage({
 
   return (
     <Chrome active="audits" organisationName={organisationName} credits={credits}>
-      <div style={{ padding: '26px 32px', maxWidth: 880 }}>
+      <div style={clientColumn}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
           Audits
         </h1>

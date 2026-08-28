@@ -34,7 +34,8 @@ export default function WriteUp() {
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!data) return <Loading error={error} onRetry={reload} />;
+  if (!data)
+    return <Loading error={error} onRetry={reload} onHome={() => router.replace('/home')} />;
 
   const answers = new Map([...data.answers, ...edits]);
 

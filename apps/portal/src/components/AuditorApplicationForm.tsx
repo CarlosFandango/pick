@@ -3,7 +3,7 @@
 import { AUDIT_TYPE_LABELS } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState } from 'react';
-import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
+import { bodyText, hairline, metaLabel, pillButton, sans } from '@/lib/theme';
 
 export interface ApplicationState {
   error?: string;
@@ -51,7 +51,7 @@ export function AuditorApplicationForm({
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={metaLabel}>Choose a password</span>
           <input type="password" name="password" required minLength={8} style={field} />
-          <span style={{ ...metaLabel, textTransform: 'none' }}>At least 8 characters.</span>
+          <span style={{ ...bodyText }}>At least 8 characters.</span>
         </label>
       ) : null}
 
@@ -68,7 +68,7 @@ export function AuditorApplicationForm({
       <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <span style={metaLabel}>Postcode areas you cover</span>
         <input type="text" name="areas" required placeholder="SW, EC, N" style={field} />
-        <span style={{ ...metaLabel, textTransform: 'none' }}>
+        <span style={{ ...bodyText }}>
           Letters only, separated by commas — SW, not SW1A. This is what decides which audits reach
           you.
         </span>
@@ -105,7 +105,7 @@ export function AuditorApplicationForm({
         {saving ? 'Saving…' : 'Finish'}
       </button>
 
-      <p style={{ ...metaLabel, textTransform: 'none', margin: 0 }}>
+      <p style={{ ...bodyText, margin: 0 }}>
         PICK checks every auditor before offering work. You will not see any audits until that is
         done.
       </p>

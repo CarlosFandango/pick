@@ -36,7 +36,8 @@ export default function Session() {
 
   const { data: stages, error, reload } = useLoad(() => fetchStages(type));
 
-  if (!stages) return <Loading error={error} onRetry={reload} />;
+  if (!stages)
+    return <Loading error={error} onRetry={reload} onHome={() => router.replace('/home')} />;
 
   const live = session ?? startStagedSession(stages, new Date());
   const stage = currentStage(stages, live);

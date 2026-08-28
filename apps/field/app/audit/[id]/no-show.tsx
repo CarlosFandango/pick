@@ -29,7 +29,8 @@ export default function NoShow() {
   const [submitted, setSubmitted] = useState(false);
   const { data: stages, error, reload } = useLoad(() => fetchStages(type));
 
-  if (!stages) return <Loading error={error} onRetry={reload} />;
+  if (!stages)
+    return <Loading error={error} onRetry={reload} onHome={() => router.replace('/home')} />;
 
   // The clock runs from when the auditor arrived, which the session carries.
   const startedAt = since ? new Date(Number(since)) : new Date();

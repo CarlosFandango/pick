@@ -16,7 +16,7 @@ import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { requireSession } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
-import { hairline, metaLabel, mono } from '@/lib/theme';
+import { clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
 
 /**
  * S1.8 — the client report.
@@ -24,6 +24,12 @@ import { hairline, metaLabel, mono } from '@/lib/theme';
  * Only a released audit has a report. Before that the client can see the audit
  * exists — they booked it — but not what it found.
  */
+/** "Opening and Ask", "Opening, Pitch and Ask" — a list a person would say. */
+function joinWords(words: readonly string[]): string {
+  if (words.length <= 1) return words[0] ?? '';
+  return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
+}
+
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await requireSession();
@@ -101,7 +107,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       organisationName={organisation?.name ?? '—'}
       credits={balance?.balance ?? 0}
     >
-      <div style={{ padding: '26px 32px', maxWidth: 820 }}>
+      <div style={clientColumn}>
         <div style={{ marginBottom: 16 }}>
           <BackLink href={`/audits/${audit.id}`} label="Back to the audit" />
         </div>
@@ -153,9 +159,17 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
                 </span>
               </div>
 
-              {score.criticalFailures.length > 0 ? (
+              {score.criticalMoments.length > 0 ? (
                 <p style={{ margin: '10px 0 0', fontSize: 13, color: color.creativeText }}>
-                  Critical: {score.criticalFailures.join(', ')} — read these before the total.
+                  {/*
+                    Moments, never check codes. "OPN-02" is our catalogue key
+                    and means nothing to a charity — it was doing the work of a
+                    sentence on the line that tells a fundraising director two
+                    critical things went wrong (TND-100).
+                  */}
+                  Critical {score.criticalMoments.length === 1 ? 'failure' : 'failures'} in{' '}
+                  {joinWords(score.criticalMoments.map((m) => MOMENT_LABELS[m]))} — read these
+                  before the total.
                 </p>
               ) : null}
             </section>

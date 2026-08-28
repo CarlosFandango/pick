@@ -12,7 +12,7 @@ import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { PipelineRail } from '@/components/PipelineRail';
 import { clientPage } from '@/lib/client-page';
-import { hairline, metaLabel, mono, pillButton } from '@/lib/theme';
+import { clientColumn, hairline, metaLabel, mono, pillButton } from '@/lib/theme';
 
 /** S3.3 — one audit, with the rail and whatever it is waiting on. */
 export default async function AuditDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -33,15 +33,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
 
   return (
     <Chrome active="audits" organisationName={organisationName} credits={credits}>
-      <div
-        style={{
-          padding: '26px 32px',
-          maxWidth: 820,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 20,
-        }}
-      >
+      <div style={{ ...clientColumn, display: 'flex', flexDirection: 'column', gap: 20 }}>
         <BackLink href="/audits" label="All audits" />
 
         <div>

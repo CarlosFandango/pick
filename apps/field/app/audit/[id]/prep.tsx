@@ -1,5 +1,5 @@
 import { buildPrepPlan, type PrepCard } from '@picksel/core';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Loading } from '@/components/Loading';
 import { PrepScreen } from '@/components/PrepScreen';
@@ -19,10 +19,12 @@ import { useLoad } from '@/lib/useLoad';
  */
 export default function Prep() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { data, error, reload } = useLoad(() => fetchPrep(id));
   const [learnt, setLearnt] = useState<Set<string> | null>(null);
 
-  if (!data) return <Loading error={error} onRetry={reload} />;
+  if (!data)
+    return <Loading error={error} onRetry={reload} onHome={() => router.replace('/home')} />;
 
   const known = learnt ?? data.learntIds;
   const plan = buildPrepPlan(data.cards, known);

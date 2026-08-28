@@ -1,4 +1,4 @@
-import { OPS_PRESENTATION, type OpsItem, waitingFor } from '@picksel/core';
+import { formatDay, OPS_PRESENTATION, type OpsItem, waitingFor } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { AdminChrome } from '@/components/AdminChrome';
@@ -50,12 +50,7 @@ export default async function OpsHomePage() {
   ];
 
   return (
-    <AdminChrome
-      who={session.fullName}
-      queuePosition={now
-        .toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-        .toUpperCase()}
-    >
+    <AdminChrome who={session.fullName} queuePosition={formatDay(now).toUpperCase()}>
       <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', gap: 14 }}>
           {tiles.map((tile) => (

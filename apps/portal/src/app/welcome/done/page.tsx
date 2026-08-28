@@ -1,7 +1,7 @@
 import { color, radius } from '@picksel/tokens';
 import { redirect } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase';
-import { hairline, metaLabel, pageTitle, sans } from '@/lib/theme';
+import { bodyText, hairline, metaLabel, pageTitle, sans } from '@/lib/theme';
 
 /**
  * What happens next, said plainly.
@@ -55,22 +55,20 @@ export default async function WelcomeDonePage() {
         {approved ? (
           <>
             <h1 style={pageTitle}>You are on the network</h1>
-            <p style={{ ...metaLabel, textTransform: 'none' }}>
+            <p style={{ ...bodyText }}>
               Your work lives in the PICK app, not here — offers, prep, the session itself and your
               write-ups are all there.
             </p>
-            <p style={{ ...metaLabel, textTransform: 'none' }}>
-              There is nothing else for you on this site.
-            </p>
+            <p style={{ ...bodyText }}>There is nothing else for you on this site.</p>
           </>
         ) : (
           <>
             <h1 style={pageTitle}>Thanks — that is everything we need</h1>
-            <p style={{ ...metaLabel, textTransform: 'none' }}>
+            <p style={{ ...bodyText }}>
               PICK checks every auditor before offering any work: identity, right to work, and the
               methodologies you said you can run. We will be in touch when that is done.
             </p>
-            <p style={{ ...metaLabel, textTransform: 'none' }}>
+            <p style={{ ...bodyText }}>
               There will be nothing in the app until then. That is expected, not a fault.
             </p>
           </>

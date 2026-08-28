@@ -1,3 +1,4 @@
+import { formatDateRange } from '@picksel/core';
 /** How long an auditor has left, in the design's register: "EXPIRES IN 46H". */
 export function expiresIn(expiresAt: Date, now: Date): string {
   const ms = expiresAt.getTime() - now.getTime();
@@ -21,10 +22,10 @@ export function offerArea(postcodeOutward: string, locality?: string | null): st
   return locality ? `${postcodeOutward} — ${locality}` : postcodeOutward;
 }
 
-/** "Tue 3 – Thu 5 March" */
-export function windowLabel(start: Date, end: Date): string {
-  const day = (d: Date) =>
-    d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }).replace(',', '');
-  const month = end.toLocaleDateString('en-GB', { month: 'long' });
-  return `${day(start)} – ${day(end)} ${month}`;
-}
+/**
+ * "Tue 3 – Thu 5 March"
+ *
+ * Kept as a name the field code already uses, but the format itself now lives
+ * in core so the portal writes dates the same way (TND-98).
+ */
+export const windowLabel = formatDateRange;

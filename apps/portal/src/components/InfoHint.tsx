@@ -1,6 +1,6 @@
 import { color, radius } from '@picksel/tokens';
 import type { ReactNode } from 'react';
-import { hairline, sans } from '@/lib/theme';
+import { bodyText, hairline, sans } from '@/lib/theme';
 
 /**
  * A label, with "why are you asking me this?" answered on demand.
@@ -56,12 +56,8 @@ export function InfoHint({ label, children }: { label: ReactNode; children: Reac
           border: hairline,
           borderRadius: radius.tile,
           padding: '10px 13px',
+          ...bodyText,
           fontSize: 12.5,
-          lineHeight: 1.55,
-          fontWeight: 400,
-          letterSpacing: 0,
-          textTransform: 'none',
-          color: color.bodyBrown,
           maxWidth: 460,
         }}
       >

@@ -1,3 +1,4 @@
+import { formatDay } from '@picksel/core';
 import { color } from '@picksel/tokens';
 import { AdminChrome } from '@/components/AdminChrome';
 import { BackLink } from '@/components/BackLink';
@@ -97,7 +98,7 @@ export default async function RisksPage() {
                       {risk.status.toUpperCase()}
                     </span>
                     <span style={{ ...metaLabel, marginLeft: 'auto', fontFamily: mono }}>
-                      {risk.raised_by} · {new Date(risk.raised_at).toLocaleDateString('en-GB')}
+                      {risk.raised_by} · {formatDay(new Date(risk.raised_at))}
                     </span>
                   </div>
 
@@ -115,8 +116,7 @@ export default async function RisksPage() {
                       }}
                     >
                       <div style={metaLabel}>
-                        Advised by {advisory.channel} on{' '}
-                        {new Date(advisory.advised_at).toLocaleDateString('en-GB')}
+                        Advised by {advisory.channel} on {formatDay(new Date(advisory.advised_at))}
                       </div>
                       <p style={{ margin: '4px 0 8px' }}>{advisory.content}</p>
                       {advisory.client_response ? (

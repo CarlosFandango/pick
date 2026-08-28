@@ -12,7 +12,8 @@ export default function OfferDetail() {
   const [busy, setBusy] = useState(false);
   const { data, error, reload } = useLoad(() => fetchOffer(id));
 
-  if (!data) return <Loading error={error} onRetry={reload} />;
+  if (!data)
+    return <Loading error={error} onRetry={reload} onHome={() => router.replace('/home')} />;
 
   /**
    * The database is the authority on whether an offer can still be taken —

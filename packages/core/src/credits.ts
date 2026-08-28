@@ -108,10 +108,26 @@ export function currentBalance(entries: readonly CreditEntry[]): number {
 
 /** "+4" or "−1". A minus sign, not a hyphen. */
 export function deltaLabel(delta: number): string {
+  // A consumption moves nothing — the credit left at reservation — so its
+  // delta is zero, and "−0" is correct arithmetic and nonsense as English on
+  // the ledger's most important row: the one saying the charity received what
+  // it paid for. An em dash says "no change" without looking like a fault.
+  if (delta === 0) return '—';
   return delta > 0 ? `+${delta}` : `−${Math.abs(delta)}`;
 }
 
-/** "£700" for a purchase of 4 at £175. Nothing for a movement with no money. */
+/**
+ * "£700" for a purchase of 4 at £175. Nothing for a movement with no money.
+ *
+ * The blank on every other row is deliberate and was nearly undone by TND-99:
+ * a reservation carries a unit price, so it looks like a value waiting to be
+ * shown. It is not. The purchase row already states what the charity paid, and
+ * pricing each reservation as well would make the column sum to twice the
+ * money that ever moved.
+ *
+ * What a specific audit cost is a real question, and FIFO-at-reservation
+ * exists to answer it — but it belongs on the audit, not in a column of money.
+ */
 export function valueLabel(entry: CreditEntry): string {
   if (!entry.unitPriceMinorUnits || entry.reason !== 'purchase') return '';
   return formatMoney(entry.unitPriceMinorUnits * entry.delta);

@@ -1,4 +1,4 @@
-import { routeFor } from '@picksel/core';
+import { formatDay, routeFor } from '@picksel/core';
 import { color } from '@picksel/tokens';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -61,7 +61,7 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
             {organisation?.name ?? '—'} · {raisedBy?.full_name ?? 'unknown'}
           </span>
           <span style={{ ...metaLabel, marginLeft: 'auto', fontFamily: mono }}>
-            {new Date(complaint.raised_at).toLocaleDateString('en-GB')}
+            {formatDay(new Date(complaint.raised_at))}
           </span>
         </div>
 

@@ -129,3 +129,12 @@ describe('credit bundles', () => {
     expect(sortBundles(list).map((b) => b.quantity)).toEqual([1, 3, 8]);
   });
 });
+
+describe('a movement that changes nothing', () => {
+  it('reads as no change, not as a debit of zero', () => {
+    // A consumption settles a reservation; the credit left at booking. "−0" is
+    // correct arithmetic and nonsense as English, on the row that tells a
+    // charity they received what they paid for (TND-99).
+    expect(deltaLabel(0)).toBe('—');
+  });
+});

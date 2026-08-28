@@ -3,7 +3,7 @@ import { color, radius } from '@picksel/tokens';
 import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
 import { clientPage } from '@/lib/client-page';
-import { hairline, metaLabel } from '@/lib/theme';
+import { bodyText, clientColumn, hairline, metaLabel } from '@/lib/theme';
 import { ComplaintForm } from './ComplaintForm';
 
 /**
@@ -25,7 +25,7 @@ export default async function ComplaintPage() {
 
   return (
     <Chrome active="audits" organisationName={organisationName} credits={credits}>
-      <div style={{ padding: '26px 32px', maxWidth: 720 }}>
+      <div style={clientColumn}>
         <div style={{ marginBottom: 16 }}>
           <BackLink href="/audits" label="All audits" />
         </div>
@@ -59,17 +59,7 @@ export default async function ComplaintPage() {
               >
                 {route.description}
               </p>
-              <p
-                style={{
-                  margin: '8px 0 0',
-                  ...metaLabel,
-                  textTransform: 'none',
-                  letterSpacing: 0,
-                  fontSize: 12,
-                }}
-              >
-                {route.outcome}
-              </p>
+              <p style={{ ...bodyText, margin: '8px 0 0', fontSize: 12.5 }}>{route.outcome}</p>
             </div>
           ))}
         </div>

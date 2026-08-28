@@ -156,7 +156,7 @@ where not exists (
 insert into public.credit_transaction
   (id, organisation_id, delta, reason, unit_price_minor_units, note, occurred_at)
 select '00000000-0000-7000-8000-00000000f001', '00000000-0000-7000-8000-0000000000c1',
-       12, 'purchase', 17500, 'Local development seed', now() - interval '60 days'
+       12, 'purchase', 17500, 'Local development seed', now() - interval '70 days'
 where not exists (
   select 1 from public.credit_transaction where id = '00000000-0000-7000-8000-00000000f001'
 );
@@ -301,21 +301,25 @@ where not exists (
 -- out rather than generated so the arithmetic can be read: 12 purchased, 9
 -- reserved, 1 handed back, so 4 available.
 -- ---------------------------------------------------------------------------
+-- Staggered rather than all at one instant (TND-105). Nine rows sharing a
+-- timestamp appear in arbitrary order, and the running balance beside them
+-- then looks wrong — on the one screen whose whole job is letting a charity
+-- check our arithmetic. The oldest audit was booked longest ago.
 insert into public.credit_transaction
   (organisation_id, delta, reason, audit_id, unit_price_minor_units, source_purchase_id, occurred_at)
 select '00000000-0000-7000-8000-0000000000c1', -1, 'reservation', v.audit_id, 17500,
-       '00000000-0000-7000-8000-00000000f001', now() - interval '20 days'
+       '00000000-0000-7000-8000-00000000f001', now() - make_interval(days => v.days_ago)
 from (values
-  ('00000000-0000-7000-8000-00000000a001'::uuid),
-  ('00000000-0000-7000-8000-00000000a002'),
-  ('00000000-0000-7000-8000-00000000a003'),
-  ('00000000-0000-7000-8000-00000000a004'),
-  ('00000000-0000-7000-8000-00000000a005'),
-  ('00000000-0000-7000-8000-00000000a006'),
-  ('00000000-0000-7000-8000-00000000a007'),
-  ('00000000-0000-7000-8000-00000000a008'),
-  ('00000000-0000-7000-8000-00000000a009')
-) as v(audit_id)
+  ('00000000-0000-7000-8000-00000000a008'::uuid, 50),
+  ('00000000-0000-7000-8000-00000000a007', 26),
+  ('00000000-0000-7000-8000-00000000a009', 16),
+  ('00000000-0000-7000-8000-00000000a006', 12),
+  ('00000000-0000-7000-8000-00000000a005', 8),
+  ('00000000-0000-7000-8000-00000000a003', 6),
+  ('00000000-0000-7000-8000-00000000a004', 5),
+  ('00000000-0000-7000-8000-00000000a002', 4),
+  ('00000000-0000-7000-8000-00000000a001', 3)
+) as v(audit_id, days_ago)
 where not exists (
   select 1 from public.credit_transaction t
   where t.audit_id = v.audit_id and t.reason = 'reservation'
@@ -332,7 +336,7 @@ insert into public.credit_transaction
   (organisation_id, delta, reason, audit_id, unit_price_minor_units,
    source_purchase_id, settles_transaction_id, occurred_at)
 select '00000000-0000-7000-8000-0000000000c1', 0, 'consumption', r.audit_id, 17500,
-       '00000000-0000-7000-8000-00000000f001', r.id, now() - interval '15 days'
+       '00000000-0000-7000-8000-00000000f001', r.id, r.occurred_at + interval '5 days'
 from public.credit_transaction r
 where r.reason = 'reservation'
   and r.audit_id in (
@@ -350,7 +354,7 @@ insert into public.credit_transaction
   (organisation_id, delta, reason, audit_id, unit_price_minor_units,
    settles_transaction_id, note, occurred_at)
 select '00000000-0000-7000-8000-0000000000c1', 1, 'release', r.audit_id, 17500,
-       r.id, 'No team present', now() - interval '9 days'
+       r.id, 'No team present', r.occurred_at + interval '7 days'
 from public.credit_transaction r
 where r.reason = 'reservation'
   and r.audit_id = '00000000-0000-7000-8000-00000000a009'
