@@ -118,6 +118,13 @@ export async function withDatabase(body: (h: Harness) => Promise<void>): Promise
         },
         expectRefused: async (sql, params) => {
           await become(userId);
+          // Re-take the savepoint immediately before the attempt, so the
+          // rollback below undoes THIS statement and nothing else. Taking it
+          // once at the top of the transaction instead meant a refusal threw
+          // away everything the test had arranged, silently — the assertions
+          // afterwards then read an empty table and failed for the wrong
+          // reason.
+          await client.query('savepoint clean');
           try {
             await client.query(sql, params);
           } catch (error) {

@@ -1192,6 +1192,84 @@ $$;
 ALTER FUNCTION "public"."client_roster"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean DEFAULT false) RETURNS "public"."auditor_profile"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $_$
+declare
+  v_user    uuid := auth.uid();
+  v_profile public.auditor_profile;
+  v_area    text;
+begin
+  if v_user is null then
+    raise exception 'sign in first' using errcode = 'insufficient_privilege';
+  end if;
+
+  -- Invited-and-not-yet-accepted is the only state this is legal in. It is a
+  -- once-only transition, not an edit surface: letting an active auditor
+  -- re-run it would make coverage silently editable by the person whose work
+  -- it decides, with no record of the change.
+  if not exists (
+    select 1 from public.user_profile
+    where id = v_user and role = 'auditor' and status = 'invited'
+  ) then
+    raise exception 'this invitation has already been used, or is not yours'
+      using errcode = 'insufficient_privilege';
+  end if;
+
+  if coalesce(trim(p_full_name), '') = '' then
+    raise exception 'we need a name to put on the roster'
+      using errcode = 'check_violation';
+  end if;
+
+  if coalesce(array_length(p_areas, 1), 0) = 0 then
+    raise exception 'an auditor covers at least one postcode area'
+      using errcode = 'check_violation';
+  end if;
+
+  if coalesce(array_length(p_audit_types, 1), 0) = 0 then
+    raise exception 'an auditor runs at least one kind of audit'
+      using errcode = 'check_violation';
+  end if;
+
+  -- Checked here as well as by the column constraint, so the message is a
+  -- sentence rather than a constraint name. The column remains the authority.
+  foreach v_area in array p_areas loop
+    if upper(trim(v_area)) !~ '^[A-Z]{1,2}$' then
+      raise exception '% is not a postcode area — use the letters only, like SW or EH', v_area
+        using errcode = 'check_violation';
+    end if;
+  end loop;
+
+  update public.user_profile
+     set full_name = trim(p_full_name),
+         status    = 'active'
+   where id = v_user;
+
+  update public.auditor_profile
+     set base_postcode = upper(trim(p_base_postcode)),
+         av_capable    = coalesce(p_av_capable, false)
+   where user_id = v_user
+  returning * into v_profile;
+
+  -- Replace rather than merge: this runs once, so there is nothing to merge
+  -- with, and a partial write would leave coverage half-stated.
+  delete from public.auditor_coverage where auditor_id = v_user;
+  insert into public.auditor_coverage (auditor_id, postcode_area)
+  select distinct v_user, upper(trim(a)) from unnest(p_areas) as a;
+
+  delete from public.auditor_capability where auditor_id = v_user;
+  insert into public.auditor_capability (auditor_id, audit_type)
+  select distinct v_user, t from unnest(p_audit_types) as t;
+
+  return v_profile;
+end;
+$_$;
+
+
+ALTER FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."consume_credit_for"("p_audit_id" "uuid") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
@@ -2489,11 +2567,16 @@ CREATE TABLE IF NOT EXISTS "public"."user_profile" (
     "status" "public"."user_status" DEFAULT 'invited'::"public"."user_status" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "invited_by" "uuid",
     CONSTRAINT "client_requires_org" CHECK ((("role" <> 'client'::"public"."app_role") OR ("organisation_id" IS NOT NULL)))
 );
 
 
 ALTER TABLE "public"."user_profile" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."user_profile"."invited_by" IS 'PICK admin who sent the invite. Null for accounts created any other way — including the public sign-up route, when that exists.';
+
 
 
 ALTER TABLE ONLY "public"."assignment_override"
@@ -3110,6 +3193,11 @@ ALTER TABLE ONLY "public"."user_profile"
 
 
 ALTER TABLE ONLY "public"."user_profile"
+    ADD CONSTRAINT "user_profile_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "public"."user_profile"("id");
+
+
+
+ALTER TABLE ONLY "public"."user_profile"
     ADD CONSTRAINT "user_profile_organisation_id_fkey" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisation"("id") ON DELETE RESTRICT;
 
 
@@ -3564,6 +3652,12 @@ GRANT ALL ON FUNCTION "public"."build_payout_run"("p_period_start" "date", "p_pe
 REVOKE ALL ON FUNCTION "public"."client_roster"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."client_roster"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."client_roster"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "service_role";
 
 
 

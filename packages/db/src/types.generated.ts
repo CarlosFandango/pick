@@ -1367,6 +1367,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          invited_by: string | null
           organisation_id: string | null
           phone: string | null
           role: Database["public"]["Enums"]["app_role"]
@@ -1378,6 +1379,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          invited_by?: string | null
           organisation_id?: string | null
           phone?: string | null
           role: Database["public"]["Enums"]["app_role"]
@@ -1389,6 +1391,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          invited_by?: string | null
           organisation_id?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["app_role"]
@@ -1396,6 +1399,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_profile_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_profile_organisation_id_fkey"
             columns: ["organisation_id"]
@@ -1732,6 +1742,34 @@ export type Database = {
           organisation_id: string
           residency_zone: Database["public"]["Enums"]["residency_zone"]
         }[]
+      }
+      complete_auditor_profile: {
+        Args: {
+          p_areas: string[]
+          p_audit_types: Database["public"]["Enums"]["audit_type"][]
+          p_av_capable?: boolean
+          p_base_postcode: string
+          p_full_name: string
+        }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["auditor_approval_status"]
+          approved_at: string | null
+          approved_by: string | null
+          av_capable: boolean
+          base_postcode: string | null
+          created_at: string
+          dbs_checked_on: string | null
+          payout_reference: string | null
+          right_to_work_checked_on: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "auditor_profile"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       consume_credit_for: { Args: { p_audit_id: string }; Returns: undefined }
       decline_offer: {

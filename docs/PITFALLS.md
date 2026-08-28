@@ -175,3 +175,46 @@ how to fix it, because the error surfacing four steps later will not.
 
 **Worth asking of any deploy workflow nobody watches:** what tells us it failed?
 If the answer is "someone notices", it will be days.
+
+## An RLS test that cannot fail
+**Symptom:** `expectRefused("update auditor_profile set approval_status = 'approved' …")`
+failed with *expected the statement to be refused, but it succeeded* — which
+read, for a moment, like an auditor being able to approve themselves.
+
+**Why it hid:** it was the test that was wrong, and wrong in the direction that
+looks safe. **RLS filters an UPDATE; it does not raise on one.** A statement
+matching no visible row reports `UPDATE 0` and succeeds. So:
+
+- asserting a *refusal* on an UPDATE or DELETE tests nothing about the policy —
+  it passes only when something unrelated throws
+- and it would keep passing if the policy were dropped, because dropping it
+  changes a silent no-op into a silent write
+
+Assert the **value did not move**, read back as `postgres`:
+
+```ts
+await db.as(attacker).query("update … set approval_status = 'approved' …");
+const [row] = await db.arrange('select approval_status from …');
+expect(row?.approval_status).toBe('pending');
+```
+
+`expectRefused` is right for a `security definer` function that raises, and for
+an INSERT violating a `WITH CHECK`. It is wrong for UPDATE and DELETE.
+
+**Caught now by:** `packages/db/test/onboarding.test.ts`, which reads the value
+back rather than trusting the statement to complain.
+
+## A test helper that silently discarded the arrangement
+**Symptom:** assertions after an `expectRefused` read `undefined` from rows the
+test had definitely just inserted.
+
+**Why it hid:** `withDatabase` took `savepoint clean` once, before the test body
+ran, and `expectRefused` rolled back to it. So a refusal undid **everything the
+test had arranged**, not just the statement that was refused — and the failure
+surfaced as a confusing empty read several lines later, never as "your setup is
+gone".
+
+**Caught now by:** the savepoint being re-taken immediately before each attempt,
+so the rollback undoes exactly one statement. Worth remembering whenever a
+helper both mutates and recovers transaction state: the recovery point has to be
+as narrow as the thing being recovered from.
