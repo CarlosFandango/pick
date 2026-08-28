@@ -20,6 +20,7 @@ import {
   type StageRow,
   toAuditStage,
   toEarningLines,
+  toHome,
   toMyAuditRow,
   toOfferListItem,
   toOfferView,
@@ -62,6 +63,37 @@ export async function fetchMyAudits(): Promise<MyAuditRow[]> {
     .limit(50);
   if (error) throw error;
   return ((data ?? []) as unknown as AuditRow[]).map(toMyAuditRow);
+}
+
+/**
+ * Everything home needs, in one round trip.
+ *
+ * The same three tables earnings reads. Kept as its own function rather than
+ * reusing `fetchEarnings` because the two answer different questions — home
+ * wants work ahead and payment state, earnings wants the money broken into its
+ * parts — and folding them together would make each carry the other's columns.
+ *
+ * Columns are named explicitly, as everywhere else here: `compliance_category`
+ * must never reach the device, and `select('*')` is how it would.
+ */
+export async function fetchHome(now: Date = new Date()) {
+  const client = supabase();
+  const [audits, payItems, payoutLines] = await Promise.all([
+    client.from('audit').select(AUDIT_COLUMNS).order('window_start_on', { ascending: false }),
+    client.from('audit_pay_item').select('audit_id, kind, amount_minor_units'),
+    client.from('payout_line_item').select('audit_id, status, external_reference'),
+  ]);
+
+  for (const result of [audits, payItems, payoutLines]) {
+    if (result.error) throw result.error;
+  }
+
+  return toHome(
+    (audits.data ?? []) as unknown as AuditRow[],
+    (payItems.data ?? []) as unknown as PayItemRow[],
+    (payoutLines.data ?? []) as unknown as PayoutLineRow[],
+    now,
+  );
 }
 
 export async function fetchEarnings(): Promise<EarningLine[]> {

@@ -4,6 +4,7 @@ import {
   type OfferBoardRow,
   toAuditStage,
   toEarningLines,
+  toHome,
   toMyAuditRow,
   toOfferListItem,
   toOfferView,
@@ -196,5 +197,124 @@ describe('stages from the database', () => {
     });
 
     expect(stage.permissions).toEqual({ tallies: false, notes: false, markers: false });
+  });
+});
+
+describe('home', () => {
+  const NOW = new Date('2026-03-04T09:00:00.000Z');
+
+  it('leads with the soonest job still to do', () => {
+    const home = toHome(
+      [
+        auditRow({
+          id: 'later',
+          status: 'assigned',
+          window_start_on: '2026-03-20',
+          window_end_on: '2026-03-22',
+        }),
+        auditRow({
+          id: 'sooner',
+          status: 'assigned',
+          window_start_on: '2026-03-06',
+          window_end_on: '2026-03-08',
+        }),
+      ],
+      [],
+      [],
+      NOW,
+    );
+    expect(home.next?.id).toBe('sooner');
+    expect(home.upcoming.map((u) => u.id)).toEqual(['later']);
+  });
+
+  it('keeps a shift being worked today at the top', () => {
+    // The window has opened but not closed. An auditor mid-shift opening the
+    // app must not find their own job filed under history.
+    const home = toHome(
+      [
+        auditRow({
+          id: 'today',
+          status: 'in_progress',
+          window_start_on: '2026-03-03',
+          window_end_on: '2026-03-05',
+        }),
+      ],
+      [],
+      [],
+      NOW,
+    );
+    expect(home.next?.id).toBe('today');
+    expect(home.next?.action).toBe('Write up');
+  });
+
+  it('drops a job whose window has closed', () => {
+    const home = toHome(
+      [
+        auditRow({
+          id: 'gone',
+          status: 'assigned',
+          window_start_on: '2026-02-01',
+          window_end_on: '2026-02-03',
+        }),
+      ],
+      [],
+      [],
+      NOW,
+    );
+    expect(home.next).toBeNull();
+  });
+
+  it('does not treat submitted work as something still to do', () => {
+    const home = toHome([auditRow({ id: 'sent', status: 'in_review' })], [], [], NOW);
+    expect(home.next).toBeNull();
+    expect(home.payments.map((p) => p.auditId)).toEqual(['sent']);
+  });
+
+  it('totals what an audit is worth from its pay items', () => {
+    const home = toHome(
+      [auditRow({ id: 'a1', status: 'released' })],
+      [
+        { audit_id: 'a1', kind: 'base', amount_minor_units: 10_000 },
+        { audit_id: 'a1', kind: 'travel', amount_minor_units: 1_500 },
+      ],
+      [],
+      NOW,
+    );
+    expect(home.payments[0]?.amountMinorUnits).toBe(11_500);
+    expect(home.payments[0]?.state).toBe('cleared');
+  });
+
+  it('follows the payout line once there is one', () => {
+    const home = toHome(
+      [auditRow({ id: 'a1', status: 'released' })],
+      [],
+      [{ audit_id: 'a1', status: 'paid', external_reference: 'BACS-0091' }],
+      NOW,
+    );
+    expect(home.payments[0]?.state).toBe('paid');
+    expect(home.payments[0]?.reference).toBe('BACS-0091');
+  });
+
+  it('shows the most recently worked audits first', () => {
+    const home = toHome(
+      [
+        auditRow({
+          id: 'old',
+          status: 'released',
+          window_start_on: '2026-01-05',
+          window_end_on: '2026-01-07',
+        }),
+        auditRow({
+          id: 'recent',
+          status: 'released',
+          window_start_on: '2026-02-05',
+          window_end_on: '2026-02-07',
+        }),
+      ],
+      [],
+      [],
+      NOW,
+    );
+    expect(home.payments.map((p) => p.auditId)).toEqual(['recent', 'old']);
   });
 });

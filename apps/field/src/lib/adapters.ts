@@ -1,14 +1,18 @@
 import {
   AUDIT_TYPE_LABELS,
   type AuditStage,
+  awaitingPayment,
   type EarningLine,
   type OfferListItem,
   parseAuditStatus,
+  paymentState,
   SHIFT_PAYMENT_LABELS,
 } from '@picksel/core';
+import type { HomeAudit, HomePayment } from '@/components/HomeScreen';
 import type { MyAuditRow } from '@/components/MyAuditsScreen';
 import type { OfferView } from '@/components/OfferScreen';
 import { offerArea, windowLabel } from '@/format/offer';
+import { actionForAudit } from '@/lib/routes';
 
 /**
  * Database rows to the shapes the screens take.
@@ -189,4 +193,64 @@ export function toAuditStage(row: StageRow): AuditStage {
     moment: row.moment as AuditStage['moment'],
     durationHintMinutes: row.duration_hint_minutes,
   };
+}
+
+/**
+ * Home (TND-95). Three lists out of one set of rows.
+ *
+ * `now` is a parameter rather than `new Date()` so "next" is testable without
+ * freezing the clock — and because an auditor's device clock is the one that
+ * matters here, exactly as it is for `occurred_at`.
+ */
+export function toHome(
+  audits: readonly AuditRow[],
+  payItems: readonly PayItemRow[],
+  payoutLines: readonly PayoutLineRow[],
+  now: Date,
+): { next: HomeAudit | null; upcoming: HomeAudit[]; payments: HomePayment[] } {
+  const view = (row: AuditRow): HomeAudit => ({
+    id: row.id,
+    title: `${AUDIT_TYPE_LABELS[row.audit_type]} · ${row.postcode_outward}`,
+    dateLabel: windowLabel(new Date(row.window_start_on), new Date(row.window_end_on)),
+    area: offerArea(row.postcode_outward),
+    windowLabel: null,
+    status: parseAuditStatus(row.status),
+    action: actionForAudit(parseAuditStatus(row.status)),
+  });
+
+  // Work still to do, soonest first. An audit whose window has closed is not
+  // "coming up" however it ended, so the end of the window is the cutoff
+  // rather than the start — a shift being worked today stays at the top.
+  const ahead = audits
+    .filter((a) => ['assigned', 'in_progress'].includes(a.status))
+    .filter((a) => new Date(a.window_end_on).getTime() >= startOfDay(now).getTime())
+    .sort((a, b) => new Date(a.window_start_on).getTime() - new Date(b.window_start_on).getTime());
+
+  const payments = audits
+    .filter((a) => awaitingPayment(a.status))
+    .sort((a, b) => new Date(b.window_start_on).getTime() - new Date(a.window_start_on).getTime())
+    .map((audit) => {
+      const line = payoutLines.find((l) => l.audit_id === audit.id) ?? null;
+      const state = paymentState(audit.status, line);
+      return {
+        auditId: audit.id,
+        title: `${AUDIT_TYPE_LABELS[audit.audit_type]} · ${audit.postcode_outward}`,
+        dateLabel: windowLabel(new Date(audit.window_start_on), new Date(audit.window_end_on)),
+        state: state.state,
+        stateLabel: state.label,
+        amountMinorUnits: payItems
+          .filter((p) => p.audit_id === audit.id)
+          .reduce((total, p) => total + Number(p.amount_minor_units), 0),
+        reference: state.reference,
+      };
+    });
+
+  return { next: ahead[0] ? view(ahead[0]) : null, upcoming: ahead.slice(1).map(view), payments };
+}
+
+/** Midnight on the device, so "today" means the auditor's today. */
+function startOfDay(at: Date): Date {
+  const day = new Date(at);
+  day.setHours(0, 0, 0, 0);
+  return day;
 }

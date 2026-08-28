@@ -88,6 +88,7 @@ reason. Deferred is a real answer and should stay populated.
 | S4.9 | Review gates | Built |
 | S5.1 | Invite an auditor | Built |
 | S5.2 | Welcome — accept an invitation | Built |
+| S5.3 | Auditor home | Built (parts 1–3; complaints deferred to TND-97) |
 
 Screens are wired as components and routes with tests at every level, with one
 exception: S3.2 above. A row here saying Built means a route a user can reach —
@@ -111,7 +112,8 @@ TND-83 adds is a summary of the observation stage rather than a rebuild.
 | Auth callback | Built | `portal/src/app/auth/callback/route.ts` | exchanges an invite code for a session; password sign-in never issues one |
 | Sign out | Built | `portal/src/lib/sign-out.ts` | form POST from both shells; never a GET link |
 | Field app routes | Built | `apps/field/app` | tabs (offers / my audits / earnings) + offer, prep, session, write-up, no-show |
-| Field app navigation | Built | `app/(tabs)/_layout.tsx` | tab bar, back on detail screens, none on a live session |
+| Field app navigation | Built | `app/(tabs)/_layout.tsx` | tab bar, back on detail screens, none on a live session. Home is the landing tab (TND-95); Offers is one along |
+| Auditor payment state | Built | `core/payment.ts`, S5.3 | TND-95. Five states off the auditor's own audit status and payout line. Never consults the review gate, so a client-release hold cannot leak — asserted by a test that scans the rendered screen for the words |
 | Device auth | Built | `field/src/lib/session.tsx`, `lib/supabase.ts` | AsyncStorage session; `ready` kept separate from `session` so a cold start does not sign anyone out |
 | Row-to-prop adapters | Built | `field/src/lib/adapters.ts` | the layer that was missing; 18 tests, no network |
 | Local field-event writes | Built | `field/src/lib/events.ts` | device-minted ids, device clock, left queued |
@@ -148,5 +150,7 @@ analytics dashboards
 | Balance/score cached columns | `sum(delta)` and on-the-fly scoring are fast at this size and cannot drift. | A query is measurably too slow |
 | Postcode districts / travel radius | Area letters are coarse but sufficient to test the model. | Matching visibly fails |
 | Column-level update rules on profiles | Writes go through server actions where they are testable. | Users need self-service editing |
+| Auditor complaints on home (TND-95 part 4) | "Complaint management" for an auditor is two different builds — rework reaching them, or issues they raise — and one is an entity that does not exist. Guessing would build the wrong thing, and safety reports may not belong in a queue at all. | TND-97 comes back from Jaz |
+| An audit detail screen in the field app | Home and My Audits both send an auditor to the thing that is *due* — prep, or the write-up. A read-only detail screen would be a second tap to nothing actionable. | An auditor needs something on it they cannot get from prep |
 | Public auditor sign-up (`/auditors/apply`) | Invite-only is smaller and matches how recruitment actually happens — one conversation at a time. The application form and `complete_auditor_profile` are already shared, so the public route is a second front door, not a second model. | Recruiting outgrows hand-sent invitations |
 | Emailing the invitation | `generateLink` returns a URL the admin sends however they already talk to that person. SMTP is a deployment concern with nothing to test against locally. | Invitations outgrow copy and paste |

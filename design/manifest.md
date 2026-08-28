@@ -67,6 +67,7 @@ the shared vocabulary, so they are allocated here.
 |---|---|---|---|
 | S5.1 | Invite an auditor (link shown once, no email) | Web | /admin/auditors |
 | S5.2 | Welcome — password, coverage, methodologies | Web | /welcome |
+| S5.3 | Auditor home — next audit, coming up, payment state | Field | /(tabs)/home |
 
 ## Open decisions
 - S3.4: auditor named vs coded in client reports — build coded (B) first; naming is additive.

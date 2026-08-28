@@ -14,9 +14,9 @@ import { text } from '@/theme';
  * two clipboards, and this is read at arm's length in daylight by someone who
  * is watching something they cannot pause.
  *
- * Which of these is *home* is still an open product question — see TND-95.
- * Offers stays the landing tab for now because an auditor with no work needs
- * it, and changing that unilaterally would change what the app is for.
+ * Home is now the landing tab (TND-95): an auditor with a shift today opens
+ * the app to check what is next, not to browse. Offers stays a tab, because an
+ * auditor with nothing on still needs somewhere to look for work.
  */
 export default function TabsLayout() {
   return (
@@ -34,6 +34,7 @@ export default function TabsLayout() {
         tabBarLabel: () => null,
       }}
     >
+      <Tabs.Screen name="home" options={{ title: 'Home', tabBarIcon: label('Home') }} />
       <Tabs.Screen name="offers" options={{ title: 'Offers', tabBarIcon: label('Offers') }} />
       <Tabs.Screen name="audits" options={{ title: 'My audits', tabBarIcon: label('My audits') }} />
       <Tabs.Screen name="earnings" options={{ title: 'Earnings', tabBarIcon: label('Earnings') }} />

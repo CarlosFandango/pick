@@ -8,6 +8,7 @@ export * from './moments';
 export * from './money';
 export * from './offers';
 export * from './ops';
+export * from './payment';
 export * from './pipeline';
 export * from './prep';
 export * from './reporting';
