@@ -22,6 +22,7 @@ reason. Deferred is a real answer and should stay populated.
 | Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:generate` after every migration |
 | Generated schema snapshot | Built | `packages/db/src/schema.generated.sql` | current-state DDL, so schema questions cost one lookup instead of a sweep of 39 migrations |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
+| Agent tool permissions | Built | `.claude/settings.json` | read-only commands and the project's own safe scripts, pre-allowed. Local overrides go in `settings.local.json`, which is ignored. |
 
 ## Domain
 

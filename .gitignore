@@ -23,3 +23,6 @@ packages/db/supabase/.temp/
 .DS_Store
 *.log
 *.tsbuildinfo
+
+# claude code — project settings are shared, local overrides are not
+.claude/settings.local.json
