@@ -23,6 +23,7 @@ reason. Deferred is a real answer and should stay populated.
 | Generated schema snapshot | Built | `packages/db/src/schema.generated.sql` | current-state DDL, so schema questions cost one lookup instead of a sweep of 39 migrations |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
 | Agent tool permissions | Built | `.claude/settings.json` | read-only commands and the project's own safe scripts, pre-allowed. Local overrides go in `settings.local.json`, which is ignored. |
+| Linear (project management) | Built | `.mcp.json` | project-scoped MCP server, approved via `enabledMcpjsonServers`. The account-wide claude.ai connectors are disabled for this repo — their tool definitions load on every request. |
 
 ## Domain
 

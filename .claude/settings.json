@@ -27,5 +27,6 @@
       "Bash(pnpm db:schema:*)",
       "Bash(pnpm db:generate:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["linear"]
 }
