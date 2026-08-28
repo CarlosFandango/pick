@@ -57,6 +57,10 @@ NEXT_PUBLIC_SUPABASE_URL=$URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON
 SUPABASE_SERVICE_ROLE_KEY=$SERVICE
 
+# Where the portal is reachable. Invitation links are absolute, so this has to
+# be the real origin in a deployed environment or people land nowhere.
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
 EXPO_PUBLIC_SUPABASE_URL=$URL
 EXPO_PUBLIC_SUPABASE_ANON_KEY=$ANON
 INNER
@@ -70,6 +74,7 @@ cat > apps/portal/.env.local <<INNER
 NEXT_PUBLIC_SUPABASE_URL=$URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON
 SUPABASE_SERVICE_ROLE_KEY=$SERVICE
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 INNER
 
 cat > apps/field/.env <<INNER

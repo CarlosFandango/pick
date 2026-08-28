@@ -39,12 +39,21 @@ export async function inviteAuditor(_previous: InviteState, form: FormData): Pro
 
   if (!email.includes('@')) return { error: 'That does not look like an email address.' };
 
+  // An invitation link is absolute, so a missing origin does not degrade — it
+  // produces a link that sends a new auditor somewhere that is not us, and the
+  // only person who finds out is the person who cannot get in. Refuse to make
+  // one rather than hand over a broken one.
+  const origin = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!origin) {
+    return { error: 'NEXT_PUBLIC_SITE_URL is not set, so the invitation link would go nowhere.' };
+  }
+
   const admin = createAdminClient();
 
   const { data, error } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,
-    options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback` },
+    options: { redirectTo: `${origin}/auth/callback` },
   });
 
   if (error || !data.user) {
