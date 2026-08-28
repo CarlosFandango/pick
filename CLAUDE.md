@@ -384,8 +384,14 @@ travel time can come when demand shows the coarse version failing.
 - **Env**: `NEXT_PUBLIC_*` / `EXPO_PUBLIC_*` are shipped to the client — safe
   values only. Everything else is server-only. `SUPABASE_SERVICE_ROLE_KEY` must
   never be imported from `apps/field`. See `.env.example`.
-- **Types**: `packages/db/src/types.generated.ts` is generated. Regenerate with
-  `pnpm db:types` after any migration; never hand-edit it.
+- **Generated from the schema**: `packages/db/src/types.generated.ts` and
+  `packages/db/src/schema.generated.sql`. Regenerate both with `pnpm db:generate`
+  after any migration; never hand-edit either.
+- **To learn the current schema, read the snapshot, not the migrations.**
+  `schema.generated.sql` is what the database *is*; the 39 migrations are how it
+  got there, and answering from them means replaying every `alter` in order.
+  `awk '/CREATE TABLE IF NOT EXISTS "public"."audit"/,/^\);/'` returns the whole
+  current table. Read migrations to learn *why* a thing changed, never *what* it is.
 
 ## Commands
 
@@ -393,7 +399,7 @@ travel time can come when demand shows the coarse version failing.
 pnpm install
 pnpm db:start          # local Supabase (Docker)
 pnpm db:reset          # re-apply migrations + seed
-pnpm db:types          # regenerate Database types — after every migration
+pnpm db:generate       # regenerate types + schema snapshot — after every migration
 pnpm dev               # all apps
 pnpm check             # lint + typecheck + unit/component tests — seconds
 pnpm verify            # the lot, including build, RLS and Playwright — minutes

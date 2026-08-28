@@ -20,6 +20,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "verify": "pnpm check:secrets && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:rls && pnpm test:e2e",
     "db:types": "pnpm --filter @picksel/db types",
+    "db:schema": "pnpm --filter @picksel/db schema",
+    "db:generate": "pnpm db:types && pnpm db:schema",
     "db:start": "pnpm --filter @picksel/db start",
     "db:reset": "pnpm --filter @picksel/db reset",
     "db:diff": "pnpm --filter @picksel/db diff",

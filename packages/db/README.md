@@ -1,6 +1,6 @@
 # @picksel/db
 
-Schema, migrations and generated types.
+Schema, migrations, and the generated types and schema snapshot.
 
 ## Working on the schema
 
@@ -8,10 +8,13 @@ Schema, migrations and generated types.
 pnpm db:start                 # local Supabase
 pnpm db:reset                 # re-apply every migration + seed, from scratch
 pnpm db:diff <name>           # capture Studio changes as a new migration
-pnpm db:types                 # regenerate src/types.generated.ts
+pnpm db:generate              # regenerate src/types.generated.ts + src/schema.generated.sql
 ```
 
-Always finish with `pnpm db:types` — the whole monorepo types against that file.
+Always finish with `pnpm db:generate`. The monorepo types against
+`types.generated.ts`; `schema.generated.sql` is the current-state DDL to read
+when you need to know what a table looks like *now* — the migrations tell you
+how it got there, which is a different and rarer question.
 
 ## Rules
 

@@ -23,7 +23,7 @@ the work happens on doorsteps and high streets, not at a desk.
 pnpm install
 pnpm db:start     # local Supabase — needs Docker
 pnpm env:local    # writes .env, apps/portal/.env.local, apps/field/.env
-pnpm db:types     # generate Database types from the local schema
+pnpm db:generate  # Database types + schema snapshot, from the local schema
 pnpm dev
 ```
 

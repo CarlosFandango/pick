@@ -40,7 +40,8 @@ like before you open it.
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
 | Test app logic that touches a platform | depend on a narrow interface, pass a double | mocking `expo-sqlite`, booting a simulator |
 | Keep logic testable | pure module beside the platform binding | logic inside the file that imports the SDK |
-| Change the schema | a new migration, then `pnpm db:types` | editing a pushed migration, `db execute`, an unexported Studio change |
+| Change the schema | a new migration, then `pnpm db:generate` | editing a pushed migration, `db execute`, an unexported Studio change |
+| Find out what the schema is now | grep `packages/db/src/schema.generated.sql` | reading the migration history and replaying the `alter`s |
 | Write DDL | explicit statements, one object each | a `DO` block building SQL with `format()`/`execute` |
 | Repeat DDL across tables | write it out per table | loop over a table-name array |
 | Share code between apps | `packages/core` | `packages/ui` (web only — RN cannot render it) |
@@ -82,8 +83,8 @@ One coherent change per commit, green on its own, revertable in isolation.
 - Never mix a refactor with a behaviour change — a revert then forces a choice
   between losing the fix and keeping the churn.
 - Tests land with the code they cover, in the same commit.
-- Schema and the regenerated `types.generated.ts` land together; separately, one
-  of them is broken.
+- Schema and the output of `pnpm db:generate` land together; separately, one of
+  them is broken.
 - Subject line says *what*; the body says *why*. The diff already says how.
 
 ## The two registers that grew out of this file

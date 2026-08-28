@@ -14,6 +14,7 @@
     "reset": "supabase db reset",
     "diff": "supabase db diff -f",
     "types": "supabase gen types typescript --local --schema public > src/types.generated.ts",
+    "schema": "supabase db dump --local --schema public,app -f src/schema.generated.sql",
     "types:staging": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF_STAGING\" --schema public > src/types.generated.ts",
     "typecheck": "tsc --noEmit",
     "test:rls": "vitest run"

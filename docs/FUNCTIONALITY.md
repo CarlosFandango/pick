@@ -19,7 +19,8 @@ reason. Deferred is a real answer and should stay populated.
 | CI deploy to staging | Partial | `.github/workflows/deploy-staging.yml` | still skips with a notice: needs `SUPABASE_PROJECT_REF`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` as GitHub secrets. Pushing from a laptop is not a pipeline. |
 | RLS verified against hosted | Not started | — | `pnpm test:rls` has only ever run locally and in CI. Both grant pitfalls came from bootstrap differences, so a hosted run is the point — see TND-86. |
 | Local Supabase stack | Built | `packages/db/supabase` | analytics off locally — see config.toml |
-| Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:types` after every migration |
+| Generated database types | Built | `packages/db/src/types.generated.ts` | `pnpm db:generate` after every migration |
+| Generated schema snapshot | Built | `packages/db/src/schema.generated.sql` | current-state DDL, so schema questions cost one lookup instead of a sweep of 39 migrations |
 | Env conventions | Built | `.env.example` | `*_PUBLIC_*` = shipped to client |
 
 ## Domain
