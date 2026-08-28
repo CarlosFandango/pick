@@ -55,7 +55,10 @@ export default async function AuditorsPage() {
             <span style={metaLabel}>Invited — not yet accepted</span>
             {invited.map((a) => (
               <p key={a.auditor_id} style={{ margin: 0, fontSize: 13 }}>
-                {a.full_name || 'Awaiting their details'}
+                {/* The email is the only identity an invitee has until they
+                    accept and choose a name. Without it these rows are
+                    indistinguishable and nobody can be chased. */}
+                {a.full_name || a.email}
               </p>
             ))}
           </section>

@@ -1633,6 +1633,7 @@ export type Database = {
           audits_completed: number
           av_capable: boolean
           base_postcode: string
+          email: string
           full_name: string
           open_conflicts: number
           user_status: Database["public"]["Enums"]["user_status"]

@@ -1,5 +1,6 @@
 import { color, radius } from '@picksel/tokens';
 import { redirect } from 'next/navigation';
+import { homeFor } from '@/lib/home';
 import { supabaseServer } from '@/lib/supabase';
 import { hairline, metaLabel, pillButton, sans } from '@/lib/theme';
 
@@ -20,13 +21,23 @@ export default async function SignInPage({
   async function signIn(form: FormData) {
     'use server';
     const supabase = await supabaseServer();
-    const { error: failure } = await supabase.auth.signInWithPassword({
+    const { data, error: failure } = await supabase.auth.signInWithPassword({
       email: String(form.get('email') ?? ''),
       password: String(form.get('password') ?? ''),
     });
     // Never echo which half was wrong — that tells an attacker which emails exist.
-    if (failure) redirect('/sign-in?error=1');
-    redirect('/book');
+    if (failure || !data.user) redirect('/sign-in?error=1');
+
+    // Everyone used to land on /book, which is a client screen: an admin
+    // signing in was bounced straight back out of it by requireRole. Send
+    // people to their own work instead.
+    const { data: profile } = await supabase
+      .from('user_profile')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    redirect(profile ? homeFor(profile.role) : '/sign-in?error=1');
   }
 
   return (

@@ -1000,13 +1000,14 @@ $$;
 ALTER FUNCTION "public"."auditor_code_for"("p_auditor_id" "uuid", "p_organisation_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
+CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "email" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
   select
     p.user_id,
     u.full_name,
+    u.email,
     p.approval_status,
     u.status,
     p.approved_at,

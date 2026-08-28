@@ -22,7 +22,9 @@ function AuthGate() {
 
     const onSignIn = segments[0] === 'sign-in';
     if (!session && !onSignIn) router.replace('/sign-in');
-    if (session && onSignIn) router.replace('/offers');
+    // Home, not offers: signing in lands an auditor on their own work,
+    // same as opening the app does (TND-95).
+    if (session && onSignIn) router.replace('/home' as never);
   }, [ready, session, segments, router]);
 
   return null;

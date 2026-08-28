@@ -50,11 +50,7 @@ export async function inviteAuditor(_previous: InviteState, form: FormData): Pro
 
   const admin = createAdminClient();
 
-  const { data, error } = await admin.auth.admin.generateLink({
-    type: 'invite',
-    email,
-    options: { redirectTo: `${origin}/auth/callback` },
-  });
+  const { data, error } = await admin.auth.admin.generateLink({ type: 'invite', email });
 
   if (error || !data.user) {
     // Distinguishing "already exists" is safe here — this screen is behind
@@ -88,5 +84,22 @@ export async function inviteAuditor(_previous: InviteState, form: FormData): Pro
   if (auditorFailed) return { error: auditorFailed.message };
 
   revalidatePath('/admin/auditors');
-  return { link: data.properties.action_link, email };
+
+  // The link is built here rather than taken from `action_link`, which was
+  // wrong in two ways that only showed up by following one:
+  //
+  //  1. It routes through Supabase's own verify endpoint, which honours
+  //     `redirectTo` only if the origin is in that project's allowlist. Ours
+  //     was not, so it silently fell back to the project's Site URL and sent
+  //     the invitee to the sign-in page — where they have no password yet.
+  //  2. It returns the session as a URL **hash fragment**, which never reaches
+  //     the server. The callback is a route handler, so it could not have read
+  //     it however the redirect was configured.
+  //
+  // `hashed_token` avoids both: it is a one-time token the callback verifies
+  // server-side, and the URL is ours, so nothing has to be allowlisted.
+  return {
+    link: `${origin}/auth/callback?token_hash=${data.properties.hashed_token}&type=invite`,
+    email,
+  };
 }
