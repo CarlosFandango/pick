@@ -21,13 +21,12 @@ export async function completeProfile(
 
   const parsed = auditorApplication.safeParse({
     full_name: form.get('full_name'),
-    base_postcode: form.get('base_postcode'),
-    // A comma-separated field is what a person actually types. Splitting here
-    // rather than asking them to add rows one at a time.
-    areas: String(form.get('areas') ?? '')
-      .split(',')
-      .map((a) => a.trim())
-      .filter(Boolean),
+    base_place_id: form.get('base_place_id'),
+    max_travel_minutes: form.get('max_travel_minutes'),
+    travel_mode: form.get('travel_mode'),
+    // The places the auditor confirmed. The circle proposed them; this is what
+    // they agreed to, and it is what gets stored.
+    place_ids: form.getAll('place_ids').map(String),
     audit_types: form.getAll('audit_types').map(String),
     av_capable: form.get('av_capable') === 'yes',
   });
@@ -44,8 +43,10 @@ export async function completeProfile(
 
   const { error } = await supabase.rpc('complete_auditor_profile', {
     p_full_name: parsed.data.full_name,
-    p_base_postcode: parsed.data.base_postcode,
-    p_areas: parsed.data.areas,
+    p_base_place_id: parsed.data.base_place_id,
+    p_minutes: parsed.data.max_travel_minutes,
+    p_mode: parsed.data.travel_mode,
+    p_place_ids: parsed.data.place_ids,
     p_audit_types: parsed.data.audit_types,
     p_av_capable: parsed.data.av_capable,
   });

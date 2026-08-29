@@ -55,9 +55,13 @@ insert into auditor_profile (user_id, approval_status, approved_at) values
   ('${ids.auditor}', 'approved', now()),
   ('${ids.otherAuditor}', 'approved', now());
 
-insert into audit (id, client_organisation_id, auditor_id, status, postcode) values
-  ('${ids.auditA}','${ids.charityA}','${ids.auditor}','assigned','SW1A 1AA'),
-  ('${ids.auditB}','${ids.charityB}','${ids.otherAuditor}','assigned','EH12 9DN');
+-- Audits carry a place, which is what matching joins on. The postcode is the
+-- address as written and is no longer format-checked.
+insert into audit (id, client_organisation_id, auditor_id, status, postcode, place_id) values
+  ('${ids.auditA}','${ids.charityA}','${ids.auditor}','assigned','SW1A 1AA',
+    (select id from place where name = 'Westminster' and country_code = 'GB')),
+  ('${ids.auditB}','${ids.charityB}','${ids.otherAuditor}','assigned','EH12 9DN',
+    (select id from place where name = 'Edinburgh' and country_code = 'GB'));
 
 insert into credit_transaction (organisation_id, delta, reason, unit_price_minor_units) values
   ('${ids.charityA}', 10, 'purchase', 17500),

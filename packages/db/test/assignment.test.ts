@@ -16,12 +16,14 @@ const AUDIT = '00000000-0000-7000-8000-0000000a0003';
 async function arrangeEligible(db: Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>) {
   await db.arrange(
     `insert into audit (id, client_organisation_id, status, audit_type, postcode,
-                        window_start_on, window_end_on)
-     values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10)`,
+                        window_start_on, window_end_on, place_id)
+     values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
     [AUDIT, ids.charityA],
   );
   await db.arrange(
-    "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+    `insert into auditor_coverage (auditor_id, place_id, source)
+         select $1, id, 'derived' from place where name = 'Westminster' and country_code = 'GB'
+         on conflict do nothing`,
     [ids.auditor],
   );
   await db.arrange(
@@ -45,17 +47,14 @@ describe('eligible_auditors', () => {
       const rows = await eligible(db);
 
       expect(rows.map((r) => r.auditor_id)).toContain(ids.auditor);
-      expect(rows[0]?.match_reason).toMatch(/covers SW.*approved.*capable of street/i);
+      expect(rows[0]?.match_reason).toMatch(/covers Westminster.*approved.*capable of street/i);
     });
   });
 
   it('excludes an auditor who does not cover the area (REACHABLE)', async () => {
     await withDatabase(async (db) => {
       await arrangeEligible(db);
-      await db.arrange(
-        "delete from auditor_coverage where auditor_id = $1 and postcode_area = 'SW'",
-        [ids.auditor],
-      );
+      await db.arrange('delete from auditor_coverage where auditor_id = $1', [ids.auditor]);
       expect((await eligible(db)).map((r) => r.auditor_id)).not.toContain(ids.auditor);
     });
   });
@@ -84,8 +83,8 @@ describe('eligible_auditors', () => {
       await arrangeEligible(db);
       await db.arrange(
         `insert into audit (client_organisation_id, auditor_id, status, postcode,
-                            window_start_on, window_end_on)
-         values ($1, $2, 'assigned', 'SW1A 1AA', current_date + 8, current_date + 9)`,
+                            window_start_on, window_end_on, place_id)
+         values ($1, $2, 'assigned', 'SW1A 1AA', current_date + 8, current_date + 9, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
         [ids.charityB, ids.auditor],
       );
       expect((await eligible(db)).map((r) => r.auditor_id)).not.toContain(ids.auditor);
@@ -97,8 +96,8 @@ describe('eligible_auditors', () => {
       await arrangeEligible(db);
       await db.arrange(
         `insert into audit (client_organisation_id, auditor_id, status, postcode,
-                            window_start_on, window_end_on)
-         values ($1, $2, 'released', 'SW1A 1AA', current_date - 10, current_date - 8)`,
+                            window_start_on, window_end_on, place_id)
+         values ($1, $2, 'released', 'SW1A 1AA', current_date - 10, current_date - 8, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
         [ids.charityA, ids.auditor],
       );
       expect((await eligible(db)).map((r) => r.auditor_id)).not.toContain(ids.auditor);
@@ -123,8 +122,8 @@ describe('eligible_auditors', () => {
       await arrangeEligible(db);
       await db.arrange(
         `insert into audit (client_organisation_id, auditor_id, status, postcode,
-                            window_start_on, window_end_on)
-         values ($1, $2, 'released', 'SW1A 1AA', current_date - 400, current_date - 398)`,
+                            window_start_on, window_end_on, place_id)
+         values ($1, $2, 'released', 'SW1A 1AA', current_date - 400, current_date - 398, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
         [ids.charityA, ids.auditor],
       );
 
@@ -173,8 +172,8 @@ describe('offer_audit', () => {
       await arrangeEligible(db);
       await db.arrange(
         `insert into audit (client_organisation_id, auditor_id, status, postcode,
-                            window_start_on, window_end_on)
-         values ($1, $2, 'released', 'SW1A 1AA', current_date - 400, current_date - 398)`,
+                            window_start_on, window_end_on, place_id)
+         values ($1, $2, 'released', 'SW1A 1AA', current_date - 400, current_date - 398, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
         [ids.charityA, ids.auditor],
       );
       await db.as(ids.admin).query('select offer_audit($1)', [AUDIT]);
@@ -227,12 +226,14 @@ describe('A/V requirement (S3.1)', () => {
   async function arrangeAvAudit(db: Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>) {
     await db.arrange(
       `insert into audit (id, client_organisation_id, status, audit_type, postcode,
-                          window_start_on, window_end_on, requires_av)
-       values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, true)`,
+                          window_start_on, window_end_on, requires_av, place_id)
+       values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, true, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
       [AV_AUDIT, ids.charityA],
     );
     await db.arrange(
-      "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+      `insert into auditor_coverage (auditor_id, place_id, source)
+         select $1, id, 'derived' from place where name = 'Westminster' and country_code = 'GB'
+         on conflict do nothing`,
       [ids.auditor],
     );
     await db.arrange(

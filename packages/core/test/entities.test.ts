@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { auditStatus, parseAuditStatus, postcode, postcodeArea } from '../src/entities';
+import { address, auditStatus, parseAuditStatus } from '../src/entities';
 import { isUuidV7, newId } from '../src/ids';
 import { AUDIT_MOMENTS, momentOrder } from '../src/moments';
 
@@ -19,24 +19,22 @@ describe('newId', () => {
   });
 });
 
-describe('postcode', () => {
-  it.each(['SW1A 1AA', 'sw1a1aa', 'M1 1AE', 'EH12 9DN', 'B33 8TH'])('accepts %s', (value) => {
-    expect(postcode.safeParse(value).success).toBe(true);
-  });
-
-  it.each(['', 'SW1A', '12345', 'LONDON'])('rejects %s', (value) => {
-    expect(postcode.safeParse(value).success).toBe(false);
-  });
-});
-
-describe('postcodeArea', () => {
+describe('the address of a shift', () => {
   it.each([
-    ['SW1A 1AA', 'SW'],
-    ['sw1a1aa', 'SW'],
-    ['M1 1AE', 'M'],
-    ['EH12 9DN', 'EH'],
-  ])('reduces %s to %s', (input, expected) => {
-    expect(postcodeArea(input)).toBe(expected);
+    'SW1A 1AA',
+    'Rye Lane, Peckham',
+    'Grafton Street, Dublin 2',
+    'Alexanderplatz, 10178 Berlin',
+  ])('accepts %s, in whatever shape the country writes it', (value) => {
+    // The UK postcode regex that used to live here made the product
+    // structurally UK-only: it rejected a Dublin address on insert. Matching
+    // is on the place now, so this only has to be legible to the auditor who
+    // navigates by it.
+    expect(address.safeParse(value).success).toBe(true);
+  });
+
+  it.each(['', ' ', 'x'])('still refuses %s, which tells nobody anything', (value) => {
+    expect(address.safeParse(value).success).toBe(false);
   });
 });
 

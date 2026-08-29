@@ -100,7 +100,13 @@ const inputStyle = {
   color: color.ink,
 } as const;
 
-export function BookingForm({ credits }: { credits: number }) {
+export interface PlaceOption {
+  id: string;
+  name: string;
+  region: string | null;
+}
+
+export function BookingForm({ credits, places }: { credits: number; places: PlaceOption[] }) {
   const [state, action, pending] = useActionState<BookingState, FormData>(bookAudit, {});
   const [auditType, setAuditType] = useState<AuditTypeKey>('street');
   const earliest = earliestWindowStart(new Date());
@@ -210,21 +216,29 @@ export function BookingForm({ credits }: { credits: number }) {
       <div style={{ display: 'flex', gap: 24 }}>
         <Step
           number={isEnabled('avEvidence') ? 4 : 3}
-          label="Postcode of activity"
+          label="Where the team is working"
           hint={
             <>
-              Where the team will be working. Auditors are matched on the outward code's area
-              letters — the SE in SE15 — so a full postcode helps the auditor find the pitch but
-              does not narrow the pool further.
+              The place decides which auditors can reach it. The address is for the auditor to
+              navigate by, and can be written however you would write it.
             </>
           }
         >
+          <select name="placeId" required defaultValue="" style={inputStyle}>
+            <option value="" disabled>
+              Choose a place
+            </option>
+            {places.map((place) => (
+              <option key={place.id} value={place.id}>
+                {place.region ? `${place.name} — ${place.region}` : place.name}
+              </option>
+            ))}
+          </select>
           <input
             name="postcode"
             required
-            placeholder="SE15 4QL"
-            autoComplete="postal-code"
-            style={{ ...inputStyle, fontFamily: mono }}
+            placeholder="Rye Lane, outside the station"
+            style={{ ...inputStyle, marginTop: 8 }}
           />
         </Step>
         <div style={{ flex: 1.4 }}>

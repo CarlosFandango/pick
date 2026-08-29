@@ -2,7 +2,7 @@
 
 A two-sided marketplace for UK charity fundraising compliance audits. Charities
 buy credits and book audits (£175 each); approved contractor auditors are matched
-by postcode and fulfil them in the field, often with no signal.
+by the places they cover and fulfil them in the field, often with no signal.
 
 Solo developer, AI-assisted, 10–15 hours a week. Every decision below is made in
 service of that: **share code, keep the surface small, prefer boring**.
@@ -335,11 +335,24 @@ is no upload, transcode, streaming or playback code, and none should be written
 until A/V is actually scheduled. Recording people on the street has consent and
 retention consequences that are a product decision, not an implementation detail.
 
-### Postcode matching
+### Places, not postcodes
 
-v1 matches on outward-code **area** letters (`SW`, `M`, `EH`), coarse on purpose.
-`audit.postcode_area` is a stored generated column, so matching is a join and
-there is no parsing logic in application code.
+An auditor covers **places** — Salford, Islington, Dublin — and an audit names
+one. Matching is `auditor_coverage.place_id = audit.place_id`, minus anything
+the auditor excluded: still one join, still no parsing in application code.
+
+Postcode areas were a UK implementation detail that had reached the interface,
+and one of the three assumptions was fatal — `audit.postcode` was checked
+against a UK regex, so a Dublin address was rejected on insert. `place` is a
+gazetteer seeded per country; a second country is rows, not a schema change.
+
+An auditor never types a place. They say where they set out from, how long they
+will travel and how, and `places_within_reach()` proposes the list — which they
+correct. **What is stored is what they confirmed**, with removals kept as
+`excluded` rows so re-deriving cannot silently undo a correction. The geometry
+runs once, on save; never at match time. `max_travel_minutes` and `travel_mode`
+are kept as given, so real journey times can replace the straight-line estimate
+without asking anybody again.
 
 ---
 

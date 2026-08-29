@@ -1,6 +1,6 @@
 'use server';
 
-import { auditType, isEnabled, postcode, shiftPaymentMethod } from '@picksel/core';
+import { address, auditType, isEnabled, shiftPaymentMethod } from '@picksel/core';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -10,7 +10,8 @@ import { supabaseServer } from '@/lib/supabase';
 const bookingForm = z.object({
   auditType,
   shiftPaymentMethod,
-  postcode,
+  postcode: address,
+  placeId: z.string().uuid('Choose where the team is working'),
   windowStartOn: z.string().date(),
   windowEndOn: z.string().date(),
   siteName: z.string().trim().max(200).optional(),
@@ -37,6 +38,7 @@ export async function bookAudit(_previous: BookingState, form: FormData): Promis
     auditType: form.get('auditType'),
     shiftPaymentMethod: form.get('shiftPaymentMethod'),
     postcode: form.get('postcode'),
+    placeId: form.get('placeId'),
     windowStartOn: form.get('windowStartOn'),
     windowEndOn: form.get('windowEndOn'),
     siteName: form.get('siteName') || undefined,
@@ -56,6 +58,7 @@ export async function bookAudit(_previous: BookingState, form: FormData): Promis
     p_audit_type: parsed.data.auditType,
     p_shift_payment_method: parsed.data.shiftPaymentMethod,
     p_postcode: parsed.data.postcode,
+    p_place_id: parsed.data.placeId,
     p_window_start_on: parsed.data.windowStartOn,
     p_window_end_on: parsed.data.windowEndOn,
     p_site_name: parsed.data.siteName,

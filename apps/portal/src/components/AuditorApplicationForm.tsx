@@ -20,13 +20,21 @@ export interface ApplicationState {
  * "SW1A" would be accepted by nothing and offered nothing, with no error to
  * explain the silence.
  */
+export interface PlaceOption {
+  id: string;
+  name: string;
+  region: string | null;
+}
+
 export function AuditorApplicationForm({
   action,
   email,
+  places,
   needsPassword = true,
 }: {
   action: (previous: ApplicationState, form: FormData) => Promise<ApplicationState>;
   email: string;
+  places: PlaceOption[];
   needsPassword?: boolean;
 }) {
   const [state, submit, saving] = useActionState<ApplicationState, FormData>(action, {});

@@ -3,16 +3,15 @@ import { AUDIT_MOMENTS, COMPLIANCE_CATEGORIES } from './moments';
 
 export const uuid = z.string().uuid();
 
-/** UK postcode, tolerant of a missing or extra inner space. */
-export const postcode = z
-  .string()
-  .trim()
-  .regex(/^[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}$/i, 'Not a valid UK postcode');
-
-/** Outward-code letters. What v1 matches auditors on. */
-export function postcodeArea(value: string): string {
-  return (value.replace(/\s+/g, '').match(/^[A-Za-z]{1,2}/)?.[0] ?? '').toUpperCase();
-}
+/**
+ * The address of a shift, as the country writes it.
+ *
+ * Deliberately not validated against a UK postcode any more: that regex made
+ * the product structurally UK-only, rejecting a Dublin address on insert. What
+ * matching needs is the place; this only has to be legible to the auditor who
+ * navigates by it.
+ */
+export const address = z.string().trim().min(3, 'Where is your agency working?');
 
 export const appRole = z.enum(['auditor', 'client', 'pick_admin']);
 export const residencyZone = z.enum(['uk', 'eea', 'other']);
@@ -177,23 +176,32 @@ export const evidenceAttachment = z.object({
  * The same shape a public sign-up route would submit, which is why it lives
  * here rather than in the portal.
  */
+export const travelMode = z.enum(['public_transport', 'own_vehicle', 'either']);
+
+export const TRAVEL_MODE_LABELS: Record<z.infer<typeof travelMode>, string> = {
+  public_transport: 'Public transport',
+  own_vehicle: 'I drive',
+  either: 'Either',
+};
+
 export const auditorApplication = z.object({
   full_name: z.string().trim().min(1, 'We need a name to put on the roster'),
-  base_postcode: z.string().trim().min(2, 'Where do you set out from?'),
-  areas: z
-    .array(
-      z
-        .string()
-        .trim()
-        .toUpperCase()
-        .regex(/^[A-Z]{1,2}$/, 'Use the area letters only, like SW or EH'),
-    )
-    .min(1, 'An auditor covers at least one postcode area'),
+  base_place_id: z.string().uuid('Where do you set out from?'),
+  max_travel_minutes: z.coerce
+    .number()
+    .int()
+    .min(5)
+    .max(240, 'That is further than anybody travels for one audit'),
+  travel_mode: travelMode,
+  place_ids: z
+    .array(z.string().uuid())
+    .min(1, 'An auditor works somewhere — pick at least one place'),
   audit_types: z.array(auditType).min(1, 'An auditor runs at least one kind of audit'),
   av_capable: z.boolean().default(false),
 });
 
 export type AuditorApplication = z.infer<typeof auditorApplication>;
+export type TravelMode = z.infer<typeof travelMode>;
 
 export type CheckDefinition = z.infer<typeof checkDefinition>;
 export type CheckResult = z.infer<typeof checkResult>;

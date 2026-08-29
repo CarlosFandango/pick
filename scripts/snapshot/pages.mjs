@@ -254,7 +254,9 @@ export const FIELD_PAGES = [
   {
     id: 'S1.5b',
     name: 'field-session',
-    route: `/audit/${AUDIT.inProgress}/session`,
+    // `type` is a real requirement of the route, not a capture convenience:
+    // the session reads its stage list by audit type.
+    route: `/audit/${AUDIT.inProgress}/session?type=street`,
     responsibility:
       'The live shift: stage stepper, per-stage capture. What may be captured is configuration.',
     state: 'An audit in progress.',
@@ -269,7 +271,7 @@ export const FIELD_PAGES = [
   {
     id: 'S2.7',
     name: 'field-no-show',
-    route: `/audit/${AUDIT.assignedSoon}/no-show`,
+    route: `/audit/${AUDIT.assignedSoon}/no-show?type=street`,
     responsibility: 'Nobody turned up. Pays in full, hands the credit back.',
     state: 'An assigned audit.',
   },

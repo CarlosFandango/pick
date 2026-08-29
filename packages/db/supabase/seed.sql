@@ -111,22 +111,50 @@ where not exists (
   select 1 from public.auditor_profile where public.auditor_profile.user_id = v.user_id
 );
 
-insert into public.auditor_coverage (auditor_id, postcode_area)
-select v.auditor_id, v.area from (values
-  ('00000000-0000-7000-8000-0000000000d2'::uuid, 'SE'),
-  ('00000000-0000-7000-8000-0000000000d2', 'SW'),
-  ('00000000-0000-7000-8000-0000000000d2', 'E'),
-  ('00000000-0000-7000-8000-0000000000d2', 'EH'),
-  -- Nadia overlaps on E and covers N: the assignment console has a real choice
-  -- to show for an N audit, and a real reason to exclude her from an SE one.
-  ('00000000-0000-7000-8000-0000000000d5', 'N'),
-  ('00000000-0000-7000-8000-0000000000d5', 'EC'),
-  ('00000000-0000-7000-8000-0000000000d5', 'E'),
-  ('00000000-0000-7000-8000-0000000000d6', 'M')
-) as v(auditor_id, area)
+-- Where each auditor works, as places. Postcode areas are gone: they were a
+-- UK implementation detail that had reached the interface, and an auditor in
+-- Dublin has none at all.
+--
+-- Travel is recorded as they would have said it — how long, and how — with the
+-- places they confirmed alongside. See 20260829160000_places_not_postcodes.
+update public.auditor_profile p
+   set base_place_id      = (select id from public.place where name = v.base and country_code = 'GB'),
+       max_travel_minutes = v.minutes,
+       travel_mode        = v.mode
+from (values
+  ('00000000-0000-7000-8000-0000000000d2'::uuid, 'Southwark',  60, 'own_vehicle'::public.travel_mode),
+  ('00000000-0000-7000-8000-0000000000d5', 'Islington',  45, 'public_transport'),
+  ('00000000-0000-7000-8000-0000000000d6', 'Manchester', 45, 'own_vehicle')
+) as v(user_id, base, minutes, mode)
+where p.user_id = v.user_id and p.base_place_id is null;
+
+insert into public.auditor_coverage (auditor_id, place_id, source)
+select v.auditor_id, pl.id, 'derived'
+from (values
+  -- Dev Auditor: south and east London, plus Edinburgh for the lottery audit
+  ('00000000-0000-7000-8000-0000000000d2'::uuid, 'Southwark'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Lambeth'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Lewisham'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Tower Hamlets'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Hackney'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Westminster'),
+  ('00000000-0000-7000-8000-0000000000d2', 'Edinburgh'),
+  -- Nadia overlaps on Hackney and covers the north: the assignment console has
+  -- a real choice for an Islington audit and a real exclusion for a Peckham one.
+  ('00000000-0000-7000-8000-0000000000d5', 'Islington'),
+  ('00000000-0000-7000-8000-0000000000d5', 'Camden'),
+  ('00000000-0000-7000-8000-0000000000d5', 'Hackney'),
+  ('00000000-0000-7000-8000-0000000000d5', 'Haringey'),
+  -- Tom is awaiting vetting and is the only person covering the north-west
+  ('00000000-0000-7000-8000-0000000000d6', 'Manchester'),
+  ('00000000-0000-7000-8000-0000000000d6', 'Salford'),
+  ('00000000-0000-7000-8000-0000000000d6', 'Trafford'),
+  ('00000000-0000-7000-8000-0000000000d6', 'Stockport')
+) as v(auditor_id, place_name)
+join public.place pl on pl.name = v.place_name and pl.country_code = 'GB'
 where not exists (
   select 1 from public.auditor_coverage c
-  where c.auditor_id = v.auditor_id and c.postcode_area = v.area
+  where c.auditor_id = v.auditor_id and c.place_id = pl.id
 );
 
 insert into public.auditor_capability (auditor_id, audit_type)
@@ -481,3 +509,23 @@ select '00000000-0000-7000-8000-00000000c901', '00000000-0000-7000-8000-00000000
 where not exists (
   select 1 from public.risk_advisory where risk_id = '00000000-0000-7000-8000-00000000c901'
 );
+
+-- ---------------------------------------------------------------------------
+-- Each audit's place. Matching joins on this; the postcode is now just the
+-- address as written.
+-- ---------------------------------------------------------------------------
+update public.audit a
+   set place_id = (select id from public.place where name = v.place_name and country_code = 'GB')
+from (values
+  ('00000000-0000-7000-8000-00000000a001'::uuid, 'Islington'),
+  ('00000000-0000-7000-8000-00000000a002', 'Southwark'),
+  ('00000000-0000-7000-8000-00000000a003', 'Southwark'),
+  ('00000000-0000-7000-8000-00000000a004', 'Hackney'),
+  ('00000000-0000-7000-8000-00000000a005', 'Lambeth'),
+  ('00000000-0000-7000-8000-00000000a006', 'Tower Hamlets'),
+  ('00000000-0000-7000-8000-00000000a007', 'Edinburgh'),
+  ('00000000-0000-7000-8000-00000000a008', 'Southwark'),
+  ('00000000-0000-7000-8000-00000000a009', 'Westminster'),
+  ('00000000-0000-7000-8000-00000000a010', 'Islington')
+) as v(audit_id, place_name)
+where a.id = v.audit_id and a.place_id is null;

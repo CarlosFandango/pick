@@ -52,7 +52,16 @@ async function shoot(page, entry, base) {
   const response = await page.goto(target, { waitUntil: 'networkidle' }).catch(() => null);
   await page.waitForTimeout(entry.settle ?? 800);
 
-  const landed = new URL(page.url()).pathname;
+  // The Next.js dev badge sits over the bottom-left of every portal page and
+  // is not part of the design. Hidden here rather than switched off in the app
+  // config, where it is genuinely useful to whoever is developing.
+  await page
+    .addStyleTag({
+      content: 'nextjs-portal,[data-nextjs-dev-tools-button]{display:none!important}',
+    })
+    .catch(() => undefined);
+
+  const landed = new URL(page.url()).pathname.replace(/\?.*$/, '');
   const file = `${OUT}/${entry.name}.jpg`;
   await page.screenshot({ path: file, fullPage: true, type: 'jpeg', quality: 90 });
 
@@ -67,7 +76,7 @@ async function shoot(page, entry, base) {
     route: entry.route,
     as: entry.as ?? 'auditor',
     status: response?.status() ?? 0,
-    bounced: landed === entry.route ? null : landed,
+    bounced: landed === entry.route.replace(/\?.*$/, '') ? null : landed,
     characters: text.replace(/\s+/g, ' ').trim().length,
     responsibility: entry.responsibility,
     state: entry.state,

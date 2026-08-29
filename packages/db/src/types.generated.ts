@@ -96,6 +96,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -141,6 +142,7 @@ export type Database = {
           matched_at?: string | null
           no_team_present_at?: string | null
           pitch_detail?: string | null
+          place_id?: string | null
           postcode: string
           postcode_area?: string | null
           postcode_outward?: string | null
@@ -186,6 +188,7 @@ export type Database = {
           matched_at?: string | null
           no_team_present_at?: string | null
           pitch_detail?: string | null
+          place_id?: string | null
           postcode?: string
           postcode_area?: string | null
           postcode_outward?: string | null
@@ -234,6 +237,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "place"
             referencedColumns: ["id"]
           },
           {
@@ -509,19 +519,25 @@ export type Database = {
           auditor_id: string
           created_at: string
           id: string
-          postcode_area: string
+          place_id: string | null
+          postcode_area: string | null
+          source: Database["public"]["Enums"]["coverage_source"]
         }
         Insert: {
           auditor_id: string
           created_at?: string
           id?: string
-          postcode_area: string
+          place_id?: string | null
+          postcode_area?: string | null
+          source?: Database["public"]["Enums"]["coverage_source"]
         }
         Update: {
           auditor_id?: string
           created_at?: string
           id?: string
-          postcode_area?: string
+          place_id?: string | null
+          postcode_area?: string | null
+          source?: Database["public"]["Enums"]["coverage_source"]
         }
         Relationships: [
           {
@@ -531,6 +547,13 @@ export type Database = {
             referencedRelation: "auditor_profile"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "auditor_coverage_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "place"
+            referencedColumns: ["id"]
+          },
         ]
       }
       auditor_profile: {
@@ -539,11 +562,14 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           av_capable: boolean
+          base_place_id: string | null
           base_postcode: string | null
           created_at: string
           dbs_checked_on: string | null
+          max_travel_minutes: number | null
           payout_reference: string | null
           right_to_work_checked_on: string | null
+          travel_mode: Database["public"]["Enums"]["travel_mode"] | null
           updated_at: string
           user_id: string
         }
@@ -552,11 +578,14 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           av_capable?: boolean
+          base_place_id?: string | null
           base_postcode?: string | null
           created_at?: string
           dbs_checked_on?: string | null
+          max_travel_minutes?: number | null
           payout_reference?: string | null
           right_to_work_checked_on?: string | null
+          travel_mode?: Database["public"]["Enums"]["travel_mode"] | null
           updated_at?: string
           user_id: string
         }
@@ -565,11 +594,14 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           av_capable?: boolean
+          base_place_id?: string | null
           base_postcode?: string | null
           created_at?: string
           dbs_checked_on?: string | null
+          max_travel_minutes?: number | null
           payout_reference?: string | null
           right_to_work_checked_on?: string | null
+          travel_mode?: Database["public"]["Enums"]["travel_mode"] | null
           updated_at?: string
           user_id?: string
         }
@@ -579,6 +611,13 @@ export type Database = {
             columns: ["approved_by"]
             isOneToOne: false
             referencedRelation: "user_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auditor_profile_base_place_id_fkey"
+            columns: ["base_place_id"]
+            isOneToOne: false
+            referencedRelation: "place"
             referencedColumns: ["id"]
           },
           {
@@ -1160,6 +1199,36 @@ export type Database = {
           },
         ]
       }
+      place: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          region: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          region?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          region?: string | null
+        }
+        Relationships: []
+      }
       prep_progress: {
         Row: {
           auditor_id: string
@@ -1473,6 +1542,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -1560,11 +1630,14 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           av_capable: boolean
+          base_place_id: string | null
           base_postcode: string | null
           created_at: string
           dbs_checked_on: string | null
+          max_travel_minutes: number | null
           payout_reference: string | null
           right_to_work_checked_on: string | null
+          travel_mode: Database["public"]["Enums"]["travel_mode"] | null
           updated_at: string
           user_id: string
         }
@@ -1632,10 +1705,13 @@ export type Database = {
           auditor_id: string
           audits_completed: number
           av_capable: boolean
+          base_place: string
           base_postcode: string
           email: string
           full_name: string
+          max_travel_minutes: number
           open_conflicts: number
+          travel_mode: Database["public"]["Enums"]["travel_mode"]
           user_status: Database["public"]["Enums"]["user_status"]
         }[]
       }
@@ -1645,6 +1721,7 @@ export type Database = {
           p_audit_type: Database["public"]["Enums"]["audit_type"]
           p_campaign_name?: string
           p_organisation_id: string
+          p_place_id: string
           p_postcode: string
           p_requires_av?: boolean
           p_shift_payment_method: Database["public"]["Enums"]["shift_payment_method"]
@@ -1669,6 +1746,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -1747,22 +1825,27 @@ export type Database = {
       }
       complete_auditor_profile: {
         Args: {
-          p_areas: string[]
           p_audit_types: Database["public"]["Enums"]["audit_type"][]
           p_av_capable?: boolean
-          p_base_postcode: string
+          p_base_place_id: string
           p_full_name: string
+          p_minutes: number
+          p_mode: Database["public"]["Enums"]["travel_mode"]
+          p_place_ids: string[]
         }
         Returns: {
           approval_status: Database["public"]["Enums"]["auditor_approval_status"]
           approved_at: string | null
           approved_by: string | null
           av_capable: boolean
+          base_place_id: string | null
           base_postcode: string | null
           created_at: string
           dbs_checked_on: string | null
+          max_travel_minutes: number | null
           payout_reference: string | null
           right_to_work_checked_on: string | null
+          travel_mode: Database["public"]["Enums"]["travel_mode"] | null
           updated_at: string
           user_id: string
         }
@@ -1779,6 +1862,15 @@ export type Database = {
         Returns: undefined
       }
       default_travel_uplift_minor_units: { Args: never; Returns: number }
+      distance_km: {
+        Args: {
+          p_lat_a: number
+          p_lat_b: number
+          p_lng_a: number
+          p_lng_b: number
+        }
+        Returns: number
+      }
       eligible_auditors: {
         Args: { p_audit_id: string }
         Returns: {
@@ -1901,6 +1993,19 @@ export type Database = {
           reference: string
         }[]
       }
+      places_within_reach: {
+        Args: {
+          p_minutes: number
+          p_mode: Database["public"]["Enums"]["travel_mode"]
+          p_place_id: string
+        }
+        Returns: {
+          minutes: number
+          name: string
+          place_id: string
+          region: string
+        }[]
+      }
       prefer_auditor: {
         Args: { p_audit_id: string; p_code: string }
         Returns: {
@@ -1920,6 +2025,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2005,6 +2111,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2063,6 +2170,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2121,6 +2229,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2162,7 +2271,7 @@ export type Database = {
         Args: {
           p_audit_type: Database["public"]["Enums"]["audit_type"]
           p_organisation_id: string
-          p_postcode_area: string
+          p_place_id: string
           p_requires_av?: boolean
         }
         Returns: {
@@ -2172,6 +2281,16 @@ export type Database = {
           state: string
           warning: string
         }[]
+      }
+      set_auditor_coverage: {
+        Args: {
+          p_base_place_id: string
+          p_excluded_ids?: string[]
+          p_minutes: number
+          p_mode: Database["public"]["Enums"]["travel_mode"]
+          p_place_ids: string[]
+        }
+        Returns: number
       }
       single_credit_price_minor_units: { Args: never; Returns: number }
       submit_write_up: {
@@ -2193,6 +2312,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2235,11 +2355,14 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           av_capable: boolean
+          base_place_id: string | null
           base_postcode: string | null
           created_at: string
           dbs_checked_on: string | null
+          max_travel_minutes: number | null
           payout_reference: string | null
           right_to_work_checked_on: string | null
+          travel_mode: Database["public"]["Enums"]["travel_mode"] | null
           updated_at: string
           user_id: string
         }
@@ -2249,6 +2372,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      travel_km_per_minute: {
+        Args: { p_mode: Database["public"]["Enums"]["travel_mode"] }
+        Returns: number
       }
       uuid_generate_v7: { Args: never; Returns: string }
       void_audit: {
@@ -2270,6 +2397,7 @@ export type Database = {
           matched_at: string | null
           no_team_present_at: string | null
           pitch_detail: string | null
+          place_id: string | null
           postcode: string
           postcode_area: string | null
           postcode_outward: string | null
@@ -2357,6 +2485,7 @@ export type Database = {
         | "site_conduct"
         | "safeguarding"
         | "record_keeping"
+      coverage_source: "derived" | "added" | "excluded"
       credit_reason:
         | "purchase"
         | "reservation"
@@ -2408,6 +2537,7 @@ export type Database = {
       risk_subject: "audit" | "auditor" | "client" | "assignment"
       risk_type: "exposure" | "conflict" | "quality" | "data_protection"
       shift_payment_method: "direct_debit" | "contactless"
+      travel_mode: "public_transport" | "own_vehicle" | "either"
       user_status: "invited" | "active" | "suspended"
     }
     CompositeTypes: {
@@ -2584,6 +2714,7 @@ export const Constants = {
         "safeguarding",
         "record_keeping",
       ],
+      coverage_source: ["derived", "added", "excluded"],
       credit_reason: [
         "purchase",
         "reservation",
@@ -2640,6 +2771,7 @@ export const Constants = {
       risk_subject: ["audit", "auditor", "client", "assignment"],
       risk_type: ["exposure", "conflict", "quality", "data_protection"],
       shift_payment_method: ["direct_debit", "contactless"],
+      travel_mode: ["public_transport", "own_vehicle", "either"],
       user_status: ["invited", "active", "suspended"],
     },
   },

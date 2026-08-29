@@ -8,12 +8,14 @@ const AUDIT = '00000000-0000-7000-8000-0000000a0009';
 async function arrange(db: Db) {
   await db.arrange(
     `insert into audit (id, client_organisation_id, status, audit_type, postcode,
-                        window_start_on, window_end_on)
-     values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10)`,
+                        window_start_on, window_end_on, place_id)
+     values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
     [AUDIT, ids.charityA],
   );
   await db.arrange(
-    "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+    `insert into auditor_coverage (auditor_id, place_id, source)
+         select $1, id, 'derived' from place where name = 'Westminster' and country_code = 'GB'
+         on conflict do nothing`,
     [ids.auditor],
   );
   await db.arrange(
@@ -51,7 +53,7 @@ describe('assignment_console (S4.2)', () => {
       const excluded = rows.find((r) => r.auditor_id === ids.otherAuditor);
 
       expect(excluded?.eligible).toBe(false);
-      expect(excluded?.reasons).toContain('Does not cover this area');
+      expect(excluded?.reasons).toContain('Does not cover this place');
       expect(excluded?.reasons).toContain('Not signed off for this methodology');
     });
   });

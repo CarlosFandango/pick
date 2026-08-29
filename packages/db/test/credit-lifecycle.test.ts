@@ -15,6 +15,7 @@ const position = async (db: Db, org: string) => {
 async function book(db: Db) {
   const [audit] = await db.as(ids.clientA).query<{ id: string }>(
     `select (book_audit($1, 'street', 'direct_debit', 'SW1A 1AA',
+                        (select id from place where name = 'Southwark' and country_code = 'GB'),
                         current_date + 7, current_date + 10)).id`,
     [ids.charityA],
   );

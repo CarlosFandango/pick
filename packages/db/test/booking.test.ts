@@ -21,7 +21,7 @@ const book = (over: Record<string, unknown> = {}) => ({
 
 function call(b: ReturnType<typeof book>) {
   return {
-    sql: 'select * from book_audit($1, $2, $3, $4, $5, $6, null, null, $7)',
+    sql: `select * from book_audit($1, $2, $3, $4, (select id from place where name = 'Southwark' and country_code = 'GB'), $5, $6, null, null, $7)`,
     params: [b.org, b.type, b.method, b.postcode, b.from, b.to, b.av],
   };
 }
@@ -124,19 +124,23 @@ describe('book_audit (S1.1)', () => {
     });
   });
 
-  it('rejects a postcode the schema does not recognise', async () => {
+  it('takes an address in whatever shape the country writes it', async () => {
+    // The UK postcode CHECK is gone deliberately: it rejected a Dublin or
+    // Berlin address on insert, which made the product structurally UK-only.
+    // Matching is on the place, so the address only has to be legible to the
+    // auditor who navigates by it.
     await withDatabase(async (db) => {
-      const { sql, params } = call(book({ postcode: 'NOT A POSTCODE' }));
-      const message = await db.as(ids.clientA).expectRefused(sql, params);
-      expect(message).toMatch(/postcode/i);
+      const { sql, params } = call(book({ postcode: 'Grafton Street, Dublin 2' }));
+      const [audit] = await db.as(ids.clientA).query<{ postcode: string }>(sql, params);
+      expect(audit?.postcode).toBe('Grafton Street, Dublin 2');
     });
   });
 
-  it('derives the matching area from the postcode', async () => {
+  it('records the place matching will use', async () => {
     await withDatabase(async (db) => {
       const { sql, params } = call(book({ postcode: 'se154ql' }));
-      const [audit] = await db.as(ids.clientA).query<{ postcode_area: string }>(sql, params);
-      expect(audit?.postcode_area).toBe('SE');
+      const [audit] = await db.as(ids.clientA).query<{ place_id: string }>(sql, params);
+      expect(audit?.place_id).toBeTruthy();
     });
   });
 

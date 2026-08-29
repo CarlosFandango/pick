@@ -30,8 +30,32 @@ async function invite(db: Harness) {
   );
 }
 
-const COMPLETE = `select * from complete_auditor_profile($1, $2, $3, $4, $5)`;
-const DETAILS: unknown[] = ['Dana Okoro', 'SW1A 1AA', ['SW', 'EC'], ['street'], false];
+const COMPLETE = `select * from complete_auditor_profile($1, $2, $3, $4, $5, $6, $7)`;
+
+/**
+ * An auditor says where they set out from, how far they will travel and how,
+ * and the places they confirmed — never a postcode area. The place ids are
+ * looked up per test because the gazetteer is seeded by migration.
+ */
+async function details(db: Harness, over: Partial<{ places: string[]; types: string[] }> = {}) {
+  const [base] = await db.arrange<{ id: string }>(
+    "select id from place where name = 'Westminster' and country_code = 'GB'",
+  );
+  const names = over.places ?? ['Westminster', 'Southwark'];
+  const places = await db.arrange<{ id: string }>(
+    'select id from place where name = any($1) and country_code = $2',
+    [names, 'GB'],
+  );
+  return [
+    'Dana Okoro',
+    base?.id,
+    45,
+    'own_vehicle',
+    places.map((p) => p.id),
+    over.types ?? ['street'],
+    false,
+  ];
+}
 
 describe('accepting an invitation', () => {
   it('puts a new auditor in front of vetting, and no further', async () => {
@@ -39,14 +63,16 @@ describe('accepting an invitation', () => {
     // queue S4.3 already knows how to show.
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(INVITEE).query(COMPLETE, DETAILS);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
 
-      const [profile] = await db.arrange<{ approval_status: string; base_postcode: string }>(
-        'select approval_status, base_postcode from auditor_profile where user_id = $1',
+      const [profile] = await db.arrange<{ approval_status: string; base_place: string }>(
+        `select ap.approval_status, p.name as base_place
+         from auditor_profile ap join place p on p.id = ap.base_place_id
+         where ap.user_id = $1`,
         [INVITEE],
       );
       expect(profile?.approval_status).toBe('pending');
-      expect(profile?.base_postcode).toBe('SW1A 1AA');
+      expect(profile?.base_place).toBe('Westminster');
 
       const [user] = await db.arrange<{ status: string; full_name: string }>(
         'select status, full_name from user_profile where id = $1',
@@ -69,7 +95,7 @@ describe('accepting an invitation', () => {
     // deleted tomorrow.
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(INVITEE).query(COMPLETE, DETAILS);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
 
       await db
         .as(INVITEE)
@@ -103,8 +129,8 @@ describe('accepting an invitation', () => {
     // open, that would be quietly self-editable with no trace.
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(INVITEE).query(COMPLETE, DETAILS);
-      const message = await db.as(INVITEE).expectRefused(COMPLETE, DETAILS);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
+      const message = await db.as(INVITEE).expectRefused(COMPLETE, await details(db));
       expect(message).toMatch(/already been used/i);
     });
   });
@@ -114,7 +140,7 @@ describe('accepting an invitation', () => {
       await invite(db);
       // The function takes no id, so there is nothing to pass — the only way
       // to try is to call it as someone else, which changes nothing for them.
-      const message = await db.as(ids.auditor).expectRefused(COMPLETE, DETAILS);
+      const message = await db.as(ids.auditor).expectRefused(COMPLETE, await details(db));
       expect(message).toMatch(/already been used|not yours/i);
 
       const [user] = await db.arrange<{ status: string }>(
@@ -128,39 +154,36 @@ describe('accepting an invitation', () => {
   it('refuses a client and an admin outright', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(ids.clientA).expectRefused(COMPLETE, DETAILS);
-      await db.as(ids.admin).expectRefused(COMPLETE, DETAILS);
+      await db.as(ids.clientA).expectRefused(COMPLETE, await details(db));
+      await db.as(ids.admin).expectRefused(COMPLETE, await details(db));
     });
   });
 
   it('refuses anon', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(null).expectRefused(COMPLETE, DETAILS);
+      await db.as(null).expectRefused(COMPLETE, await details(db));
     });
   });
 });
 
 describe('what an auditor has to tell us', () => {
-  let details: unknown[];
-  beforeEach(() => {
-    details = [...DETAILS];
-  });
-
   it('insists on somewhere to work', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      details[2] = [];
-      const message = await db.as(INVITEE).expectRefused(COMPLETE, details);
-      expect(message).toMatch(/at least one postcode area/i);
+      const args = await details(db);
+      args[4] = [];
+      const message = await db.as(INVITEE).expectRefused(COMPLETE, args);
+      expect(message).toMatch(/at least one place/i);
     });
   });
 
   it('insists on something to run', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      details[3] = [];
-      const message = await db.as(INVITEE).expectRefused(COMPLETE, details);
+      const args = await details(db);
+      args[5] = [];
+      const message = await db.as(INVITEE).expectRefused(COMPLETE, args);
       expect(message).toMatch(/at least one kind of audit/i);
     });
   });
@@ -168,35 +191,55 @@ describe('what an auditor has to tell us', () => {
   it('insists on a name to put on the roster', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      details[0] = '   ';
-      const message = await db.as(INVITEE).expectRefused(COMPLETE, details);
+      const args = await details(db);
+      args[0] = '   ';
+      const message = await db.as(INVITEE).expectRefused(COMPLETE, args);
       expect(message).toMatch(/name/i);
     });
   });
 
-  it('rejects a full postcode where an area belongs, and says which', async () => {
-    // Matching joins on area letters. A district here would silently match
-    // nothing, and the auditor would simply never be offered work.
+  it('insists on knowing where they set out from', async () => {
+    // Without an origin there is nothing to derive coverage from, and no way
+    // to tell them how far anything is.
     await withDatabase(async (db) => {
       await invite(db);
-      details[2] = ['SW1A'];
-      const message = await db.as(INVITEE).expectRefused(COMPLETE, details);
-      expect(message).toMatch(/SW1A/);
-      expect(message).toMatch(/letters only/i);
+      const args = await details(db);
+      args[1] = null;
+      const message = await db.as(INVITEE).expectRefused(COMPLETE, args);
+      expect(message).toMatch(/where you set out from/i);
     });
   });
 
-  it('stores areas uppercased, so matching is not case-sensitive', async () => {
+  it('records the places they confirmed, not a postcode', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      details[2] = ['sw', 'ec'];
-      await db.as(INVITEE).query(COMPLETE, details);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
 
-      const areas = await db.arrange<{ postcode_area: string }>(
-        'select postcode_area from auditor_coverage where auditor_id = $1 order by postcode_area',
+      const places = await db.arrange<{ name: string }>(
+        `select p.name from auditor_coverage c
+         join place p on p.id = c.place_id
+         where c.auditor_id = $1 and c.source <> 'excluded'
+         order by p.name`,
         [INVITEE],
       );
-      expect(areas.map((a) => a.postcode_area)).toEqual(['EC', 'SW']);
+      expect(places.map((p) => p.name)).toEqual(['Southwark', 'Westminster']);
+    });
+  });
+
+  it('keeps how far they said they would travel, as they said it', async () => {
+    // The straight-line radius is derived from this, never stored in its
+    // place — so real journey times can replace the estimate later without
+    // asking anybody again.
+    await withDatabase(async (db) => {
+      await invite(db);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
+
+      const [profile] = await db.arrange<{ max_travel_minutes: number; travel_mode: string }>(
+        'select max_travel_minutes, travel_mode from auditor_profile where user_id = $1',
+        [INVITEE],
+      );
+      expect(profile?.max_travel_minutes).toBe(45);
+      expect(profile?.travel_mode).toBe('own_vehicle');
     });
   });
 });
@@ -228,7 +271,7 @@ describe('the roster tells vetting from waiting', () => {
   it('moves them into the vetting queue once they accept', async () => {
     await withDatabase(async (db) => {
       await invite(db);
-      await db.as(INVITEE).query(COMPLETE, DETAILS);
+      await db.as(INVITEE).query(COMPLETE, await details(db));
 
       const roster = await db
         .as(ids.admin)

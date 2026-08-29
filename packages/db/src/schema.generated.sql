@@ -164,6 +164,16 @@ CREATE TYPE "public"."compliance_category" AS ENUM (
 ALTER TYPE "public"."compliance_category" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."coverage_source" AS ENUM (
+    'derived',
+    'added',
+    'excluded'
+);
+
+
+ALTER TYPE "public"."coverage_source" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."credit_reason" AS ENUM (
     'purchase',
     'reservation',
@@ -393,6 +403,16 @@ CREATE TYPE "public"."shift_payment_method" AS ENUM (
 ALTER TYPE "public"."shift_payment_method" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."travel_mode" AS ENUM (
+    'public_transport',
+    'own_vehicle',
+    'either'
+);
+
+
+ALTER TYPE "public"."travel_mode" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."user_status" AS ENUM (
     'invited',
     'active',
@@ -595,8 +615,8 @@ CREATE TABLE IF NOT EXISTS "public"."audit" (
     "requires_av" boolean DEFAULT false NOT NULL,
     "preferred_auditor_id" "uuid",
     "stage_set_version" integer DEFAULT 1 NOT NULL,
+    "place_id" "uuid",
     CONSTRAINT "assigned_when_matched" CHECK ((("status" = ANY (ARRAY['draft'::"public"."audit_status", 'booked'::"public"."audit_status", 'cancelled'::"public"."audit_status"])) OR ("auditor_id" IS NOT NULL))),
-    CONSTRAINT "postcode_format" CHECK (("postcode" ~* '^[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}$'::"text")),
     CONSTRAINT "session_ordered" CHECK ((("session_ended_at" IS NULL) OR ("session_started_at" IS NULL) OR ("session_ended_at" >= "session_started_at"))),
     CONSTRAINT "status_in_pipeline" CHECK (("status" = ANY (ARRAY['draft'::"public"."audit_status", 'booked'::"public"."audit_status", 'assigned'::"public"."audit_status", 'in_progress'::"public"."audit_status", 'in_review'::"public"."audit_status", 'released'::"public"."audit_status", 'no_team_present'::"public"."audit_status", 'cancelled'::"public"."audit_status"]))),
     CONSTRAINT "window_ordered" CHECK ((("window_end_on" IS NULL) OR ("window_start_on" IS NULL) OR ("window_end_on" >= "window_start_on")))
@@ -604,6 +624,14 @@ CREATE TABLE IF NOT EXISTS "public"."audit" (
 
 
 ALTER TABLE "public"."audit" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."audit"."postcode" IS 'The address as written, in whatever shape the country uses. Display and navigation only — never matching, and no longer format-checked.';
+
+
+
+COMMENT ON COLUMN "public"."audit"."place_id" IS 'Resolved when the audit is booked. What auditor matching joins on.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."accept_offer"("p_offer_id" "uuid") RETURNS "public"."audit"
@@ -788,11 +816,19 @@ CREATE TABLE IF NOT EXISTS "public"."auditor_profile" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "av_capable" boolean DEFAULT false NOT NULL,
-    CONSTRAINT "approved_has_timestamp" CHECK ((("approval_status" <> 'approved'::"public"."auditor_approval_status") OR ("approved_at" IS NOT NULL)))
+    "base_place_id" "uuid",
+    "max_travel_minutes" integer,
+    "travel_mode" "public"."travel_mode",
+    CONSTRAINT "approved_has_timestamp" CHECK ((("approval_status" <> 'approved'::"public"."auditor_approval_status") OR ("approved_at" IS NOT NULL))),
+    CONSTRAINT "travel_minutes_sane" CHECK ((("max_travel_minutes" IS NULL) OR (("max_travel_minutes" >= 5) AND ("max_travel_minutes" <= 240))))
 );
 
 
 ALTER TABLE "public"."auditor_profile" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."auditor_profile"."max_travel_minutes" IS 'As the auditor gave it. The straight-line radius is derived from this and the mode, never stored in its place — so better journey times can replace the estimate without asking anyone again.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."approve_auditor"("p_auditor_id" "uuid") RETURNS "public"."auditor_profile"
@@ -896,7 +932,7 @@ CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RE
     AS $$
   with caller as (select app.is_admin() as ok),
   target as (
-    select id, client_organisation_id, postcode_area, audit_type,
+    select id, client_organisation_id, place_id, audit_type,
            window_start_on, window_end_on, requires_av
     from public.audit where id = p_audit_id
   ),
@@ -913,7 +949,8 @@ CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RE
       ap.approval_status = 'approved' as approved,
       (not t.requires_av or ap.av_capable) as av_ok,
       exists (select 1 from public.auditor_coverage c
-               where c.auditor_id = ap.user_id and c.postcode_area = t.postcode_area) as reachable,
+               where c.auditor_id = ap.user_id and c.place_id = t.place_id
+                 and c.source <> 'excluded') as reachable,
       exists (select 1 from public.auditor_capability k
                where k.auditor_id = ap.user_id and k.audit_type = t.audit_type) as capable,
       not exists (select 1 from public.auditor_conflict f
@@ -942,7 +979,7 @@ CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RE
     array_remove(array[
       case when not no_conflict  then 'Declared conflict with this charity' end,
       case when not approved     then 'Not approved' end,
-      case when not reachable    then 'Does not cover this area' end,
+      case when not reachable    then 'Does not cover this place' end,
       case when not capable      then 'Not signed off for this methodology' end,
       case when not av_ok        then 'No A/V capability, and the client asked for it' end,
       case when not exposure_ok  then 'Audited this charity too recently' end,
@@ -1000,7 +1037,7 @@ $$;
 ALTER FUNCTION "public"."auditor_code_for"("p_auditor_id" "uuid", "p_organisation_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "email" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
+CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "email" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "base_place" "text", "max_travel_minutes" integer, "travel_mode" "public"."travel_mode", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -1012,9 +1049,14 @@ CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id
     u.status,
     p.approved_at,
     p.base_postcode,
+    bp.name,
+    p.max_travel_minutes,
+    p.travel_mode,
     p.av_capable,
-    coalesce((select array_agg(c.postcode_area order by c.postcode_area)
-              from public.auditor_coverage c where c.auditor_id = p.user_id), '{}'),
+    coalesce((select array_agg(pl.name order by pl.name)
+              from public.auditor_coverage c
+              join public.place pl on pl.id = c.place_id
+              where c.auditor_id = p.user_id and c.source <> 'excluded'), '{}'),
     coalesce((select array_agg(k.audit_type order by k.audit_type)
               from public.auditor_capability k where k.auditor_id = p.user_id), '{}'),
     (select count(*)::integer from public.audit a
@@ -1022,10 +1064,9 @@ CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id
     (select count(*)::integer from public.auditor_conflict f where f.auditor_id = p.user_id)
   from public.auditor_profile p
   join public.user_profile u on u.id = p.user_id
+  left join public.place bp on bp.id = p.base_place_id
   where app.is_admin()
   order by
-    -- Vettable first, invitations last: the queue is a list of things to do,
-    -- and an unaccepted invitation is not one of them.
     (case when u.status = 'invited' then 2
           when p.approval_status = 'pending' then 0
           else 1 end),
@@ -1044,7 +1085,7 @@ CREATE OR REPLACE FUNCTION "public"."base_audit_fee_minor_units"() RETURNS integ
 ALTER FUNCTION "public"."base_audit_fee_minor_units"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text" DEFAULT NULL::"text", "p_campaign_name" "text" DEFAULT NULL::"text", "p_requires_av" boolean DEFAULT false) RETURNS "public"."audit"
+CREATE OR REPLACE FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_place_id" "uuid", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text" DEFAULT NULL::"text", "p_campaign_name" "text" DEFAULT NULL::"text", "p_requires_av" boolean DEFAULT false) RETURNS "public"."audit"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -1090,13 +1131,18 @@ begin
     raise exception 'no credits available' using errcode = 'check_violation';
   end if;
 
+  if p_place_id is null or not exists (select 1 from public.place where id = p_place_id) then
+    raise exception 'an audit needs a place, so we know who can reach it'
+      using errcode = 'check_violation';
+  end if;
+
   insert into public.audit (
     client_organisation_id, status, audit_type, shift_payment_method,
-    postcode, window_start_on, window_end_on, site_name, campaign_name,
+    postcode, place_id, window_start_on, window_end_on, site_name, campaign_name,
     requires_av, created_by, requested_at
   ) values (
     p_organisation_id, 'booked', p_audit_type, p_shift_payment_method,
-    p_postcode, p_window_start_on, p_window_end_on, p_site_name, p_campaign_name,
+    p_postcode, p_place_id, p_window_start_on, p_window_end_on, p_site_name, p_campaign_name,
     p_requires_av, v_caller, now()
   ) returning * into v_audit;
 
@@ -1118,7 +1164,7 @@ end;
 $$;
 
 
-ALTER FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) OWNER TO "postgres";
+ALTER FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_place_id" "uuid", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."booking_lead_days"() RETURNS integer
@@ -1198,23 +1244,18 @@ $$;
 ALTER FUNCTION "public"."client_roster"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean DEFAULT false) RETURNS "public"."auditor_profile"
+CREATE OR REPLACE FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean DEFAULT false) RETURNS "public"."auditor_profile"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
-    AS $_$
+    AS $$
 declare
   v_user    uuid := auth.uid();
   v_profile public.auditor_profile;
-  v_area    text;
 begin
   if v_user is null then
     raise exception 'sign in first' using errcode = 'insufficient_privilege';
   end if;
 
-  -- Invited-and-not-yet-accepted is the only state this is legal in. It is a
-  -- once-only transition, not an edit surface: letting an active auditor
-  -- re-run it would make coverage silently editable by the person whose work
-  -- it decides, with no record of the change.
   if not exists (
     select 1 from public.user_profile
     where id = v_user and role = 'auditor' and status = 'invited'
@@ -1224,12 +1265,15 @@ begin
   end if;
 
   if coalesce(trim(p_full_name), '') = '' then
-    raise exception 'we need a name to put on the roster'
-      using errcode = 'check_violation';
+    raise exception 'we need a name to put on the roster' using errcode = 'check_violation';
   end if;
 
-  if coalesce(array_length(p_areas, 1), 0) = 0 then
-    raise exception 'an auditor covers at least one postcode area'
+  if p_base_place_id is null then
+    raise exception 'we need to know where you set out from' using errcode = 'check_violation';
+  end if;
+
+  if coalesce(array_length(p_place_ids, 1), 0) = 0 then
+    raise exception 'an auditor works somewhere — pick at least one place'
       using errcode = 'check_violation';
   end if;
 
@@ -1238,31 +1282,23 @@ begin
       using errcode = 'check_violation';
   end if;
 
-  -- Checked here as well as by the column constraint, so the message is a
-  -- sentence rather than a constraint name. The column remains the authority.
-  foreach v_area in array p_areas loop
-    if upper(trim(v_area)) !~ '^[A-Z]{1,2}$' then
-      raise exception '% is not a postcode area — use the letters only, like SW or EH', v_area
-        using errcode = 'check_violation';
-    end if;
-  end loop;
-
   update public.user_profile
      set full_name = trim(p_full_name),
          status    = 'active'
    where id = v_user;
 
   update public.auditor_profile
-     set base_postcode = upper(trim(p_base_postcode)),
-         av_capable    = coalesce(p_av_capable, false)
+     set base_place_id      = p_base_place_id,
+         max_travel_minutes = p_minutes,
+         travel_mode        = p_mode,
+         av_capable         = coalesce(p_av_capable, false)
    where user_id = v_user
   returning * into v_profile;
 
-  -- Replace rather than merge: this runs once, so there is nothing to merge
-  -- with, and a partial write would leave coverage half-stated.
   delete from public.auditor_coverage where auditor_id = v_user;
-  insert into public.auditor_coverage (auditor_id, postcode_area)
-  select distinct v_user, upper(trim(a)) from unnest(p_areas) as a;
+  insert into public.auditor_coverage (auditor_id, place_id, source)
+  select v_user, id, 'derived' from unnest(p_place_ids) as id
+  on conflict do nothing;
 
   delete from public.auditor_capability where auditor_id = v_user;
   insert into public.auditor_capability (auditor_id, audit_type)
@@ -1270,10 +1306,10 @@ begin
 
   return v_profile;
 end;
-$_$;
+$$;
 
 
-ALTER FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) OWNER TO "postgres";
+ALTER FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."consume_credit_for"("p_audit_id" "uuid") RETURNS "void"
@@ -1348,15 +1384,32 @@ CREATE OR REPLACE FUNCTION "public"."default_travel_uplift_minor_units"() RETURN
 ALTER FUNCTION "public"."default_travel_uplift_minor_units"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."distance_km"("p_lat_a" double precision, "p_lng_a" double precision, "p_lat_b" double precision, "p_lng_b" double precision) RETURNS double precision
+    LANGUAGE "sql" IMMUTABLE
+    AS $$
+  select 6371 * 2 * asin(sqrt(
+    power(sin(radians(p_lat_b - p_lat_a) / 2), 2) +
+    cos(radians(p_lat_a)) * cos(radians(p_lat_b)) *
+    power(sin(radians(p_lng_b - p_lng_a) / 2), 2)
+  ));
+$$;
+
+
+ALTER FUNCTION "public"."distance_km"("p_lat_a" double precision, "p_lng_a" double precision, "p_lat_b" double precision, "p_lng_b" double precision) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."eligible_auditors"("p_audit_id" "uuid") RETURNS TABLE("auditor_id" "uuid", "match_reason" "text", "warnings" "public"."eligibility_flag"[])
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
   with allowed as (select app.is_admin() as ok),
   target as (
-    select id, client_organisation_id, postcode_area, audit_type,
-           window_start_on, window_end_on, requires_av
-    from public.audit where id = p_audit_id
+    select a.id, a.client_organisation_id, a.place_id, a.audit_type,
+           a.window_start_on, a.window_end_on, a.requires_av,
+           p.name as place_name
+    from public.audit a
+    left join public.place p on p.id = a.place_id
+    where a.id = p_audit_id
   ),
   history as (
     select a.auditor_id, max(a.window_end_on) as last_seen
@@ -1367,7 +1420,7 @@ CREATE OR REPLACE FUNCTION "public"."eligible_auditors"("p_audit_id" "uuid") RET
   )
   select
     ap.user_id,
-    format('covers %s, approved, capable of %s%s', t.postcode_area, t.audit_type,
+    format('covers %s, approved, capable of %s%s', t.place_name, t.audit_type,
            case when t.requires_av then ', A/V equipped' else '' end),
     case when h.last_seen is not null
          then array['familiarity']::public.eligibility_flag[]
@@ -1378,12 +1431,16 @@ CREATE OR REPLACE FUNCTION "public"."eligible_auditors"("p_audit_id" "uuid") RET
   left join history h on h.auditor_id = ap.user_id
   where
     allowed.ok
+    -- An audit with no place resolved cannot be matched to anybody. Visible as
+    -- an empty console rather than a silently wrong offer.
+    and t.place_id is not null
     and ap.approval_status = 'approved'
-    -- A/V, when the client asked for it. A smaller pool, and they were told so.
     and (not t.requires_av or ap.av_capable)
     and exists (
       select 1 from public.auditor_coverage c
-      where c.auditor_id = ap.user_id and c.postcode_area = t.postcode_area
+      where c.auditor_id = ap.user_id
+        and c.place_id = t.place_id
+        and c.source <> 'excluded'
     )
     and exists (
       select 1 from public.auditor_capability k
@@ -1740,6 +1797,29 @@ $$;
 ALTER FUNCTION "public"."payable_audits"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."places_within_reach"("p_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode") RETURNS TABLE("place_id" "uuid", "name" "text", "region" "text", "minutes" integer)
+    LANGUAGE "sql" STABLE
+    AS $$
+  select
+    p.id,
+    p.name,
+    p.region,
+    greatest(1, round(
+      public.distance_km(origin.latitude, origin.longitude, p.latitude, p.longitude)
+      / public.travel_km_per_minute(p_mode)
+    )::integer)
+  from public.place p
+  cross join (select latitude, longitude, country_code from public.place where id = p_place_id) origin
+  where p.country_code = origin.country_code
+    and public.distance_km(origin.latitude, origin.longitude, p.latitude, p.longitude)
+        <= p_minutes * public.travel_km_per_minute(p_mode)
+  order by 4, 2;
+$$;
+
+
+ALTER FUNCTION "public"."places_within_reach"("p_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."prefer_auditor"("p_audit_id" "uuid", "p_code" "text") RETURNS "public"."audit"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
@@ -2035,7 +2115,7 @@ $$;
 ALTER FUNCTION "public"."review_gate_reason"("p_audit_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_postcode_area" "text", "p_audit_type" "public"."audit_type", "p_requires_av" boolean DEFAULT false) RETURNS TABLE("code" "text", "state" "text", "audits_completed" integer, "av_capable" boolean, "warning" "text")
+CREATE OR REPLACE FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_place_id" "uuid", "p_audit_type" "public"."audit_type", "p_requires_av" boolean DEFAULT false) RETURNS TABLE("code" "text", "state" "text", "audits_completed" integer, "av_capable" boolean, "warning" "text")
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -2082,7 +2162,7 @@ CREATE OR REPLACE FUNCTION "public"."selectable_auditors"("p_organisation_id" "u
     and (not p_requires_av or ap.av_capable)
     and exists (
       select 1 from public.auditor_coverage c
-      where c.auditor_id = ap.user_id and c.postcode_area = p_postcode_area
+      where c.auditor_id = ap.user_id and c.place_id = p_place_id and c.source <> 'excluded'
     )
     and exists (
       select 1 from public.auditor_capability k
@@ -2092,7 +2172,61 @@ CREATE OR REPLACE FUNCTION "public"."selectable_auditors"("p_organisation_id" "u
 $$;
 
 
-ALTER FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_postcode_area" "text", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) OWNER TO "postgres";
+ALTER FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_place_id" "uuid", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."set_auditor_coverage"("p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_excluded_ids" "uuid"[] DEFAULT '{}'::"uuid"[]) RETURNS integer
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+declare
+  v_user  uuid := auth.uid();
+  v_count integer;
+begin
+  if v_user is null then
+    raise exception 'sign in first' using errcode = 'insufficient_privilege';
+  end if;
+
+  if not exists (select 1 from public.auditor_profile where user_id = v_user) then
+    raise exception 'only an auditor has coverage' using errcode = 'insufficient_privilege';
+  end if;
+
+  if coalesce(array_length(p_place_ids, 1), 0) = 0 then
+    raise exception 'an auditor works somewhere — pick at least one place'
+      using errcode = 'check_violation';
+  end if;
+
+  update public.auditor_profile
+     set base_place_id      = p_base_place_id,
+         max_travel_minutes = p_minutes,
+         travel_mode        = p_mode
+   where user_id = v_user;
+
+  -- Replaced wholesale: this is a statement of where they work now, and a
+  -- place dropped from the list is one they no longer cover.
+  delete from public.auditor_coverage where auditor_id = v_user;
+
+  insert into public.auditor_coverage (auditor_id, place_id, source)
+  select v_user, id, 'derived' from unnest(p_place_ids) as id
+  on conflict do nothing;
+
+  -- An exclusion only means something for a place they did not also keep.
+  insert into public.auditor_coverage (auditor_id, place_id, source)
+  select v_user, e.id, 'excluded'
+  from unnest(p_excluded_ids) as e(id)
+  where not exists (select 1 from unnest(p_place_ids) as k(id) where k.id = e.id)
+  on conflict do nothing;
+
+  select count(*) into v_count
+  from public.auditor_coverage
+  where auditor_id = v_user and source <> 'excluded';
+
+  return v_count;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."set_auditor_coverage"("p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_excluded_ids" "uuid"[]) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."submit_write_up"("p_audit_id" "uuid", "p_results" "jsonb") RETURNS "public"."audit"
@@ -2199,6 +2333,20 @@ $$;
 
 
 ALTER FUNCTION "public"."suspend_auditor"("p_auditor_id" "uuid", "p_reason" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."travel_km_per_minute"("p_mode" "public"."travel_mode") RETURNS double precision
+    LANGUAGE "sql" IMMUTABLE
+    AS $$
+  select case p_mode
+    when 'public_transport' then 0.30
+    when 'own_vehicle'      then 0.50
+    else 0.50
+  end;
+$$;
+
+
+ALTER FUNCTION "public"."travel_km_per_minute"("p_mode" "public"."travel_mode") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."void_audit"("p_audit_id" "uuid", "p_reason" "text") RETURNS "public"."audit"
@@ -2360,9 +2508,10 @@ ALTER TABLE "public"."auditor_conflict" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."auditor_coverage" (
     "id" "uuid" DEFAULT "public"."uuid_generate_v7"() NOT NULL,
     "auditor_id" "uuid" NOT NULL,
-    "postcode_area" "text" NOT NULL,
+    "postcode_area" "text",
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "postcode_area_format" CHECK (("postcode_area" ~ '^[A-Z]{1,2}$'::"text"))
+    "place_id" "uuid",
+    "source" "public"."coverage_source" DEFAULT 'derived'::"public"."coverage_source" NOT NULL
 );
 
 
@@ -2536,6 +2685,23 @@ CREATE TABLE IF NOT EXISTS "public"."payout_line_item" (
 
 
 ALTER TABLE "public"."payout_line_item" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."place" (
+    "id" "uuid" DEFAULT "public"."uuid_generate_v7"() NOT NULL,
+    "country_code" character(2) NOT NULL,
+    "name" "text" NOT NULL,
+    "region" "text",
+    "latitude" double precision NOT NULL,
+    "longitude" double precision NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "place_latitude_sane" CHECK ((("latitude" >= ('-90'::integer)::double precision) AND ("latitude" <= (90)::double precision))),
+    CONSTRAINT "place_longitude_sane" CHECK ((("longitude" >= ('-180'::integer)::double precision) AND ("longitude" <= (180)::double precision))),
+    CONSTRAINT "place_name_not_empty" CHECK (("length"(TRIM(BOTH FROM "name")) > 0))
+);
+
+
+ALTER TABLE "public"."place" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."prep_progress" (
@@ -2724,6 +2890,11 @@ ALTER TABLE ONLY "public"."payout_run"
 
 
 
+ALTER TABLE ONLY "public"."place"
+    ADD CONSTRAINT "place_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."prep_progress"
     ADD CONSTRAINT "prep_progress_pkey" PRIMARY KEY ("auditor_id", "check_definition_id");
 
@@ -2790,6 +2961,10 @@ CREATE INDEX "audit_pay_item_audit_idx" ON "public"."audit_pay_item" USING "btre
 
 
 
+CREATE INDEX "audit_place_idx" ON "public"."audit" USING "btree" ("place_id", "status");
+
+
+
 CREATE INDEX "audit_scheduled_idx" ON "public"."audit" USING "btree" ("scheduled_for");
 
 
@@ -2811,6 +2986,14 @@ CREATE INDEX "auditor_conflict_org_idx" ON "public"."auditor_conflict" USING "bt
 
 
 CREATE INDEX "auditor_coverage_area_idx" ON "public"."auditor_coverage" USING "btree" ("postcode_area");
+
+
+
+CREATE INDEX "auditor_coverage_matching_idx" ON "public"."auditor_coverage" USING "btree" ("place_id") WHERE ("source" <> 'excluded'::"public"."coverage_source");
+
+
+
+CREATE UNIQUE INDEX "auditor_coverage_place_idx" ON "public"."auditor_coverage" USING "btree" ("auditor_id", "place_id") WHERE ("place_id" IS NOT NULL);
 
 
 
@@ -2871,6 +3054,14 @@ CREATE UNIQUE INDEX "payout_line_item_one_per_audit" ON "public"."payout_line_it
 
 
 CREATE INDEX "payout_line_item_run_idx" ON "public"."payout_line_item" USING "btree" ("payout_run_id");
+
+
+
+CREATE INDEX "place_country_idx" ON "public"."place" USING "btree" ("country_code");
+
+
+
+CREATE UNIQUE INDEX "place_identity_idx" ON "public"."place" USING "btree" ("country_code", "name", COALESCE("region", ''::"text"));
 
 
 
@@ -3018,6 +3209,11 @@ ALTER TABLE ONLY "public"."audit_pay_item"
 
 
 ALTER TABLE ONLY "public"."audit"
+    ADD CONSTRAINT "audit_place_id_fkey" FOREIGN KEY ("place_id") REFERENCES "public"."place"("id") ON DELETE RESTRICT;
+
+
+
+ALTER TABLE ONLY "public"."audit"
     ADD CONSTRAINT "audit_preferred_auditor_id_fkey" FOREIGN KEY ("preferred_auditor_id") REFERENCES "public"."auditor_profile"("user_id") ON DELETE SET NULL;
 
 
@@ -3052,8 +3248,18 @@ ALTER TABLE ONLY "public"."auditor_coverage"
 
 
 
+ALTER TABLE ONLY "public"."auditor_coverage"
+    ADD CONSTRAINT "auditor_coverage_place_id_fkey" FOREIGN KEY ("place_id") REFERENCES "public"."place"("id") ON DELETE RESTRICT;
+
+
+
 ALTER TABLE ONLY "public"."auditor_profile"
     ADD CONSTRAINT "auditor_profile_approved_by_fkey" FOREIGN KEY ("approved_by") REFERENCES "public"."user_profile"("id");
+
+
+
+ALTER TABLE ONLY "public"."auditor_profile"
+    ADD CONSTRAINT "auditor_profile_base_place_id_fkey" FOREIGN KEY ("base_place_id") REFERENCES "public"."place"("id") ON DELETE RESTRICT;
 
 
 
@@ -3446,6 +3652,13 @@ CREATE POLICY "payout_run_admin" ON "public"."payout_run" TO "authenticated" USI
 
 
 
+ALTER TABLE "public"."place" ENABLE ROW LEVEL SECURITY;
+
+
+CREATE POLICY "place_readable" ON "public"."place" FOR SELECT TO "authenticated" USING (true);
+
+
+
 ALTER TABLE "public"."prep_progress" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3641,9 +3854,9 @@ GRANT ALL ON FUNCTION "public"."base_audit_fee_minor_units"() TO "service_role";
 
 
 
-REVOKE ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) TO "service_role";
+REVOKE ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_place_id" "uuid", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_place_id" "uuid", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."book_audit"("p_organisation_id" "uuid", "p_audit_type" "public"."audit_type", "p_shift_payment_method" "public"."shift_payment_method", "p_postcode" "text", "p_place_id" "uuid", "p_window_start_on" "date", "p_window_end_on" "date", "p_site_name" "text", "p_campaign_name" "text", "p_requires_av" boolean) TO "service_role";
 
 
 
@@ -3665,9 +3878,9 @@ GRANT ALL ON FUNCTION "public"."client_roster"() TO "service_role";
 
 
 
-REVOKE ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_postcode" "text", "p_areas" "text"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "service_role";
+REVOKE ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."complete_auditor_profile"("p_full_name" "text", "p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_audit_types" "public"."audit_type"[], "p_av_capable" boolean) TO "service_role";
 
 
 
@@ -3686,6 +3899,12 @@ GRANT ALL ON FUNCTION "public"."decline_offer"("p_offer_id" "uuid", "p_reason" "
 GRANT ALL ON FUNCTION "public"."default_travel_uplift_minor_units"() TO "anon";
 GRANT ALL ON FUNCTION "public"."default_travel_uplift_minor_units"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."default_travel_uplift_minor_units"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."distance_km"("p_lat_a" double precision, "p_lng_a" double precision, "p_lat_b" double precision, "p_lng_b" double precision) TO "anon";
+GRANT ALL ON FUNCTION "public"."distance_km"("p_lat_a" double precision, "p_lng_a" double precision, "p_lat_b" double precision, "p_lng_b" double precision) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."distance_km"("p_lat_a" double precision, "p_lng_a" double precision, "p_lat_b" double precision, "p_lng_b" double precision) TO "service_role";
 
 
 
@@ -3749,6 +3968,12 @@ GRANT ALL ON FUNCTION "public"."payable_audits"() TO "service_role";
 
 
 
+REVOKE ALL ON FUNCTION "public"."places_within_reach"("p_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."places_within_reach"("p_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."places_within_reach"("p_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."prefer_auditor"("p_audit_id" "uuid", "p_code" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."prefer_auditor"("p_audit_id" "uuid", "p_code" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."prefer_auditor"("p_audit_id" "uuid", "p_code" "text") TO "service_role";
@@ -3803,9 +4028,15 @@ GRANT ALL ON FUNCTION "public"."review_gate_reason"("p_audit_id" "uuid") TO "ser
 
 
 
-REVOKE ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_postcode_area" "text", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_postcode_area" "text", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_postcode_area" "text", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) TO "service_role";
+REVOKE ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_place_id" "uuid", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_place_id" "uuid", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."selectable_auditors"("p_organisation_id" "uuid", "p_place_id" "uuid", "p_audit_type" "public"."audit_type", "p_requires_av" boolean) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."set_auditor_coverage"("p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_excluded_ids" "uuid"[]) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."set_auditor_coverage"("p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_excluded_ids" "uuid"[]) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_auditor_coverage"("p_base_place_id" "uuid", "p_minutes" integer, "p_mode" "public"."travel_mode", "p_place_ids" "uuid"[], "p_excluded_ids" "uuid"[]) TO "service_role";
 
 
 
@@ -3818,6 +4049,12 @@ GRANT ALL ON FUNCTION "public"."submit_write_up"("p_audit_id" "uuid", "p_results
 REVOKE ALL ON FUNCTION "public"."suspend_auditor"("p_auditor_id" "uuid", "p_reason" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."suspend_auditor"("p_auditor_id" "uuid", "p_reason" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."suspend_auditor"("p_auditor_id" "uuid", "p_reason" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."travel_km_per_minute"("p_mode" "public"."travel_mode") TO "anon";
+GRANT ALL ON FUNCTION "public"."travel_km_per_minute"("p_mode" "public"."travel_mode") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."travel_km_per_minute"("p_mode" "public"."travel_mode") TO "service_role";
 
 
 
@@ -3930,6 +4167,12 @@ GRANT ALL ON TABLE "public"."organisation_credit_position" TO "service_role";
 
 GRANT ALL ON TABLE "public"."payout_line_item" TO "authenticated";
 GRANT ALL ON TABLE "public"."payout_line_item" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."place" TO "anon";
+GRANT ALL ON TABLE "public"."place" TO "authenticated";
+GRANT ALL ON TABLE "public"."place" TO "service_role";
 
 
 

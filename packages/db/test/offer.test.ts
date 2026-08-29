@@ -9,9 +9,9 @@ const AUDIT = '00000000-0000-7000-8000-0000000a0004';
 async function arrangeOffers(db: Db) {
   await db.arrange(
     `insert into audit (id, client_organisation_id, status, audit_type, postcode,
-                        window_start_on, window_end_on, pitch_detail)
+                        window_start_on, window_end_on, pitch_detail, place_id)
      values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10,
-             'Outside the station, north entrance')`,
+             'Outside the station, north entrance', (select id from place where name = 'Westminster' and country_code = 'GB'))`,
     [AUDIT, ids.charityA],
   );
   for (const auditor of [ids.auditor, ids.otherAuditor]) {

@@ -36,6 +36,8 @@ like before you open it.
 | Format money | `formatMoney(minorUnits, currency)` | a `£` in a component, a hardcoded `/100` |
 | Quote a price | read `credit_bundle`; amount and currency together | a price constant in app code |
 | Derive a value from a column | a stored generated column | parsing in application code |
+| Say where something is | a `place_id` into the gazetteer | a postcode, a region string, a country's own codes |
+| Match on geography | a join on `place_id` | distance arithmetic in the request path |
 | Enforce an invariant | a CHECK or unique partial index | a service-layer guard alone |
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |

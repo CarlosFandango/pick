@@ -33,6 +33,8 @@ export default async function WelcomePage() {
   if (!profile || profile.role !== 'auditor') redirect('/sign-in');
   if (profile.status !== 'invited') redirect('/welcome/done');
 
+  const { data: places } = await supabase.from('place').select('id, name, region').order('name');
+
   return (
     <main
       style={{
@@ -61,7 +63,11 @@ export default async function WelcomePage() {
           A few things about where you work, so we only send you audits you can actually reach.
         </p>
 
-        <AuditorApplicationForm action={completeProfile} email={profile.email} />
+        <AuditorApplicationForm
+          action={completeProfile}
+          email={profile.email}
+          places={places ?? []}
+        />
       </div>
     </main>
   );

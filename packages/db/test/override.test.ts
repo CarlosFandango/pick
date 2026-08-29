@@ -6,7 +6,9 @@ type Db = Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>;
 async function arrangePool(db: Db) {
   for (const auditor of [ids.auditor, ids.otherAuditor]) {
     await db.arrange(
-      "insert into auditor_coverage (auditor_id, postcode_area) values ($1, 'SW') on conflict do nothing",
+      `insert into auditor_coverage (auditor_id, place_id, source)
+         select $1, id, 'derived' from place where name = 'Westminster' and country_code = 'GB'
+         on conflict do nothing`,
       [auditor],
     );
     await db.arrange(
@@ -17,12 +19,11 @@ async function arrangePool(db: Db) {
 }
 
 const pool = (db: Db, as: string, org = ids.charityA) =>
-  db
-    .as(as)
-    .query<{ code: string; state: string; warning: string | null; av_capable: boolean }>(
-      "select * from selectable_auditors($1, 'SW', 'street')",
-      [org],
-    );
+  db.as(as).query<{ code: string; state: string; warning: string | null; av_capable: boolean }>(
+    `select * from selectable_auditors($1,
+         (select id from place where name = 'Westminster' and country_code = 'GB'), 'street')`,
+    [org],
+  );
 
 describe('selectable_auditors (S3.2)', () => {
   it('shows auditors coded, never named', async () => {
@@ -65,8 +66,8 @@ describe('selectable_auditors (S3.2)', () => {
       await arrangePool(db);
       await db.arrange(
         `insert into audit (client_organisation_id, auditor_id, status, postcode,
-                            window_start_on, window_end_on)
-         values ($1, $2, 'released', 'SW1A 1AA', current_date - 10, current_date - 8)`,
+                            window_start_on, window_end_on, place_id)
+         values ($1, $2, 'released', 'SW1A 1AA', current_date - 10, current_date - 8, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
         [ids.charityA, ids.auditor],
       );
 
@@ -105,8 +106,8 @@ describe('prefer_auditor', () => {
     await arrangePool(db);
     await db.arrange(
       `insert into audit (id, client_organisation_id, status, audit_type, postcode,
-                          window_start_on, window_end_on)
-       values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10)`,
+                          window_start_on, window_end_on, place_id)
+       values ($1, $2, 'booked', 'street', 'SW1A 1AA', current_date + 7, current_date + 10, (select id from place where name = 'Westminster' and country_code = 'GB'))`,
       [AUDIT, ids.charityA],
     );
   }

@@ -39,7 +39,8 @@ reason. Deferred is a real answer and should stay populated.
 | Stage sequence editing | Partial | S4.10 `/admin/stages` | Read-only. Reordering has to publish a new `stage_set_version` rather than move rows an in-flight shift is reading — same argument as TND-84 |
 | UUIDv7 ids | Built | `core/ids.ts`, `uuid_generate_v7()` | device-minted for field events |
 | Scoring | Built | `core/scoring.ts` | weighted, critical failures separate, 11 tests |
-| Postcode area matching | Partial | generated columns on `audit` | area letters only; join, no algorithm yet |
+| Place matching | Built | `place`, `auditor_coverage.place_id` | one join. A gazetteer seeded per country, so a second country is rows rather than a migration |
+| Travel-based coverage | Built | `places_within_reach()`, `set_auditor_coverage()` | an auditor gives minutes and mode; the circle proposes places and they confirm. Removals kept as `excluded` |
 | Credit ledger lifecycle | Built | `20260826290100_credit_lifecycle.sql` | reserve at booking, consume at release, release on void/no-show. FIFO by purchase date; each credit carries what it cost |
 | Credit position (5 figures) | Built | `organisation_credit_position` view | purchased / reserved / consumed / released / available, all folds over the ledger |
 | Atomic reservation | Built | `book_audit` locks the organisation row | two bookings against a last credit can no longer both succeed |
@@ -148,7 +149,8 @@ analytics dashboards
 | Reading `observation_log.payload` | Capture now, decide later. Querying it would freeze a shape we have not chosen. | A real report needs a field in it |
 | Real payout rails | `execution_method` makes them swappable. Manual CSV is correct at this volume. | Volume makes manual painful |
 | Balance/score cached columns | `sum(delta)` and on-the-fly scoring are fast at this size and cannot drift. | A query is measurably too slow |
-| Postcode districts / travel radius | Area letters are coarse but sufficient to test the model. | Matching visibly fails |
+| Real journey times | Straight-line distance with a factor per mode, and the screen says so. The auditor corrects what it gets wrong, and the correction is what is stored. | An estimate is wrong often enough that people notice |
+| A complete gazetteer | Around 75 places: the urban centres plus everywhere the seed uses. Filling in the rest is a data-loading job against ONS or OpenStreetMap, not hand-writing. | An audit is booked somewhere absent |
 | Column-level update rules on profiles | Writes go through server actions where they are testable. | Users need self-service editing |
 | Auditor complaints on home (TND-95 part 4) | "Complaint management" for an auditor is two different builds — rework reaching them, or issues they raise — and one is an entity that does not exist. Guessing would build the wrong thing, and safety reports may not belong in a queue at all. | TND-97 comes back from Jaz |
 | An audit detail screen in the field app | Home and My Audits both send an auditor to the thing that is *due* — prep, or the write-up. A read-only detail screen would be a second tap to nothing actionable. | An auditor needs something on it they cannot get from prep |

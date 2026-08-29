@@ -26,3 +26,7 @@ packages/db/supabase/.temp/
 
 # claude code — project settings are shared, local overrides are not
 .claude/settings.local.json
+
+# Worktrees live here. They are checkouts of this same repository, so
+# committing one embeds a git repo inside itself and clones come back empty.
+.claude/worktrees/
