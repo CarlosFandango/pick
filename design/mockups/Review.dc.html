@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span class="navlink">Today</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Audits</span>
+    <span class="navlink">Auditors</span><span class="navlink">Clients</span><span class="navlink">Payouts</span><span class="navlink">Risks</span>
+    <span style="margin-left: auto;" class="meta">1 of 1 in review</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <div class="body" style="font-size: 13px; color: #0B6A68; margin-bottom: 14px;">← Today</div>
+
+    <!-- VERDICT — why it is held, and what the decision is -->
+    <div style="display: flex; gap: 18px; align-items: flex-start; padding: 20px 24px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #F2A900; border-radius: 5px; margin-bottom: 24px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #F2A900; display: flex; align-items: center; justify-content: center;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4A3400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </div>
+      <div style="flex-grow: 1;">
+        <div class="meta" style="margin-bottom: 5px;">PS-000906 · Whitechapel E1 · street · submitted Thu 22:14</div>
+        <h1 style="margin: 0 0 6px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.3;">
+          Held because it is this charity's first audit.
+        </h1>
+        <p class="body" style="margin: 0;">
+          Client release only — the auditor's £115 cleared on submission and is not waiting on you.
+        </p>
+      </div>
+    </div>
+
+    <!-- The two gates, resolved separately. This is TND-79 made visible. -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px;">
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #0B5D5C; border-radius: 5px; padding: 16px 19px;">
+        <div class="meta" style="color: #0B5D5C; margin-bottom: 6px;">Payment · cleared</div>
+        <p class="body" style="margin: 0;">
+          Auditor 906 was paid on submission. Nothing you decide here changes that — their fee never
+          depends on a charity liking the result.
+        </p>
+      </div>
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #F2A900; border-radius: 5px; padding: 16px 19px;">
+        <div class="meta" style="color: #8A6100; margin-bottom: 6px;">Client release · held by you</div>
+        <p class="body" style="margin: 0;">
+          First audit for St Luke's Hospice. Auto-releases in 2 days if nobody looks.
+        </p>
+      </div>
+    </div>
+
+    <!-- What the auditor found, in the same order as everywhere else -->
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; align-items: start;">
+
+      <div>
+        <div class="meta" style="margin-bottom: 12px;">What they found · 2 breaches in 29</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+
+          <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 15px 18px;">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+              <span class="meta" style="color: #A4382C;">03 Opening · breach · critical</span>
+            </div>
+            <p style="margin: 0 0 6px; font-size: 14.5px; font-weight: 600; line-height: 1.4;">
+              Did the fundraiser say they are paid, and name the agency employing them?
+            </p>
+            <p class="body" style="margin: 0; font-style: italic;">"Did not say they were paid, or name the agency."</p>
+          </div>
+
+          <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 15px 18px;">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+              <span class="meta" style="color: #A4382C;">05 Ask · breach · critical</span>
+            </div>
+            <p style="margin: 0 0 6px; font-size: 14.5px; font-weight: 600; line-height: 1.4;">
+              Did the fundraiser accept the first clear refusal and stop asking?
+            </p>
+            <p class="body" style="margin: 0; font-style: italic;">"Asked a third time after a clear no."</p>
+          </div>
+
+          <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 15px 18px; display: flex; align-items: center; gap: 12px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B5D5C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="m5 13 4 4L19 7"/></svg>
+            <span class="body" style="flex-grow: 1;">The other 27 checks were answered and in order.</span>
+            <span class="meta" style="color: #0B6A68;">Show all</span>
+          </div>
+
+        </div>
+
+        <!-- What the auditor captured live, so a reviewer can corroborate -->
+        <div style="margin-top: 20px; background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 18px 20px;">
+          <div class="meta" style="margin-bottom: 10px;">Captured during the shift</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 12px; align-items: baseline;">
+              <span class="meta" style="width: 54px; flex: none; color: #8A6100;">14:22</span>
+              <span class="body" style="flex-grow: 1;">Flagged during Ask — matches the breach above</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: baseline;">
+              <span class="meta" style="width: 54px; flex: none; color: #8A6100;">14:09</span>
+              <span class="body" style="flex-grow: 1;">Flagged during Opening — matches the breach above</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: baseline;">
+              <span class="meta" style="width: 54px; flex: none;">Watch</span>
+              <span class="body" style="flex-grow: 1;">31 approaches · 9 stops · 4 asks · 1 sign-up over 45 minutes</span>
+            </div>
+          </div>
+          <p class="body" style="margin: 12px 0 0; font-size: 12.5px;">
+            Both breaches were flagged live, not remembered afterwards. That is the corroboration
+            worth having before releasing a critical finding.
+          </p>
+        </div>
+      </div>
+
+      <!-- The decision -->
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 20px; position: sticky; top: 20px;">
+        <div class="meta" style="margin-bottom: 12px;">Your decision</div>
+
+        <div style="background: #0B5D5C; color: #F4EFE6; border-radius: 100px; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700; margin-bottom: 8px;">
+          Release to the charity
+        </div>
+        <p class="body" style="margin: 0 0 16px; font-size: 12.5px;">They get the report and an email straight away.</p>
+
+        <div style="border: 1px solid #E5DFD0; border-radius: 100px; padding: 11px 0; text-align: center; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+          Send back for rework
+        </div>
+        <p class="body" style="margin: 0 0 16px; font-size: 12.5px;">
+          Pick the moments that need more, and say what you need. The auditor keeps their fee.
+        </p>
+
+        <div style="border: 1px solid #E5DFD0; border-radius: 100px; padding: 11px 0; text-align: center; font-size: 14px; font-weight: 600; color: #A4382C; margin-bottom: 8px;">
+          Void it
+        </div>
+        <p class="body" style="margin: 0; font-size: 12.5px;">
+          The charity's credit goes back and they see nothing. Needs a reason on the record.
+        </p>
+
+        <div style="border-top: 1px solid #E5DFD0; margin-top: 16px; padding-top: 14px;">
+          <div class="meta" style="margin-bottom: 4px;">Auditor 906</div>
+          <div class="body" style="font-size: 12.5px;">Second audit · first was released without changes</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

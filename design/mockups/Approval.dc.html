@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #041825; font-family: 'Archivo', system-ui, -apple-system, sans-serif; color: #F4EFE6; }
+    a { color: #7FD3D1; } a:hover { color: #C9EFEE; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #7E93A6; }
+    .body { font-size: 14px; line-height: 1.5; color: #C6D4E2; }
+    .sheet { background: #0A2438; border-radius: 5px; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #041825; padding: 54px 18px 24px; display: flex; flex-direction: column;">
+
+  <!-- VERDICT — where they are, and that nothing is required of them -->
+  <div class="meta" style="margin-bottom: 8px;">Welcome, Priya</div>
+  <h1 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">
+    We are checking your details. Nothing needed from you.
+  </h1>
+  <p class="body" style="margin: 0 0 26px;">
+    Usually two or three working days. We will let you know the moment it is done, and offers start
+    arriving straight after.
+  </p>
+
+  <!-- SEQUENCE — what is actually being checked -->
+  <div class="meta" style="margin-bottom: 14px;">What we are doing</div>
+  <div style="display: flex; flex-direction: column; margin-bottom: 26px;">
+
+    <div style="display: flex; gap: 14px;">
+      <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 18px; height: 18px; border-radius: 100px; background: #0B5D5C; display: flex; align-items: center; justify-content: center; margin-top: 10px;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+        </div>
+        <div style="width: 2px; flex-grow: 1; background: #0B5D5C; opacity: 0.4;"></div>
+      </div>
+      <div style="flex-grow: 1; padding: 7px 0 16px;">
+        <div style="font-size: 15px; font-weight: 600;">Your details</div>
+        <div class="body" style="font-size: 13px; color: #7E93A6;">Received Tuesday</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px;">
+      <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 18px; height: 18px; border-radius: 100px; background: #F2A900; margin-top: 10px;"></div>
+        <div style="width: 2px; flex-grow: 1; background: #21455E;"></div>
+      </div>
+      <div style="flex-grow: 1; padding: 7px 0 16px;">
+        <div style="font-size: 15px; font-weight: 600;">Identity and right to work</div>
+        <div class="body" style="font-size: 13px;">The standard checks any employer runs. We may email you for a document.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px;">
+      <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 18px; height: 18px; border-radius: 100px; border: 2px solid #4E6377; box-sizing: border-box; margin-top: 10px;"></div>
+        <div style="width: 2px; flex-grow: 1; background: #21455E;"></div>
+      </div>
+      <div style="flex-grow: 1; padding: 7px 0 16px;">
+        <div style="font-size: 15px; font-weight: 600; color: #7E93A6;">The kinds of audit you said you can run</div>
+        <div class="body" style="font-size: 13px; color: #7E93A6;">Street and door-to-door. A short call if we have questions.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px;">
+      <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 18px; height: 18px; border-radius: 100px; border: 2px solid #4E6377; box-sizing: border-box; margin-top: 10px;"></div>
+      </div>
+      <div style="flex-grow: 1; padding: 7px 0 0;">
+        <div style="font-size: 15px; font-weight: 600; color: #7E93A6;">Offers start arriving</div>
+        <div class="body" style="font-size: 13px; color: #7E93A6;">In N, EC and E — the areas you said you cover.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Something useful to do with the wait -->
+  <div class="sheet" style="padding: 18px 20px; margin-bottom: 12px;">
+    <div class="meta" style="margin-bottom: 8px;">While you wait</div>
+    <p class="body" style="margin: 0 0 14px;">
+      Have a look at what you will be checking for. Twenty-nine points, grouped by the part of the
+      conversation they belong to — worth reading once before your first audit.
+    </p>
+    <div style="border: 1.5px solid #4E6377; border-radius: 100px; padding: 14px 0; text-align: center;">
+      <span style="font-size: 15px; font-weight: 600; color: #C6D4E2;">Read the checklist</span>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1;"></div>
+
+  <div style="text-align: center;">
+    <span class="meta">Something wrong, or changed your mind? Email jaz@pick.example</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

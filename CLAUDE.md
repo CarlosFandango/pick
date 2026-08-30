@@ -33,7 +33,8 @@ Three things this licenses, and one it does not:
 
 `design/` holds the committed design drop: **[design/BUILD-GUIDE.md](design/BUILD-GUIDE.md)**
 (domain rules, visual rules, copy register), **[design/manifest.md](design/manifest.md)**
-(stable screen IDs S1.1–S3.6 → routes) and `design/tokens/tokens.ts`.
+(stable screen IDs S1.1–S5.3 → routes), **[design/mockups/](design/mockups/)** (28
+artboards — the screen each one is, in its README) and `design/tokens/tokens.ts`.
 
 - **Screen IDs are the shared vocabulary.** Reference them in commits, branches
   and conversation — "update S2.3", not "the flag thing".

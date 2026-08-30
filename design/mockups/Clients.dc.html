@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+    .num { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span class="navlink">Today</span><span class="navlink">Audits</span><span class="navlink">Auditors</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Clients</span>
+    <span class="navlink">Payouts</span><span class="navlink">Risks</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <!-- VERDICT — who needs selling to, who needs watching -->
+    <div style="display: flex; gap: 18px; align-items: center; padding: 20px 24px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #F2A900; border-radius: 5px; margin-bottom: 26px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #F2A900; display: flex; align-items: center; justify-content: center;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: #4A3400;">1</span>
+      </div>
+      <div style="flex-grow: 1;">
+        <h1 style="margin: 0 0 3px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">
+          One charity will run out of credits after their next booking.
+        </h1>
+        <p class="body" style="margin: 0;">Rowan Mercy Trust has two left and books roughly one a month.</p>
+      </div>
+      <span style="flex: none; background: #062134; color: #F4EFE6; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 700;">Invoice them</span>
+    </div>
+
+    <div class="meta" style="margin-bottom: 10px;">Charities</div>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px;">
+
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 20px 24px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.02em;">St Luke's Hospice</h2>
+          <span class="meta">Charity 1012345 · UK · since June</span>
+          <span class="meta" style="margin-left: auto; color: #8A6100;">1 open concern</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; padding: 16px 0; border-top: 1px solid #E5DFD0; border-bottom: 1px solid #E5DFD0; margin-bottom: 14px;">
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Available</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">4</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Set aside</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">6</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Delivered</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">2</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Spent with us</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">£2,100</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Breaches found</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em; color: #A4382C;">4</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 600;">Add credits</span>
+          <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 600;">Their audits</span>
+          <span class="body" style="margin-left: auto;">Dev Client · client@example.test</span>
+        </div>
+      </div>
+
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #F2A900; border-radius: 5px; padding: 20px 24px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px;">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.02em;">Rowan Mercy Trust</h2>
+          <span class="meta">Charity 1099887 · UK · since July</span>
+          <span class="meta" style="margin-left: auto; color: #8A6100;">Running low</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; padding: 16px 0; border-top: 1px solid #E5DFD0; border-bottom: 1px solid #E5DFD0; margin-bottom: 14px;">
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Available</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em; color: #8A6100;">2</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Set aside</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">1</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Delivered</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">0</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Spent with us</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">£525</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 3px;">Breaches found</div>
+            <div class="num" style="font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">0</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="background: #062134; color: #F4EFE6; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 700;">Add credits</span>
+          <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 600;">Their audits</span>
+          <span class="body" style="margin-left: auto;">Mercy Client · client-b@example.test</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- An adjustment always needs a reason -->
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #062134; border-radius: 5px; padding: 20px 24px;">
+      <div class="meta" style="margin-bottom: 8px;">Adding credits</div>
+      <p class="body" style="margin: 0 0 14px; max-width: 66ch;">
+        Every adjustment is a new row on the ledger with your name and a reason on it — nothing is
+        ever edited, and a charity can see the whole history. An adjustment without a reason is
+        refused.
+      </p>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px; padding: 11px 14px; width: 90px; font-size: 14px;">+12</div>
+        <div style="background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px; padding: 11px 14px; flex-grow: 1; font-size: 14px; color: #625C4C;">Reason — invoice number, or why this is a goodwill credit</div>
+        <span style="background: #0B5D5C; color: #F4EFE6; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 700;">Add</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,440 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "The charity"
+    },
+    {
+      "id": "page-2",
+      "name": "The auditor"
+    },
+    {
+      "id": "page-4",
+      "name": "PICK"
+    },
+    {
+      "id": "page-3",
+      "name": "The pattern"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "ClientWelcome.dc.html",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1000,
+      "h": 1260,
+      "title": "1 \u00b7 First run \u2014 NEW"
+    },
+    {
+      "file": "Book.dc.html",
+      "page": "page-1",
+      "x": 1120,
+      "y": 0,
+      "w": 1000,
+      "h": 1500,
+      "title": "2 \u00b7 Book an audit"
+    },
+    {
+      "file": "AuditsList.dc.html",
+      "page": "page-1",
+      "x": 2240,
+      "y": 0,
+      "w": 1000,
+      "h": 1420,
+      "title": "3 \u00b7 Your audits"
+    },
+    {
+      "file": "AuditDetail.dc.html",
+      "page": "page-1",
+      "x": 3360,
+      "y": 0,
+      "w": 1000,
+      "h": 1360,
+      "title": "4 \u00b7 While you wait"
+    },
+    {
+      "file": "Main.dc.html",
+      "page": "page-1",
+      "x": 4480,
+      "y": 0,
+      "w": 1000,
+      "h": 1560,
+      "title": "5 \u00b7 The report"
+    },
+    {
+      "file": "Concern.dc.html",
+      "page": "page-1",
+      "x": 5600,
+      "y": 0,
+      "w": 1000,
+      "h": 1240,
+      "title": "6 \u00b7 Raising a concern \u2014 NEW"
+    },
+    {
+      "file": "History.dc.html",
+      "page": "page-1",
+      "x": 6720,
+      "y": 0,
+      "w": 1000,
+      "h": 1560,
+      "title": "7 \u00b7 Across audits \u2014 NEW"
+    },
+    {
+      "file": "Credits.dc.html",
+      "page": "page-1",
+      "x": 7840,
+      "y": 0,
+      "w": 1000,
+      "h": 1420,
+      "title": "8 \u00b7 Credits"
+    },
+    {
+      "file": "Invitation.dc.html",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1000,
+      "h": 1760,
+      "title": "1 \u00b7 The invitation"
+    },
+    {
+      "file": "Approval.dc.html",
+      "page": "page-2",
+      "x": 1120,
+      "y": 0,
+      "w": 414,
+      "h": 900,
+      "title": "2 \u00b7 Waiting to be approved \u2014 NEW"
+    },
+    {
+      "file": "AuditorHome.dc.html",
+      "page": "page-2",
+      "x": 1640,
+      "y": 0,
+      "w": 414,
+      "h": 1120,
+      "title": "3 \u00b7 Home"
+    },
+    {
+      "file": "Offers.dc.html",
+      "page": "page-2",
+      "x": 2160,
+      "y": 0,
+      "w": 414,
+      "h": 1060,
+      "title": "4 \u00b7 Offers"
+    },
+    {
+      "file": "Accept.dc.html",
+      "page": "page-2",
+      "x": 2680,
+      "y": 0,
+      "w": 414,
+      "h": 1020,
+      "title": "5 \u00b7 Accepting \u2014 NEW conflict step"
+    },
+    {
+      "file": "Prep.dc.html",
+      "page": "page-2",
+      "x": 3200,
+      "y": 0,
+      "w": 414,
+      "h": 1420,
+      "title": "6 \u00b7 Prep"
+    },
+    {
+      "file": "Arrival.dc.html",
+      "page": "page-2",
+      "x": 3720,
+      "y": 0,
+      "w": 414,
+      "h": 900,
+      "title": "7 \u00b7 Arriving \u2014 NEW"
+    },
+    {
+      "file": "Session.dc.html",
+      "page": "page-2",
+      "x": 4240,
+      "y": 0,
+      "w": 414,
+      "h": 940,
+      "title": "8 \u00b7 Working the shift"
+    },
+    {
+      "file": "WriteUp.dc.html",
+      "page": "page-2",
+      "x": 4760,
+      "y": 0,
+      "w": 414,
+      "h": 1500,
+      "title": "9 \u00b7 The write-up"
+    },
+    {
+      "file": "Rework.dc.html",
+      "page": "page-2",
+      "x": 5280,
+      "y": 0,
+      "w": 414,
+      "h": 1360,
+      "title": "10 \u00b7 Sent back \u2014 NEW"
+    },
+    {
+      "file": "Coverage.dc.html",
+      "page": "page-2",
+      "x": 5800,
+      "y": 0,
+      "w": 414,
+      "h": 1900,
+      "title": "11 \u00b7 Where you will work \u2014 NEW"
+    },
+    {
+      "file": "OpsHome.dc.html",
+      "page": "page-4",
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 1280,
+      "title": "1 \u00b7 Today \u2014 the queue"
+    },
+    {
+      "file": "Assignment.dc.html",
+      "page": "page-4",
+      "x": 1320,
+      "y": 0,
+      "w": 1200,
+      "h": 1120,
+      "title": "2 \u00b7 Who can do this"
+    },
+    {
+      "file": "Review.dc.html",
+      "page": "page-4",
+      "x": 2640,
+      "y": 0,
+      "w": 1200,
+      "h": 1400,
+      "title": "3 \u00b7 Reviewing a write-up"
+    },
+    {
+      "file": "Vetting.dc.html",
+      "page": "page-4",
+      "x": 3960,
+      "y": 0,
+      "w": 1200,
+      "h": 1520,
+      "title": "4 \u00b7 Vetting an auditor"
+    },
+    {
+      "file": "Triage.dc.html",
+      "page": "page-4",
+      "x": 5280,
+      "y": 0,
+      "w": 1200,
+      "h": 1280,
+      "title": "5 \u00b7 A concern \u2014 NEW triage"
+    },
+    {
+      "file": "Payouts.dc.html",
+      "page": "page-4",
+      "x": 6600,
+      "y": 0,
+      "w": 1200,
+      "h": 1360,
+      "title": "6 \u00b7 Paying auditors"
+    },
+    {
+      "file": "Risks.dc.html",
+      "page": "page-4",
+      "x": 7920,
+      "y": 0,
+      "w": 1200,
+      "h": 1240,
+      "title": "7 \u00b7 The risk register"
+    },
+    {
+      "file": "Clients.dc.html",
+      "page": "page-4",
+      "x": 9240,
+      "y": 0,
+      "w": 1200,
+      "h": 1180,
+      "title": "8 \u00b7 Charities and credits"
+    },
+    {
+      "file": "CoverageModel.dc.html",
+      "page": "page-2",
+      "x": 6320,
+      "y": 0,
+      "w": 980,
+      "h": 1500,
+      "title": "12 \u00b7 Why places, not postcodes"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-charity",
+      "page": "page-1",
+      "x": 0,
+      "y": -250,
+      "w": 480,
+      "text": "THE CHARITY \u2014 all seven flow steps\n\nA fundraising director who uses this twice a month and is not a compliance specialist.\n\nThree of these do not exist today: the first run (their first screen is currently an unstyled password box), the concern they have raised going anywhere, and any view across more than one audit.\n\nEvery screen opens with the answer to the question they arrived with \u2014 usually 'nothing needs you' \u2014 then lets them read down for why."
+    },
+    {
+      "id": "note-book",
+      "page": "page-1",
+      "x": 1120,
+      "y": -250,
+      "w": 300,
+      "text": "2 \u00b7 BOOK\n\nS3.2 folded in as a step rather than a separate screen: choose anyone eligible, or somebody specific by code.\n\nThe hard block is explained where it happens \u2014 a conflicted auditor is not a setting you can override, and the copy says why rather than just refusing."
+    },
+    {
+      "id": "note-list",
+      "page": "page-1",
+      "x": 2240,
+      "y": -250,
+      "w": 300,
+      "text": "3 \u00b7 YOUR AUDITS\n\nGrouped by what it means to them \u2014 ready, under way, waiting for an auditor, finished \u2014 rather than listed by our status enum.\n\nOnly one group has an action in it. The rest are there to stop them worrying."
+    },
+    {
+      "id": "note-concern",
+      "page": "page-1",
+      "x": 5600,
+      "y": -250,
+      "w": 300,
+      "text": "6 \u00b7 RAISING A CONCERN \u2014 NEW\n\nToday a charity types into a box and never hears anything again.\n\nThis gives the concern a life: acknowledged, being investigated, one of three named outcomes. It also explains, once, why they are not talking to the auditor directly \u2014 because that is the product working, not us being obstructive."
+    },
+    {
+      "id": "note-history",
+      "page": "page-1",
+      "x": 6720,
+      "y": -250,
+      "w": 320,
+      "text": "7 \u00b7 ACROSS AUDITS \u2014 NEW\n\nFlow map finding 04: every audit is an island, and this is the question that decides whether they renew.\n\nThe pattern is the product. One report says a fundraiser did something wrong; four say the agency has a training problem and it started in July.\n\nAll the data exists. Nothing reads across it."
+    },
+    {
+      "id": "note-auditor",
+      "page": "page-2",
+      "x": 0,
+      "y": -250,
+      "w": 480,
+      "text": "THE AUDITOR \u2014 all eleven flow steps\n\nA contractor, outdoors, one-handed, often with no signal \u2014 and during the mystery shop they must not be seen using this at all.\n\nFour do not exist today: what happens while they wait to be approved, declaring a conflict when accepting, arriving, and being told their write-up came back.\n\nPortal screens are 1000px; field screens are at real phone width, 414px."
+    },
+    {
+      "id": "note-invite",
+      "page": "page-2",
+      "x": 0,
+      "y": 1650,
+      "w": 620,
+      "text": "1 \u00b7 THE INVITATION \u2014 rebuilt twice\n\nThe version we shipped last week asks its questions before answering any of theirs, and it asks the hardest one badly.\n\nCOVERAGE IS NOW A TRAVEL QUESTION. 'Postcode areas you cover' made an auditor translate 'how far will I go' into geography they would have to look up. Nobody thinks in postcode areas. They think '45 minutes on the tube' or 'an hour in the car'.\n\nSo: base postcode, how far, and how they travel \u2014 then we DERIVE the areas and show them, editable. The auditor checks a list rather than composing one.\n\nMODE IS NOT JUST A DISTANCE MULTIPLIER. An hour by car in rural Scotland is a different world from an hour on the tube, and only a driver reaches a retail park with no station. It is a capability, like av_capable.\n\nWHAT THIS COSTS: nothing at match time. Matching stays a join on postcode_area \u2014 the derivation happens once, on save, against a static table of the 121 UK postcode areas. The travel radius work deferred in FUNCTIONALITY stays deferred; we just stop making the auditor do it in their head.\n\nStore BOTH: max_travel_minutes and travel_mode on auditor_profile, plus the derived rows in auditor_coverage. If we ever want real journey times, the inputs are already captured \u2014 which is the standing rule about recording everything from day one."
+    },
+    {
+      "id": "note-accept",
+      "page": "page-2",
+      "x": 2680,
+      "y": -250,
+      "w": 340,
+      "text": "5 \u00b7 ACCEPTING \u2014 NEW conflict step\n\nThe database blocks a conflict PICK already knows about. A friend on that agency's team is invisible to us, and nothing today invites the auditor to say so.\n\nIndependence is the product, so this is the moment to ask \u2014 and the copy makes declaring one costless, because an auditor who fears losing work will not."
+    },
+    {
+      "id": "note-arrival",
+      "page": "page-2",
+      "x": 3720,
+      "y": -250,
+      "w": 340,
+      "text": "7 \u00b7 ARRIVING \u2014 NEW\n\nToday 'start session' means both 'I am here' and 'the audit is running', and the 45-minute no-show clock runs from it \u2014 so an auditor who arrives early and waits properly is penalised for pressing it late.\n\nTwo buttons, two facts."
+    },
+    {
+      "id": "note-session",
+      "page": "page-2",
+      "x": 4240,
+      "y": -250,
+      "w": 340,
+      "text": "8 \u00b7 WORKING THE SHIFT\n\nThe highest-stakes screen in the product: read at arm's length, in daylight, while watching something you cannot pause.\n\nCounters are the whole interface during the watching half. The screen says what is coming BEFORE it arrives, so nobody is surprised into holding a phone during the mystery shop."
+    },
+    {
+      "id": "note-rework",
+      "page": "page-2",
+      "x": 5280,
+      "y": -250,
+      "w": 340,
+      "text": "10 \u00b7 SENT BACK \u2014 NEW\n\nNobody is told today. The work waits on someone who does not know it is waiting.\n\nIt leads with reassurance because the first thought is 'am I in trouble' and the second is 'do I still get paid' \u2014 and the answers are no and yes. Only the moments PICK unlocked are editable; the other 27 are visibly locked."
+    },
+    {
+      "id": "note-pattern-page",
+      "page": "page-3",
+      "x": 0,
+      "y": 0,
+      "w": 620,
+      "text": "VERDICT FIRST, THEN READ DOWN\n\nApplied to all 18 screens. Each opens with the one thing the person came for \u2014 in words, not a number \u2014 then lets them read down a sequence for the evidence.\n\nIT ONLY WORKS WHERE BOTH ARE TRUE:\n\n\u00b7 the system HAS a judgement\n\u00b7 the content HAS a real order\n\nWhere there is no judgement, the opening line still answers the question they arrived with \u2014 which is often 'nothing needs you'. That is a verdict too, and it is the most valuable one on a waiting screen.\n\nWHERE IT DOES NOT APPLY\n\nThe assignment console (S4.2) fails both tests: six parallel eligibility rules, no chronology, and PICK is choosing rather than being told. Forcing a timeline onto it would be worse than the flat list it has now. The ops queue (S4.1) takes the verdict half only \u2014 it is ranked, not sequential.\n\nTHE EIGHT MOMENTS ARE THE SPINE\n\nApproach \u00b7 Walk-up \u00b7 Opening \u00b7 Pitch \u00b7 Ask \u00b7 Tablet \u00b7 Sign-up \u00b7 Close\n\nThey appear in the same order, with the same names, on the report, the prep cards, the session and the write-up. A charity and an auditor end up describing the same shift the same way \u2014 which is most of what makes two apps feel like one product."
+    },
+    {
+      "id": "note-invented",
+      "page": "page-3",
+      "x": 680,
+      "y": 0,
+      "w": 620,
+      "text": "WHAT I INVENTED \u2014 CHECK THESE\n\n1. THE VERDICT WORDS. The product says PASS and FAIL. These say 'in order' and 'breach' to a charity, and ask an auditor Yes / No / Note \u2014 because the checks are written as questions and 'did they stop asking? FAIL' reads backwards. A real change to core, not layout.\n\n2. EVERY TIMING PROMISE. 'Two or three working days' for vetting, 'report expected Monday', 'next payout run is Friday 5 September', 'we will let you know'. The product has no SLAs, no schedule and no notifications. Every screen here quietly assumes all three.\n\n3. 'WHY THIS CHECK MATTERS' lines, on the report, prep and rework. Not a field that exists \u2014 it would be a client-facing note on check_definition.\n\n4. THE ARRIVAL BRIEF \u2014 where they stand, what the tabards look like. Captured nowhere today.\n\n5. TIME ESTIMATES on offers ('about 90 min') and the write-up ('about ten minutes left'). Reasonable, unmeasured.\n\n6. THE HISTORY SCREEN'S RECURRENCE ANALYSIS. The data exists; nothing computes it. It is the biggest single build here.\n\n7. 'You have passed on 3 offers this month \u00b7 that is fine' \u2014 I invented both the counter and the reassurance. Worth deciding whether we track that at all, because an auditor who feels counted behaves differently.\n\n8. Jaz named as account manager and jaz@pick.example. Placeholders."
+    },
+    {
+      "id": "note-next",
+      "page": "page-3",
+      "x": 0,
+      "y": 700,
+      "w": 620,
+      "text": "IF YOU BUILD ONE THING FROM THIS\n\nNotifications. Not a screen \u2014 the absence underneath half of these designs.\n\nSix of the eighteen say some version of 'we will let you know', and none of them can. An offer expiring in four hours, a report going live, a write-up coming back, vetting finishing: all silent today.\n\nThe screens work without it. The product does not."
+    },
+    {
+      "id": "note-pick",
+      "page": "page-4",
+      "x": 0,
+      "y": -270,
+      "w": 560,
+      "text": "PICK \u2014 the third actor\n\nTwo people running a marketplace. Everything has to be dispatchable in one pass, and nothing may be silently dropped.\n\nTHE PATTERN BENDS HERE, DELIBERATELY. A charity and an auditor arrive with a question and want an answer. PICK arrives with a LIST and wants it empty. So the verdict half stays \u2014 every screen opens with what needs a person \u2014 but the sequence half only applies where there genuinely is one (a payout run, an advisory trail). Forcing a timeline onto the assignment console would be worse than the table it deserves.\n\nAll eight of these exist today. None is a new screen; what changes is what each one leads with."
+    },
+    {
+      "id": "note-assign",
+      "page": "page-4",
+      "x": 1320,
+      "y": -270,
+      "w": 340,
+      "text": "2 \u00b7 WHO CAN DO THIS\n\nThe screen the flow map said fails both tests \u2014 six parallel eligibility rules, no chronology. So it gets a table, not a timeline.\n\nThe design work is making the SIX SETS legible as columns, so the first failing one is the thing to fix \u2014 and pairing each near-miss with the action that would clear it ('sign off?', 'widen?'). Today it is a flat list of who qualified.\n\nExposure warns; conflict never waives. Both are said once, at the bottom, rather than repeated in every row."
+    },
+    {
+      "id": "note-review",
+      "page": "page-4",
+      "x": 2640,
+      "y": -270,
+      "w": 340,
+      "text": "3 \u00b7 REVIEWING A WRITE-UP\n\nThe two gates resolve SEPARATELY on screen, which is TND-79 made visible: the auditor was paid on submission and nothing here changes that.\n\nIt also surfaces what the auditor flagged LIVE during the shift, with times, beside their written findings. A critical breach corroborated at 14:22 is a different thing from one remembered afterwards \u2014 and that is exactly what a reviewer should be weighing."
+    },
+    {
+      "id": "note-triage",
+      "page": "page-4",
+      "x": 5280,
+      "y": -270,
+      "w": 340,
+      "text": "5 \u00b7 A CONCERN \u2014 NEW triage\n\nTND-80's three paths made concrete: the finding stands, ask the auditor for more, or uphold it and re-audit at our cost.\n\nThe reply box says 'nothing here reaches the auditor'. That separation IS the product \u2014 an auditor whose findings can be argued with by the charity paying for them is not independent \u2014 so the screen states it where the decision gets made.\n\nThe corroboration panel also caught something real: the charity has read 'followed' into a finding about persistence. Worth correcting in the reply."
+    },
+    {
+      "id": "note-admin-invented",
+      "page": "page-4",
+      "x": 9240,
+      "y": -270,
+      "w": 560,
+      "text": "WHAT I INVENTED HERE\n\n1. THE COVERAGE GAP on Today \u2014 'nobody covers SE for lottery'. Nothing computes this. It is probably the single most useful thing a marketplace operator can be told, and it is a real build.\n\n2. 'Approve unlocks when the agreement is in' on vetting. There is no agreement-tracking field. Given TND-58 gates going live, there probably should be.\n\n3. Auto-release timers \u2014 'releases in 2 days if nobody looks'. The gate stores timeout_days and nothing applies it; there is no scheduler. TND-81.\n\n4. 'No finding overturned in 4 audits' on triage. We do not track overturn history.\n\n5. Every count of what a charity has spent, and breaches found. Derivable, not derived.\n\n6. The CSV export on a past run. TND-94, not built."
+    },
+    {
+      "id": "note-coverage",
+      "page": "page-2",
+      "x": 5800,
+      "y": -270,
+      "w": 460,
+      "text": "11\u201312 \u00b7 WHERE YOU WILL WORK\n\nThe hardest question in onboarding, and the one the first version got wrong twice.\n\nV1 asked for postcode areas \u2014 geography an auditor has to look up. V2 asked for travel time and then showed them postcode areas anyway, which is the same problem wearing a hat.\n\nTHE FIX IS TO STOP SHOWING CODES AT ALL. An auditor says where they start, how long they will travel and how. We propose PLACES \u2014 Salford, Trafford, Stockport \u2014 and they tick or untick. Place names are the one geographic unit every country has.\n\nThe screen is honest that the times are as the crow flies, because a river or a bad junction will make one wrong. Untick is the correction, and we keep it.\n\nThe artboard beside this is why the schema has to move first: today an audit's postcode is checked against a UK regex, so the product cannot store a Dublin address at all."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  }
+}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #041825; font-family: 'Archivo', system-ui, -apple-system, sans-serif; color: #F4EFE6; }
+    a { color: #7FD3D1; } a:hover { color: #C9EFEE; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #7E93A6; }
+    .body { font-size: 14px; line-height: 1.5; color: #C6D4E2; }
+    .sheet { background: #0A2438; border-radius: 5px; }
+    .opt { border: 1.5px solid #4E6377; border-radius: 5px; padding: 13px 8px; text-align: center; font-size: 15px; font-weight: 600; color: #C6D4E2; }
+    .opt.on { border: 2px solid #0B5D5C; background: #0B5D5C; color: #F4EFE6; font-weight: 700; padding: 12px 7px; }
+    .place { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-bottom: 1px solid #21455E; }
+    .tick { flex: none; width: 21px; height: 21px; border-radius: 4px; background: #0B5D5C; display: flex; align-items: center; justify-content: center; }
+    .untick { flex: none; width: 21px; height: 21px; border-radius: 4px; border: 2px solid #4E6377; box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #041825; padding: 54px 18px 24px;">
+
+  <div class="meta" style="margin-bottom: 8px;">Your details</div>
+  <h1 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">
+    Where you will work
+  </h1>
+  <p class="body" style="margin: 0 0 24px;">
+    This decides which audits reach you. Change it whenever your circumstances do — there is no
+    penalty for narrowing it, and no advantage to overstating it.
+  </p>
+
+  <!-- 1 · Origin. A place, resolved and shown back, not a code. -->
+  <div class="sheet" style="padding: 18px 20px; margin-bottom: 12px;">
+    <div class="meta" style="margin-bottom: 9px;">You set out from</div>
+    <div style="border: 1.5px solid #4E6377; border-radius: 5px; padding: 13px 15px; display: flex; align-items: center; gap: 11px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7E93A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span style="flex-grow: 1; font-size: 15px;">Ancoats, Manchester</span>
+      <span class="meta" style="color: #7FD3D1;">Change</span>
+    </div>
+    <p class="body" style="margin: 9px 0 0; font-size: 12.5px; color: #7E93A6;">
+      Home, or wherever you would usually travel from. A postcode, an address, or just the area.
+    </p>
+  </div>
+
+  <!-- 2 · Time. Universal unit. -->
+  <div class="sheet" style="padding: 18px 20px; margin-bottom: 12px;">
+    <div class="meta" style="margin-bottom: 11px;">How far, each way</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px;">
+      <div class="opt">30</div>
+      <div class="opt on">45</div>
+      <div class="opt">60</div>
+      <div class="opt">90</div>
+    </div>
+    <div class="meta" style="margin-top: 8px; text-align: center;">Minutes, door to door</div>
+  </div>
+
+  <!-- 3 · Mode. Changes what 45 minutes means. -->
+  <div class="sheet" style="padding: 18px 20px; margin-bottom: 12px;">
+    <div class="meta" style="margin-bottom: 11px;">How you get there</div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="border: 1.5px solid #4E6377; border-radius: 5px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex: none; width: 19px; height: 19px; border-radius: 100px; border: 2px solid #4E6377;"></div>
+        <span style="font-size: 15px; font-weight: 600; color: #C6D4E2;">Public transport</span>
+      </div>
+      <div style="border: 2px solid #0B5D5C; border-radius: 5px; padding: 13px 15px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex: none; width: 19px; height: 19px; border-radius: 100px; background: #0B5D5C; display: flex; align-items: center; justify-content: center;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+        </div>
+        <span style="font-size: 15px; font-weight: 700;">I drive</span>
+      </div>
+    </div>
+    <p class="body" style="margin: 11px 0 0; font-size: 12.5px; color: #7E93A6;">
+      Driving reaches further, and some sites — retail parks, private venues — are hard to get to
+      any other way.
+    </p>
+  </div>
+
+  <!-- 4 · The result, as PLACES. Never a code. -->
+  <div class="sheet" style="margin-bottom: 12px; overflow: hidden;">
+    <div style="padding: 18px 20px 14px;">
+      <div class="meta" style="margin-bottom: 7px;">Which means these places</div>
+      <p class="body" style="margin: 0; font-size: 13px;">
+        Worked out from where you start and how far you will go. Untick anywhere you would not
+        actually travel — you know the roads better than we do.
+      </p>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Manchester</div>
+        <div class="meta" style="margin-top: 1px;">Where you are</div>
+      </div>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Salford</div>
+        <div class="meta" style="margin-top: 1px;">About 10 minutes</div>
+      </div>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Trafford</div>
+        <div class="meta" style="margin-top: 1px;">About 20 minutes</div>
+      </div>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Stockport</div>
+        <div class="meta" style="margin-top: 1px;">About 25 minutes</div>
+      </div>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Oldham</div>
+        <div class="meta" style="margin-top: 1px;">About 30 minutes</div>
+      </div>
+    </div>
+
+    <div class="place">
+      <div class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Bolton</div>
+        <div class="meta" style="margin-top: 1px;">About 35 minutes</div>
+      </div>
+    </div>
+
+    <!-- An exception, kept explicitly rather than silently -->
+    <div class="place" style="opacity: 0.55;">
+      <div class="untick"></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600; text-decoration: line-through;">Rochdale</div>
+        <div class="meta" style="margin-top: 1px; color: #F2A900;">You removed this</div>
+      </div>
+    </div>
+
+    <div class="place" style="border-bottom: none;">
+      <div class="tick" style="background: #F2A900;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A3400" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 15px; font-weight: 600;">Chester</div>
+        <div class="meta" style="margin-top: 1px; color: #F2A900;">You added this · about 55 minutes</div>
+      </div>
+    </div>
+
+    <div style="padding: 14px 20px; border-top: 1px solid #21455E;">
+      <div style="border: 1.5px dashed #4E6377; border-radius: 5px; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7E93A6" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="body" style="color: #7E93A6;">Add somewhere else</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Honest about what the estimate is -->
+  <div class="sheet" style="border-left: 3px solid #F2A900; padding: 16px 18px; margin-bottom: 12px;">
+    <div class="meta" style="color: #F2A900; margin-bottom: 6px;">These are estimates</div>
+    <p class="body" style="margin: 0;">
+      We work the times out as the crow flies, so a river, a mountain or a bad junction can make one
+      wrong. That is why you can untick — anything you change, we keep.
+    </p>
+  </div>
+
+  <div class="sheet" style="border-left: 3px solid #0B5D5C; padding: 16px 18px; margin-bottom: 20px;">
+    <div class="meta" style="color: #7FD3D1; margin-bottom: 6px;">What changes when you save</div>
+    <p class="body" style="margin: 0;">
+      New offers follow this straight away. The two audits you have already accepted are unaffected
+      — narrowing your area never cancels work you have taken on.
+    </p>
+  </div>
+
+  <div style="background: #0B5D5C; border-radius: 100px; padding: 16px 0; text-align: center;">
+    <span style="font-size: 16px; font-weight: 700; color: #F4EFE6;">Save · 7 places</span>
+  </div>
+
+  <div style="margin-top: 16px; text-align: center;">
+    <span class="meta">Last changed 12 August · every change is kept</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

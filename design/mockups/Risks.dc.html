@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span class="navlink">Today</span><span class="navlink">Audits</span><span class="navlink">Auditors</span><span class="navlink">Clients</span><span class="navlink">Payouts</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Risks</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <!-- VERDICT — the point of the register, said out loud -->
+    <div style="padding: 22px 26px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #0B5D5C; border-radius: 5px; margin-bottom: 26px;">
+      <div class="meta" style="margin-bottom: 6px;">1 open · 1 advised · 0 unanswered</div>
+      <h1 style="margin: 0 0 8px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.3;">
+        Everything we have spotted has been put to the charity in writing.
+      </h1>
+      <p class="body" style="margin: 0; max-width: 68ch;">
+        That is what this register is for. If a finding is ever disputed, the defensible position is
+        that we flagged the risk, we advised, and they chose to proceed — and none of that is worth
+        anything unless the advice is on the record.
+      </p>
+    </div>
+
+    <div class="meta" style="margin-bottom: 12px;">Open and advised</div>
+
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #8A6100; border-radius: 5px; padding: 22px 24px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px;">
+        <span class="meta" style="color: #8A6100;">Exposure · medium</span>
+        <span class="meta">Raised by the system · 14 days ago</span>
+        <span class="meta" style="margin-left: auto; color: #0B5D5C;">Advised</span>
+      </div>
+
+      <h2 style="margin: 0 0 8px; font-size: 16.5px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35;">
+        Auditor 907 has audited St Luke's Hospice three times in eight weeks.
+      </h2>
+      <p class="body" style="margin: 0 0 18px; max-width: 66ch;">
+        They are becoming recognisable to the agency's team, which weakens the independence of
+        anything they find next. Raised automatically when the third audit was assigned.
+      </p>
+
+      <!-- The advisory — the part that makes it evidence -->
+      <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; gap: 14px;">
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #0B5D5C; margin-top: 13px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #0B5D5C; opacity: 0.35;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 16px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px;">We told them · 13 days ago, by email</div>
+            <p class="body" style="margin: 0; max-width: 62ch;">
+              "Flagged to the charity that repeat visits from the same auditor weaken the
+              independence of the finding. They asked us to proceed for this booking and rotate
+              afterwards."
+            </p>
+            <div class="meta" style="margin-top: 6px;">Dev Admin</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #0B5D5C; margin-top: 13px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #E5DFD0;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 16px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px;">They replied · proceeded</div>
+            <p class="body" style="margin: 0;">Recorded 13 days ago. They accepted the risk for that booking.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #FBF8F1; border: 2px solid #E5DFD0; margin-top: 13px;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 0;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px; color: #625C4C;">Still open</div>
+            <p class="body" style="margin: 0; color: #625C4C; max-width: 62ch;">
+              Close it when a different auditor takes their next booking, or record that the
+              exposure has passed.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #E5DFD0;">
+        <span style="background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 600;">Advise again</span>
+        <span style="background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 10px 20px; font-size: 13px; font-weight: 600;">Mark resolved</span>
+        <span class="meta" style="margin-left: auto; align-self: center;">Never deleted · this is the evidence trail</span>
+      </div>
+    </div>
+
+    <!-- What raises one -->
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 20px 24px; margin-top: 26px;">
+      <div class="meta" style="margin-bottom: 12px;">What puts a risk here</div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px;">Automatically</div>
+          <p class="body" style="margin: 0;">
+            An exposure override at assignment. The system raises it the moment somebody proceeds
+            past the warning, so nobody has to remember to.
+          </p>
+        </div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px;">By hand</div>
+          <p class="body" style="margin: 0;">
+            Anything you notice — a quality concern about an auditor, a data-protection worry, a
+            pattern in a charity's overrides.
+          </p>
+        </div>
+      </div>
+      <div style="margin-top: 16px;">
+        <span style="background: #062134; color: #F4EFE6; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 700;">Raise a risk</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

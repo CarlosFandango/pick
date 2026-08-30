@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #041825; font-family: 'Archivo', system-ui, -apple-system, sans-serif; color: #F4EFE6; }
+    a { color: #7FD3D1; } a:hover { color: #C9EFEE; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #7E93A6; }
+    .body { font-size: 14px; line-height: 1.5; color: #C6D4E2; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #041825; padding: 54px 18px 28px; display: flex; flex-direction: column;">
+
+  <div class="meta" style="margin-bottom: 8px;">Today · Street · SE15</div>
+  <h1 style="margin: 0 0 6px; font-size: 25px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">
+    Rye Lane, outside the station
+  </h1>
+  <p class="body" style="margin: 0 0 26px;">St Luke's Hospice · direct debit · window 10:00–16:00</p>
+
+  <!-- What they need on arrival, before anything is running -->
+  <div style="background: #0A2438; border-radius: 5px; padding: 18px 20px; margin-bottom: 12px;">
+    <div class="meta" style="margin-bottom: 10px;">Finding the team</div>
+    <div style="display: flex; flex-direction: column; gap: 11px;">
+      <div style="display: flex; gap: 11px; align-items: flex-start;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7E93A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 1px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="body" style="flex-grow: 1;">Outside the station entrance, on the pavement side</span>
+      </div>
+      <div style="display: flex; gap: 11px; align-items: flex-start;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7E93A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 1px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        <span class="body" style="flex-grow: 1;">Usually three or four fundraisers in branded tabards</span>
+      </div>
+      <div style="display: flex; gap: 11px; align-items: flex-start;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7E93A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 1px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span class="body" style="flex-grow: 1;">Watch for about 45 minutes, then approach one of them</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: #0A2438; border-radius: 5px; padding: 18px 20px; margin-bottom: 26px;">
+    <div class="meta" style="margin-bottom: 8px;">Before you start</div>
+    <p class="body" style="margin: 0;">
+      Stand where you can see the team without being part of the queue. Once you tap below the
+      audit is running and the app should stay in your pocket during the conversation.
+    </p>
+  </div>
+
+  <div style="flex-grow: 1;"></div>
+
+  <!-- The two facts, separated. Arriving is not the same as starting. -->
+  <div style="display: flex; flex-direction: column; gap: 11px;">
+    <div style="background: #0B5D5C; border-radius: 100px; padding: 19px 0; text-align: center;">
+      <span style="font-size: 16px; font-weight: 700; color: #F4EFE6;">They are here — start the audit</span>
+    </div>
+
+    <div style="border: 1.5px solid #4E6377; border-radius: 100px; padding: 18px 0; text-align: center;">
+      <span style="font-size: 16px; font-weight: 600; color: #C6D4E2;">Nobody is here yet</span>
+    </div>
+
+    <p class="body" style="margin: 8px 4px 0; text-align: center; color: #7E93A6; font-size: 13px;">
+      Tap the second one when you arrive and the team is not there. It starts the 45-minute wait —
+      you are paid in full whether or not they turn up.
+    </p>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

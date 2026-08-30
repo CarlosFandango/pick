@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+    .set { border-radius: 100px; padding: 4px 11px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; white-space: nowrap; }
+    .pass { background: #0B5D5C; color: #F4EFE6; }
+    .fail { background: #FBF8F1; border: 1px solid #A4382C; color: #A4382C; }
+    .warn { background: #FBF8F1; border: 1px solid #8A6100; color: #8A6100; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span class="navlink">Today</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Audits</span>
+    <span class="navlink">Auditors</span><span class="navlink">Clients</span><span class="navlink">Payouts</span><span class="navlink">Risks</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <div class="body" style="font-size: 13px; color: #0B6A68; margin-bottom: 14px;">← Today</div>
+
+    <!-- VERDICT — who can do it, and the blocker if there is one -->
+    <div style="display: flex; gap: 18px; align-items: flex-start; padding: 20px 24px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #A4382C; border-radius: 5px; margin-bottom: 26px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #A4382C; display: flex; align-items: center; justify-content: center;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: #F4EFE6;">0</span>
+      </div>
+      <div style="flex-grow: 1;">
+        <div class="meta" style="margin-bottom: 5px;">PS-000902 · Peckham SE15 · street · window in 3 days</div>
+        <h1 style="margin: 0 0 6px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.3;">
+          Nobody is currently eligible. Three passed, and two are ruled out on coverage.
+        </h1>
+        <p class="body" style="margin: 0; max-width: 66ch;">
+          The nearest fix is signing an approved auditor off for street work in SE, or widening
+          somebody's travel. Both are one change away.
+        </p>
+      </div>
+    </div>
+
+    <!-- The six sets, as columns. Parallel tests, not a sequence. -->
+    <div class="meta" style="margin-bottom: 4px;">Everyone considered, and why</div>
+    <p class="body" style="margin: 0 0 14px; max-width: 66ch;">
+      Six independent tests. An auditor has to pass all of them — the first column that fails is the
+      one to fix.
+    </p>
+
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; gap: 0; padding: 11px 18px; border-bottom: 1px solid #E5DFD0; background: #F4EFE6;">
+        <span class="meta">Auditor</span>
+        <span class="meta">Approved</span>
+        <span class="meta">Reachable</span>
+        <span class="meta">Capable</span>
+        <span class="meta">Available</span>
+        <span class="meta">Exposure</span>
+        <span class="meta">Conflict</span>
+        <span class="meta"></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; align-items: center; gap: 0; padding: 14px 18px; border-bottom: 1px solid #E5DFD0;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Auditor 902</div>
+          <div class="meta">Passed twice</div>
+        </div>
+        <span><span class="set pass">Yes</span></span>
+        <span><span class="set pass">SE</span></span>
+        <span><span class="set pass">Street</span></span>
+        <span><span class="set pass">Free</span></span>
+        <span><span class="set warn">3 recent</span></span>
+        <span><span class="set pass">Clear</span></span>
+        <span style="text-align: right;"><span style="background: #062134; color: #F4EFE6; border-radius: 100px; padding: 8px 15px; font-size: 12px; font-weight: 700;">Offer</span></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; align-items: center; gap: 0; padding: 14px 18px; border-bottom: 1px solid #E5DFD0;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Auditor 906</div>
+          <div class="meta">Passed once</div>
+        </div>
+        <span><span class="set pass">Yes</span></span>
+        <span><span class="set pass">SE</span></span>
+        <span><span class="set pass">Street</span></span>
+        <span><span class="set fail">Booked</span></span>
+        <span><span class="set pass">None</span></span>
+        <span><span class="set pass">Clear</span></span>
+        <span style="text-align: right;"><span class="meta">Working E1</span></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; align-items: center; gap: 0; padding: 14px 18px; border-bottom: 1px solid #E5DFD0;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Nadia Osei</div>
+          <div class="meta">907</div>
+        </div>
+        <span><span class="set pass">Yes</span></span>
+        <span><span class="set fail">N, EC, E</span></span>
+        <span><span class="set pass">Street</span></span>
+        <span><span class="set pass">Free</span></span>
+        <span><span class="set pass">None</span></span>
+        <span><span class="set pass">Clear</span></span>
+        <span style="text-align: right;"><span class="meta" style="color: #0B6A68;">Widen?</span></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; align-items: center; gap: 0; padding: 14px 18px; border-bottom: 1px solid #E5DFD0;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Auditor 904</div>
+          <div class="meta">Passed once</div>
+        </div>
+        <span><span class="set pass">Yes</span></span>
+        <span><span class="set pass">SE</span></span>
+        <span><span class="set fail">Door only</span></span>
+        <span><span class="set pass">Free</span></span>
+        <span><span class="set pass">None</span></span>
+        <span><span class="set pass">Clear</span></span>
+        <span style="text-align: right;"><span class="meta" style="color: #0B6A68;">Sign off?</span></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px repeat(6, minmax(0, 1fr)) 92px; align-items: center; gap: 0; padding: 14px 18px;">
+        <div>
+          <div style="font-size: 14px; font-weight: 600;">Auditor 903</div>
+          <div class="meta">New</div>
+        </div>
+        <span><span class="set fail">Pending</span></span>
+        <span><span class="set pass">SE</span></span>
+        <span><span class="set pass">Street</span></span>
+        <span><span class="set pass">Free</span></span>
+        <span><span class="set pass">None</span></span>
+        <span><span class="set pass">Clear</span></span>
+        <span style="text-align: right;"><span class="meta" style="color: #0B6A68;">Vet</span></span>
+      </div>
+    </div>
+
+    <!-- The one that cannot be waived, said once -->
+    <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #8A6100; border-radius: 5px; padding: 16px 19px;">
+        <div class="meta" style="color: #8A6100; margin-bottom: 6px;">Exposure — a warning, not a block</div>
+        <p class="body" style="margin: 0;">
+          Auditor 902 has audited St Luke's three times in eight weeks. You can still offer it, and
+          doing so raises a risk record automatically so we have advised them before it matters.
+        </p>
+      </div>
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 16px 19px;">
+        <div class="meta" style="color: #A4382C; margin-bottom: 6px;">Conflict — never waivable</div>
+        <p class="body" style="margin: 0;">
+          Nobody here has one. If they did there would be no override, for us or the charity —
+          independence is not ours to waive, and a hand-picked auditor is not defensible to a
+          regulator however comfortable everyone is.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

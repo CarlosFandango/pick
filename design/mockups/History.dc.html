@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .nav { font-size: 13px; color: #625C4C; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6; padding: 26px 32px;">
+  <div style="max-width: 880px; margin: 0 auto;">
+
+    <div style="display: flex; align-items: center; gap: 28px; padding-bottom: 14px; border-bottom: 1px solid #E5DFD0; margin-bottom: 26px;">
+      <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px;">PICKSEL</span>
+      <span class="nav">Book</span><span class="nav">Audits</span>
+      <span style="font-size: 13px; color: #1C1A15; border-bottom: 2px solid #0B5D5C; padding-bottom: 3px;">Reports</span>
+      <span class="nav">Credits</span>
+      <span style="margin-left: auto;" class="meta">St Luke's Hospice</span>
+    </div>
+
+    <!-- VERDICT — the renewal question, answered -->
+    <div style="display: flex; gap: 18px; align-items: flex-start; padding: 22px 26px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #0B5D5C; border-radius: 5px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #0B5D5C; display: flex; align-items: center; justify-content: center;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg>
+      </div>
+      <div style="flex-grow: 1;">
+        <div class="meta" style="margin-bottom: 6px;">Four audits · June to August</div>
+        <h1 style="margin: 0 0 8px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.3;">
+          The same two things keep going wrong, and one of them is getting worse.
+        </h1>
+        <p class="body" style="margin: 0; max-width: 62ch;">
+          Fundraisers not declaring they are paid has come up in three of four audits. Not stopping
+          at a refusal has come up twice, both in the last month.
+        </p>
+      </div>
+    </div>
+
+    <!-- SEQUENCE — audits over time, most recent first -->
+    <div style="margin-top: 30px;">
+      <div class="meta" style="margin-bottom: 16px;">Your audits, most recent first</div>
+      <div style="display: flex; flex-direction: column;">
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 15px;"><div class="meta" style="letter-spacing: 0.05em;">8 Aug</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 13px; height: 13px; border-radius: 100px; background: #A4382C; margin-top: 16px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #E5DFD0;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 6px 0 16px;">
+            <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 15px 18px;">
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 600;">Lottery · Princes Street EH2</span>
+                <span class="meta" style="color: #A4382C;">2 breaches</span>
+                <span class="meta" style="margin-left: auto;">89.7%</span>
+              </div>
+              <div class="body">Did not declare they were paid · did not stop at a refusal</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 15px;"><div class="meta" style="letter-spacing: 0.05em;">14 Jul</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 13px; height: 13px; border-radius: 100px; background: #A4382C; margin-top: 16px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #E5DFD0;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 6px 0 16px;">
+            <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 15px 18px;">
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 600;">Street · South Bank SE1</span>
+                <span class="meta" style="color: #A4382C;">1 breach</span>
+                <span class="meta" style="margin-left: auto;">94.1%</span>
+              </div>
+              <div class="body">Did not stop at a refusal</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 13px;"><div class="meta" style="letter-spacing: 0.05em;">2 Jul</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #062134; margin-top: 14px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #E5DFD0;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 10px 0 16px; display: flex; align-items: baseline; gap: 10px;">
+            <span style="font-size: 15px; font-weight: 600;">Street · Victoria SW1A</span>
+            <span class="meta">Nobody was fundraising · credit returned</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 15px;"><div class="meta" style="letter-spacing: 0.05em;">21 Jun</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 13px; height: 13px; border-radius: 100px; background: #A4382C; margin-top: 16px;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 6px 0 4px;">
+            <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #A4382C; border-radius: 5px; padding: 15px 18px;">
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 600;">Street · Peckham SE15</span>
+                <span class="meta" style="color: #A4382C;">1 breach</span>
+                <span class="meta" style="margin-left: auto;">96.4%</span>
+              </div>
+              <div class="body">Did not declare they were paid</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- What recurs — the thing they take to the agency -->
+    <div style="margin-top: 28px; background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 22px 24px;">
+      <div class="meta" style="margin-bottom: 14px;">What keeps coming up</div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
+            <span style="font-size: 14.5px; font-weight: 600;">Not saying they are paid, or naming the agency</span>
+            <span class="meta" style="color: #A4382C;">3 of 4 audits</span>
+          </div>
+          <div style="display: flex; gap: 5px;">
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #A4382C;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #E5DFD0;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #A4382C;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #A4382C;"></div>
+          </div>
+          <div class="body" style="font-size: 12.5px; margin-top: 5px;">June · July · August — the only one it did not appear in was the audit nobody turned up for.</div>
+        </div>
+        <div>
+          <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
+            <span style="font-size: 14.5px; font-weight: 600;">Not stopping at a clear refusal</span>
+            <span class="meta" style="color: #A4382C;">2 of 4 · both recent</span>
+          </div>
+          <div style="display: flex; gap: 5px;">
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #E5DFD0;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #E5DFD0;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #A4382C;"></div>
+            <div style="height: 7px; flex-grow: 1; border-radius: 100px; background: #A4382C;"></div>
+          </div>
+          <div class="body" style="font-size: 12.5px; margin-top: 5px;">New since July. Worth asking whether the briefing changed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; padding: 20px 24px; background: #062134; border-radius: 5px;">
+      <p style="margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: #F4EFE6; max-width: 62ch;">
+        A pattern across audits is worth more to an agency than any single report. Send them this
+        summary and ask what changed in July.
+      </p>
+      <span style="background: #F4EFE6; color: #04201F; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 700;">Download the summary</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

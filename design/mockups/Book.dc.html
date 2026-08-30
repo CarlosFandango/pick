@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .nav { font-size: 13px; color: #625C4C; }
+    .field { background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px; padding: 12px 14px; font-size: 14px; color: #1C1A15; }
+    .opt { background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 13px 16px; font-size: 14px; }
+    .opt.on { border-color: #0B5D5C; border-width: 2px; padding: 12px 15px; background: #FFFFFF; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6; padding: 26px 32px;">
+  <div style="max-width: 880px; margin: 0 auto;">
+
+    <div style="display: flex; align-items: center; gap: 28px; padding-bottom: 14px; border-bottom: 1px solid #E5DFD0; margin-bottom: 26px;">
+      <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px;">PICKSEL</span>
+      <span style="font-size: 13px; color: #1C1A15; border-bottom: 2px solid #0B5D5C; padding-bottom: 3px;">Book</span>
+      <span class="nav">Audits</span><span class="nav">Reports</span><span class="nav">Credits</span>
+      <span style="margin-left: auto;" class="meta">St Luke's Hospice · 4 credits</span>
+    </div>
+
+    <h1 style="margin: 0 0 6px; font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">Book an audit</h1>
+    <p class="body" style="margin: 0 0 26px; max-width: 60ch;">
+      One credit. We will not tell your agency it is happening, and you choose a three-day window
+      rather than a date so the shift cannot be staged for us.
+    </p>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start;">
+
+      <div style="display: flex; flex-direction: column; gap: 22px;">
+
+        <div>
+          <div class="meta" style="margin-bottom: 9px;">What kind of fundraising</div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+            <div class="opt on"><strong style="font-weight: 600;">Street</strong><div class="body" style="font-size: 12.5px;">Public pavement, on a pitch</div></div>
+            <div class="opt"><strong style="font-weight: 600;">Door-to-door</strong><div class="body" style="font-size: 12.5px;">Residential streets</div></div>
+            <div class="opt"><strong style="font-weight: 600;">Private site</strong><div class="body" style="font-size: 12.5px;">Shopping centre, station</div></div>
+            <div class="opt"><strong style="font-weight: 600;">Lottery</strong><div class="body" style="font-size: 12.5px;">Weekly draw sign-ups</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="meta" style="margin-bottom: 9px;">Where your agency is working</div>
+          <div class="field" style="width: 100%;">SE15 4QL</div>
+          <p class="body" style="margin: 7px 0 0; font-size: 12.5px;">
+            A postcode is enough. Add the pitch below if you know it — the auditor only sees it once
+            they have accepted.
+          </p>
+        </div>
+
+        <div>
+          <div class="meta" style="margin-bottom: 9px;">Which three days</div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="field" style="flex-grow: 1;">Wed 3 September</div>
+            <span class="body">to</span>
+            <div class="field" style="flex-grow: 1;">Fri 5 September</div>
+          </div>
+          <p class="body" style="margin: 7px 0 0; font-size: 12.5px;">
+            Earliest is three days from now, so there is time to find an auditor who covers SE.
+          </p>
+        </div>
+
+        <!-- S3.2 folded in — the step that does not exist today -->
+        <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 18px 20px;">
+          <div class="meta" style="margin-bottom: 9px;">Who audits it</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="opt on" style="background: #FFFFFF;">
+              <strong style="font-weight: 600;">Anyone eligible</strong>
+              <div class="body" style="font-size: 12.5px;">We offer it to every approved auditor who covers SE and is signed off for street work.</div>
+            </div>
+            <div class="opt">
+              <strong style="font-weight: 600;">Somebody specific</strong>
+              <div class="body" style="font-size: 12.5px;">Ask for an auditor you have had before, by their code.</div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; padding: 12px 14px; border-left: 3px solid #062134; background: #F4EFE6; border-radius: 0 5px 5px 0;">
+            <p class="body" style="margin: 0; font-size: 12.5px;">
+              <strong style="font-weight: 600; color: #1C1A15;">You cannot pick someone with a connection to your agency.</strong>
+              That is not a setting — independence is what you are paying for, and it is not ours or
+              yours to waive. We also rotate people so nobody becomes recognisable to a team.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="meta" style="margin-bottom: 9px;">Audio and video evidence</div>
+          <div class="opt" style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="flex: none; width: 18px; height: 18px; border-radius: 4px; border: 2px solid #E5DFD0; margin-top: 1px;"></div>
+            <div>
+              <strong style="font-weight: 600;">Ask for A/V where the site allows it</strong>
+              <div class="body" style="font-size: 12.5px;">Fewer auditors are equipped for this, so it may take longer to place.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- What they are committing to, always visible -->
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 20px; position: sticky; top: 20px;">
+        <div class="meta" style="margin-bottom: 12px;">What you are booking</div>
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div>
+            <div class="meta" style="margin-bottom: 2px;">Kind</div>
+            <div class="body" style="color: #1C1A15;">Street · direct debit</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 2px;">Where</div>
+            <div class="body" style="color: #1C1A15;">SE15 4QL</div>
+          </div>
+          <div>
+            <div class="meta" style="margin-bottom: 2px;">Window</div>
+            <div class="body" style="color: #1C1A15;">Wed 3 – Fri 5 September</div>
+          </div>
+          <div style="border-top: 1px solid #E5DFD0; padding-top: 11px;">
+            <div class="meta" style="margin-bottom: 2px;">Cost</div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 19px; font-weight: 800; letter-spacing: -0.03em;">1 credit</span>
+              <span class="body">of 4</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 16px; background: #0B5D5C; color: #F4EFE6; border-radius: 100px; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700;">Book it</div>
+        <p class="body" style="margin: 10px 0 0; font-size: 12px; text-align: center;">
+          The credit comes back if nobody is there
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

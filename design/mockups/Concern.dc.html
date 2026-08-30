@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .nav { font-size: 13px; color: #625C4C; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6; padding: 26px 32px;">
+  <div style="max-width: 880px; margin: 0 auto;">
+
+    <div style="display: flex; align-items: center; gap: 28px; padding-bottom: 14px; border-bottom: 1px solid #E5DFD0; margin-bottom: 26px;">
+      <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px;">PICKSEL</span>
+      <span class="nav">Book</span><span class="nav">Audits</span><span class="nav">Reports</span><span class="nav">Credits</span>
+      <span style="margin-left: auto;" class="meta">St Luke's Hospice</span>
+    </div>
+
+    <!-- VERDICT — what is already happening about it -->
+    <div style="display: flex; gap: 18px; align-items: flex-start; padding: 22px 26px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #F2A900; border-radius: 5px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #F2A900; display: flex; align-items: center; justify-content: center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A3400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div style="flex-grow: 1;">
+        <div class="meta" style="margin-bottom: 6px;">Raised Tuesday · with PICK</div>
+        <h1 style="margin: 0 0 8px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.3;">
+          We are looking into your concern about PS-000907.
+        </h1>
+        <p class="body" style="margin: 0;">
+          A member of PICK is reviewing the auditor's write-up and the evidence behind the two
+          findings you queried. We will come back to you by Friday.
+        </p>
+      </div>
+    </div>
+
+    <!-- SEQUENCE — what happens to a concern -->
+    <div style="margin-top: 30px;">
+      <div class="meta" style="margin-bottom: 16px;">How this gets resolved</div>
+      <div style="display: flex; flex-direction: column;">
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 12px;"><div class="meta" style="letter-spacing: 0.05em;">Tue 26 Aug</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #0B5D5C; margin-top: 13px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #0B5D5C; opacity: 0.35;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 16px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">You raised it</div>
+            <div class="body" style="max-width: 58ch;">
+              "The report says our fundraiser followed someone. We would like to see what that was
+              based on before we act on it."
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 12px;"><div class="meta" style="letter-spacing: 0.05em;">Tue 26 Aug</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #0B5D5C; margin-top: 13px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #0B5D5C; opacity: 0.35;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 16px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 2px;">We acknowledged it</div>
+            <div class="body">Within two hours. Nothing about your concern goes to the auditor or the agency directly.</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 16px;"><div class="meta" style="letter-spacing: 0.05em; color: #8A6100;">Now</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 14px; height: 14px; border-radius: 100px; background: #F2A900; margin-top: 15px;"></div>
+            <div style="width: 2px; flex-grow: 1; background: #E5DFD0;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 4px 0 16px;">
+            <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #F2A900; border-radius: 5px; padding: 15px 18px;">
+              <div class="meta" style="color: #8A6100; margin-bottom: 6px;">Happening now</div>
+              <div style="font-size: 14px; font-weight: 600; margin-bottom: 3px;">PICK is investigating</div>
+              <div class="body" style="max-width: 56ch;">
+                We go back to the auditor for their account, and we may ask them to clarify or
+                rewrite part of the report. They are told what we need, never what you said.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: none; width: 92px; padding-top: 12px;"><div class="meta" style="letter-spacing: 0.05em; opacity: 0.55;">Next</div></div>
+          <div style="flex: none; width: 20px; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 10px; height: 10px; border-radius: 100px; background: #FBF8F1; border: 2px solid #E5DFD0; margin-top: 13px;"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 9px 0 4px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 2px; color: #625C4C;">One of three outcomes</div>
+            <div class="body" style="color: #625C4C; max-width: 58ch;">
+              The finding stands and we explain why · the report is corrected and reissued · or we
+              re-audit the shift at our cost.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="margin-top: 26px; background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 20px 24px;">
+      <div class="meta" style="margin-bottom: 9px;">Why you are not talking to the auditor</div>
+      <p class="body" style="margin: 0; max-width: 64ch;">
+        An auditor whose findings can be argued with by the charity paying for the audit is not an
+        independent auditor. Everything goes through us, in both directions — that is what makes the
+        report worth having.
+      </p>
+    </div>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 600;">Add something to this concern</span>
+      <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 600;">Withdraw it</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

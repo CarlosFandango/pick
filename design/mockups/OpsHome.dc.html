@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+    .item { background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 15px 18px; display: flex; align-items: center; gap: 16px; }
+    .act { border-radius: 100px; padding: 9px 18px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Today</span>
+    <span class="navlink">Audits</span><span class="navlink">Auditors</span><span class="navlink">Clients</span>
+    <span class="navlink">Payouts</span><span class="navlink">Risks</span><span class="navlink">Settings</span>
+    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #7E93A6;">FRI 29 AUG · DEV ADMIN</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <!-- VERDICT — the day, in one line -->
+    <div style="display: flex; gap: 18px; align-items: center; padding: 20px 24px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #F2A900; border-radius: 5px; margin-bottom: 26px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #F2A900; display: flex; align-items: center; justify-content: center;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: #4A3400;">5</span>
+      </div>
+      <div style="flex-grow: 1;">
+        <h1 style="margin: 0 0 3px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">
+          Five things need a person today. One is overdue.
+        </h1>
+        <p class="body" style="margin: 0;">An audit in three days still has nobody on it, and a write-up is two days late.</p>
+      </div>
+    </div>
+
+    <!-- THE QUEUE — ranked, dispatchable in one pass -->
+    <div class="meta" style="margin-bottom: 10px;">Worst first · clear this list and the day is done</div>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 30px;">
+
+      <div class="item" style="border-left: 3px solid #A4382C;">
+        <span class="meta" style="width: 92px; flex: none; color: #A4382C;">Overdue</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Write-up two days late</div>
+          <div class="body">PS-000905 · Brixton SW9 · Auditor 905 · shift ended Wednesday</div>
+        </div>
+        <span class="act" style="background: #A4382C; color: #F4EFE6;">Chase</span>
+      </div>
+
+      <div class="item" style="border-left: 3px solid #A4382C;">
+        <span class="meta" style="width: 92px; flex: none; color: #A4382C;">3 days out</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Nobody has taken this audit</div>
+          <div class="body">PS-000902 · Peckham SE15 · offered to 3, all passed</div>
+        </div>
+        <span class="act" style="background: #A4382C; color: #F4EFE6;">Assign</span>
+      </div>
+
+      <div class="item" style="border-left: 3px solid #F2A900;">
+        <span class="meta" style="width: 92px; flex: none; color: #8A6100;">Held</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Write-up waiting on review</div>
+          <div class="body">PS-000906 · Whitechapel E1 · submitted Thursday · first audit for this charity</div>
+        </div>
+        <span class="act" style="background: #0B5D5C; color: #F4EFE6;">Review</span>
+      </div>
+
+      <div class="item" style="border-left: 3px solid #F2A900;">
+        <span class="meta" style="width: 92px; flex: none; color: #8A6100;">2 days</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Concern from St Luke's Hospice</div>
+          <div class="body">About PS-000907 — they query a finding before acting on it</div>
+        </div>
+        <span class="act" style="background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15;">Open</span>
+      </div>
+
+      <div class="item">
+        <span class="meta" style="width: 92px; flex: none;">Waiting</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">One auditor to vet</div>
+          <div class="body">Tom Beckett · applied Tuesday · covers M, street only</div>
+        </div>
+        <span class="act" style="background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15;">Vet</span>
+      </div>
+
+    </div>
+
+    <!-- The marketplace's health, subordinate to the queue -->
+    <div class="meta" style="margin-bottom: 10px;">The network, right now</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 26px;">
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 16px 18px;">
+        <div class="meta" style="margin-bottom: 5px;">Audits in flight</div>
+        <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">6</div>
+        <div class="body" style="font-size: 12.5px;">2 booked · 2 assigned · 1 working · 1 in review</div>
+      </div>
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 16px 18px;">
+        <div class="meta" style="margin-bottom: 5px;">Auditors available</div>
+        <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">2</div>
+        <div class="body" style="font-size: 12.5px;">covering SE, E, N, EH, M</div>
+      </div>
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 16px 18px;">
+        <div class="meta" style="margin-bottom: 5px;">Owed to auditors</div>
+        <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">£250</div>
+        <div class="body" style="font-size: 12.5px;">2 cleared, not yet on a run</div>
+      </div>
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 16px 18px;">
+        <div class="meta" style="margin-bottom: 5px;">Open risks</div>
+        <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">1</div>
+        <div class="body" style="font-size: 12.5px;">exposure · advised, client proceeded</div>
+      </div>
+    </div>
+
+    <!-- Coverage gap — the thing that quietly kills a marketplace -->
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #062134; border-radius: 5px; padding: 20px 24px;">
+      <div class="meta" style="margin-bottom: 8px;">Worth knowing</div>
+      <h2 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">
+        Nobody covers SE for lottery work
+      </h2>
+      <p class="body" style="margin: 0 0 12px; max-width: 62ch;">
+        Two charities have booked in SE this quarter and the only lottery-signed auditor is in
+        Edinburgh. The Peckham audit above has been passed on three times for that reason.
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <span class="act" style="background: #062134; color: #F4EFE6;">Invite an auditor</span>
+        <span class="act" style="background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15;">Sign someone off for lottery</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

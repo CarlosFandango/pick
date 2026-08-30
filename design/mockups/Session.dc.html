@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #041825; font-family: 'Archivo', system-ui, -apple-system, sans-serif; color: #F4EFE6; }
+    a { color: #7FD3D1; } a:hover { color: #C9EFEE; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #7E93A6; }
+    .body { font-size: 14px; line-height: 1.5; color: #C6D4E2; }
+    .tally { background: #0A2438; border-radius: 5px; padding: 16px 14px; text-align: center; }
+    .tally .n { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #041825; padding: 54px 18px 24px; display: flex; flex-direction: column;">
+
+  <!-- VERDICT — which half of the job am I in, and how long left -->
+  <div style="background: #0A2438; border-radius: 5px; padding: 16px 18px; margin-bottom: 18px;">
+    <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+      <span class="meta" style="color: #0B5D5C; font-size: 11px;">Watching</span>
+      <span class="meta" style="margin-left: auto; font-size: 11px;">Peckham SE15</span>
+    </div>
+    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px;">
+      <span style="font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1; font-variant-numeric: tabular-nums;">28:14</span>
+      <span class="body" style="color: #7E93A6;">until the mystery shop</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <div style="height: 5px; flex-grow: 3; border-radius: 100px; background: #0B5D5C;"></div>
+      <div style="height: 5px; flex-grow: 1; border-radius: 100px; background: #21455E;"></div>
+    </div>
+    <p class="body" style="margin: 9px 0 0; font-size: 12.5px; color: #7E93A6;">
+      You can hold your phone during this half. Put it away before you approach.
+    </p>
+  </div>
+
+  <!-- The counters — big, one-handed, no reading required -->
+  <div class="meta" style="margin-bottom: 9px;">Count what you see</div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px;">
+    <div class="tally">
+      <div class="n">31</div>
+      <div class="meta" style="margin-top: 6px;">Approaches</div>
+    </div>
+    <div class="tally">
+      <div class="n">9</div>
+      <div class="meta" style="margin-top: 6px;">Stopped</div>
+    </div>
+    <div class="tally">
+      <div class="n">4</div>
+      <div class="meta" style="margin-top: 6px;">Asked for money</div>
+    </div>
+    <div class="tally">
+      <div class="n">1</div>
+      <div class="meta" style="margin-top: 6px;">Signed up</div>
+    </div>
+  </div>
+
+  <!-- One-tap flag, always reachable -->
+  <div style="background: #0A2438; border-radius: 5px; padding: 16px 18px; margin-bottom: 12px;">
+    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 11px;">
+      <span class="meta">Saw something</span>
+      <span class="meta" style="margin-left: auto; color: #F2A900;">2 flagged</span>
+    </div>
+    <div style="display: flex; gap: 9px;">
+      <span style="flex-grow: 1; text-align: center; background: #A4382C; border-radius: 100px; padding: 15px 0; font-size: 15px; font-weight: 700; color: #F4EFE6;">Wrong</span>
+      <span style="flex-grow: 1; text-align: center; border: 1.5px solid #4E6377; border-radius: 100px; padding: 14px 0; font-size: 15px; font-weight: 600; color: #C6D4E2;">Note</span>
+    </div>
+    <p class="body" style="margin: 10px 0 0; font-size: 12.5px; color: #7E93A6;">
+      One tap now, details in the write-up. It records the time so you can find it later.
+    </p>
+  </div>
+
+  <div style="flex-grow: 1;"></div>
+
+  <!-- What comes next, stated before it arrives -->
+  <div style="background: #0A2438; border-radius: 5px; border-left: 3px solid #F2A900; padding: 15px 17px; margin-bottom: 12px;">
+    <div class="meta" style="color: #F2A900; margin-bottom: 6px;">Next, in 28 minutes</div>
+    <p class="body" style="margin: 0;">
+      Approach one fundraiser as an ordinary member of the public. Phone away — one discreet tap is
+      all you get, and only if something goes badly wrong.
+    </p>
+  </div>
+
+  <div style="border: 1.5px solid #4E6377; border-radius: 100px; padding: 16px 0; text-align: center;">
+    <span style="font-size: 15px; font-weight: 600; color: #C6D4E2;">Start the mystery shop early</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

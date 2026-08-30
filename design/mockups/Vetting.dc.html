@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .navlink { font-size: 13px; color: #C6D4E2; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6;">
+
+  <div style="background: #062134; padding: 14px 32px; display: flex; align-items: center; gap: 26px;">
+    <span style="font-weight: 800; letter-spacing: 0.08em; font-size: 13px; color: #F4EFE6;">PICKSEL ADMIN</span>
+    <span class="navlink">Today</span><span class="navlink">Audits</span>
+    <span style="font-size: 13px; color: #F4EFE6; border-bottom: 2px solid #F2A900; padding-bottom: 2px;">Auditors</span>
+    <span class="navlink">Clients</span><span class="navlink">Payouts</span><span class="navlink">Risks</span>
+    <span style="margin-left: auto;" class="meta">1 to vet · 2 on the network</span>
+  </div>
+
+  <div style="padding: 26px 32px; max-width: 1100px;">
+
+    <!-- VERDICT — the queue before the directory -->
+    <div style="display: flex; gap: 18px; align-items: center; padding: 20px 24px; background: #FBF8F1; border: 1px solid #E5DFD0; border-top: 5px solid #F2A900; border-radius: 5px; margin-bottom: 26px;">
+      <div style="flex: none; width: 36px; height: 36px; border-radius: 100px; background: #F2A900; display: flex; align-items: center; justify-content: center;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: #4A3400;">1</span>
+      </div>
+      <div style="flex-grow: 1;">
+        <h1 style="margin: 0 0 3px; font-size: 20px; font-weight: 800; letter-spacing: -0.03em;">
+          One auditor is waiting on you, and it is holding up the north-west.
+        </h1>
+        <p class="body" style="margin: 0;">Tom Beckett applied Tuesday. He is the only person who covers M.</p>
+      </div>
+      <span style="flex: none; background: #FBF8F1; border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 11px 22px; font-size: 13px; font-weight: 600;">Invite someone</span>
+    </div>
+
+    <!-- The one to vet, expanded -->
+    <div class="meta" style="margin-bottom: 10px;">Waiting to be vetted</div>
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-left: 3px solid #F2A900; border-radius: 5px; padding: 22px 24px; margin-bottom: 26px;">
+      <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em;">Tom Beckett</h2>
+        <span class="meta">Applied Tue 26 Aug · invited by Dev Admin</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 20px;">
+        <div>
+          <div class="meta" style="margin-bottom: 3px;">Sets out from</div>
+          <div class="body" style="color: #1C1A15;">M4 1HQ · Manchester</div>
+        </div>
+        <div>
+          <div class="meta" style="margin-bottom: 3px;">Will travel</div>
+          <div class="body" style="color: #1C1A15;">45 min · own vehicle</div>
+        </div>
+        <div>
+          <div class="meta" style="margin-bottom: 3px;">Covers</div>
+          <div class="body" style="color: #1C1A15;">M, OL, SK, WA</div>
+        </div>
+        <div>
+          <div class="meta" style="margin-bottom: 3px;">Says they can run</div>
+          <div class="body" style="color: #1C1A15;">Street</div>
+        </div>
+      </div>
+
+      <!-- The checks, as a checklist because that is what vetting is -->
+      <div class="meta" style="margin-bottom: 10px;">Before approving</div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px;">
+          <div style="flex: none; width: 20px; height: 20px; border-radius: 100px; background: #0B5D5C; display: flex; align-items: center; justify-content: center;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+          </div>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 600;">Identity confirmed</span>
+          <span class="meta">Passport seen 27 Aug</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px;">
+          <div style="flex: none; width: 20px; height: 20px; border-radius: 100px; background: #0B5D5C; display: flex; align-items: center; justify-content: center;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+          </div>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 600;">Right to work</span>
+          <span class="meta">Checked 27 Aug</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: #FFFFFF; border: 2px solid #F2A900; border-radius: 5px;">
+          <div style="flex: none; width: 20px; height: 20px; border-radius: 100px; border: 2px solid #F2A900;"></div>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 600;">Agreement signed</span>
+          <span class="meta" style="color: #8A6100;">Sent Tuesday · not returned</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: #FFFFFF; border: 1px solid #E5DFD0; border-radius: 5px;">
+          <div style="flex: none; width: 20px; height: 20px; border-radius: 100px; border: 2px solid #E5DFD0;"></div>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 600;">Signed off for street work</span>
+          <span class="meta">A short call — has he done this before?</span>
+        </div>
+      </div>
+
+      <div style="background: #F4EFE6; border-left: 3px solid #A4382C; border-radius: 0 5px 5px 0; padding: 13px 16px; margin-bottom: 18px;">
+        <p class="body" style="margin: 0;">
+          <strong style="color: #1C1A15; font-weight: 600;">The agreement is outstanding.</strong>
+          It carries the monitoring and data clauses, so approving before it is signed puts an
+          unagreed person in front of members of the public.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="background: #0B5D5C; color: #F4EFE6; border-radius: 100px; padding: 12px 24px; font-size: 13.5px; font-weight: 700; opacity: 0.45;">Approve</span>
+        <span style="border: 1px solid #E5DFD0; color: #1C1A15; border-radius: 100px; padding: 11px 22px; font-size: 13.5px; font-weight: 600;">Chase the agreement</span>
+        <span style="border: 1px solid #E5DFD0; color: #A4382C; border-radius: 100px; padding: 11px 22px; font-size: 13.5px; font-weight: 600;">Reject</span>
+        <span class="meta" style="margin-left: auto;">Approve unlocks when the agreement is in</span>
+      </div>
+    </div>
+
+    <!-- The roster, subordinate -->
+    <div class="meta" style="margin-bottom: 10px;">On the network</div>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px;">
+
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 15px 18px; display: flex; align-items: center; gap: 16px;">
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Dev Auditor <span class="meta" style="margin-left: 6px;">906</span></div>
+          <div class="body">SE, SW, E, EH · 60 min · own vehicle · all four methodologies · A/V equipped</div>
+        </div>
+        <span class="meta">4 released</span>
+        <span class="meta" style="color: #0B6A68;">Suspend</span>
+      </div>
+
+      <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 15px 18px; display: flex; align-items: center; gap: 16px;">
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14.5px; font-weight: 600;">Nadia Osei <span class="meta" style="margin-left: 6px;">907</span></div>
+          <div class="body">N, EC, E · 45 min · public transport · street, door-to-door</div>
+        </div>
+        <span class="meta">1 released</span>
+        <span class="meta" style="color: #0B6A68;">Suspend</span>
+      </div>
+
+    </div>
+
+    <!-- Invited, not accepted -->
+    <div class="meta" style="margin-bottom: 10px;">Invited, not yet accepted</div>
+    <div style="background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; padding: 15px 18px; display: flex; align-items: center; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 14.5px; font-weight: 600; color: #625C4C;">ruth@example.test</div>
+        <div class="body">Invited 6 days ago by Dev Admin · link not opened</div>
+      </div>
+      <span class="meta" style="color: #0B6A68;">Send again</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

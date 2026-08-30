@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; background: #F4EFE6; font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1C1A15; }
+    a { color: #0B6A68; } a:hover { color: #04201F; }
+    .meta { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #625C4C; }
+    .body { font-size: 13.5px; line-height: 1.55; color: #4D483D; }
+    .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; }
+    .card { background: #FBF8F1; border: 1px solid #E5DFD0; border-radius: 5px; }
+    td, th { padding: 10px 13px; border-bottom: 1px solid #E5DFD0; text-align: left; vertical-align: top; font-size: 13px; }
+    th { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: #625C4C; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F4EFE6; padding: 30px 34px;">
+  <div style="max-width: 900px; margin: 0 auto;">
+
+    <div class="meta" style="margin-bottom: 10px;">The model behind it</div>
+    <h1 style="margin: 0 0 12px; font-size: 27px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.2; max-width: 24ch;">
+      An auditor covers places, not postcodes
+    </h1>
+    <p class="body" style="margin: 0 0 28px; max-width: 62ch; font-size: 15px;">
+      The schema currently cannot store a Dublin address, let alone match one. Three UK assumptions
+      are baked in, and the coverage screen was quietly built on top of them.
+    </p>
+
+    <!-- What is wrong today -->
+    <div class="card" style="border-left: 3px solid #A4382C; padding: 20px 24px; margin-bottom: 28px;">
+      <div class="meta" style="color: #A4382C; margin-bottom: 12px;">Where the UK is hard-coded</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <div class="mono" style="color: #1C1A15; margin-bottom: 3px;">audit.postcode — CHECK ~ '^[A-Z]{1,2}[0-9]...'</div>
+          <div class="body">A UK postcode regex. <strong style="color: #1C1A15; font-weight: 600;">A Dublin or Berlin address is rejected outright</strong> — this is the fatal one.</div>
+        </div>
+        <div>
+          <div class="mono" style="color: #1C1A15; margin-bottom: 3px;">audit.postcode_area — GENERATED ALWAYS AS substring(...)</div>
+          <div class="body">Slices the first one or two letters off a UK postcode. Means nothing anywhere else.</div>
+        </div>
+        <div>
+          <div class="mono" style="color: #1C1A15; margin-bottom: 3px;">auditor_coverage.postcode_area — CHECK ~ '^[A-Z]{1,2}$'</div>
+          <div class="body">Coverage can only ever be a UK postcode area.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The three universal facts -->
+    <div class="meta" style="margin-bottom: 12px;">What is true in every country</div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px;">
+      <div class="card" style="padding: 18px 20px;">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 5px;">A point</div>
+        <div class="body">Where the auditor sets out from, and where the audit happens. Every address on earth geocodes.</div>
+      </div>
+      <div class="card" style="padding: 18px 20px;">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 5px;">A willingness</div>
+        <div class="body">How long they will travel, and how. Minutes and mode mean the same thing everywhere.</div>
+      </div>
+      <div class="card" style="padding: 18px 20px;">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 5px;">A place name</div>
+        <div class="body">Salford. Brooklyn. Kreuzberg. Every country has human names for parts of it; only some have postcodes.</div>
+      </div>
+    </div>
+
+    <p class="body" style="margin: 0 0 26px; max-width: 64ch;">
+      Postcode areas are none of these. They are a UK implementation detail that leaked all the way
+      into the interface — which is why an auditor was being asked to translate "how far will I go"
+      into geography they would have to look up.
+    </p>
+
+    <!-- The proposed shape -->
+    <div class="meta" style="margin-bottom: 12px;">The shape that works anywhere</div>
+    <div class="card" style="overflow: hidden; margin-bottom: 20px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr><th style="width: 210px;">Table</th><th>What it holds</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono" style="color: #1C1A15;">place</td>
+            <td class="body">
+              A gazetteer row: country, name, the parent that disambiguates it
+              ("Salford, Greater Manchester"), and a point. Seeded per country from open data —
+              a table, not an API call.
+            </td>
+          </tr>
+          <tr>
+            <td class="mono" style="color: #1C1A15;">auditor_profile</td>
+            <td class="body">
+              <span class="mono">base_place_id</span>, <span class="mono">base_point</span>,
+              <span class="mono">max_travel_minutes</span>, <span class="mono">travel_mode</span>.
+              What they told us, kept as they said it.
+            </td>
+          </tr>
+          <tr>
+            <td class="mono" style="color: #1C1A15;">auditor_coverage</td>
+            <td class="body">
+              One row per place they cover, each marked <span class="mono">derived</span>,
+              <span class="mono">added</span> or <span class="mono">excluded</span>. The circle
+              proposes; the auditor confirms; we store the answer, not the guess.
+            </td>
+          </tr>
+          <tr>
+            <td class="mono" style="color: #1C1A15;">audit</td>
+            <td class="body">
+              A point, and the <span class="mono">place_id</span> resolved when it is booked.
+              The postcode becomes a free-text address again, with no regex on it.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- The bit that preserves the existing principle -->
+    <div class="card" style="border-left: 3px solid #0B5D5C; padding: 20px 24px; margin-bottom: 26px;">
+      <div class="meta" style="color: #0B5D5C; margin-bottom: 8px;">Matching stays a join</div>
+      <p class="body" style="margin: 0 0 10px; max-width: 64ch;">
+        <span class="mono" style="color: #1C1A15;">auditor_coverage.place_id = audit.place_id</span>,
+        excluding the rows marked <span class="mono">excluded</span>. No distance maths at match
+        time, no routing service in the request path, no parsing in application code — the same
+        properties the postcode-area join was chosen for.
+      </p>
+      <p class="body" style="margin: 0; max-width: 64ch;">
+        The geometry runs <strong style="color: #1C1A15; font-weight: 600;">once, on save</strong>,
+        to propose the list. Straight-line distance with a factor per mode — crude, and honest about
+        it on screen. Real journey times can replace that later without asking anyone anything again,
+        because the minutes and the mode were recorded as given.
+      </p>
+    </div>
+
+    <!-- What it costs -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 26px;">
+      <div class="card" style="padding: 18px 20px;">
+        <div class="meta" style="margin-bottom: 8px;">What this costs</div>
+        <ul style="margin: 0; padding-left: 17px;">
+          <li class="body" style="margin-bottom: 6px;">A gazetteer table, seeded per country</li>
+          <li class="body" style="margin-bottom: 6px;">Geocoding at two write points — booking, and saving coverage</li>
+          <li class="body" style="margin-bottom: 6px;">A migration that drops two regexes and a generated column</li>
+          <li class="body">Backfilling the seeded audits and coverage</li>
+        </ul>
+      </div>
+      <div class="card" style="padding: 18px 20px;">
+        <div class="meta" style="margin-bottom: 8px;">What it buys</div>
+        <ul style="margin: 0; padding-left: 17px;">
+          <li class="body" style="margin-bottom: 6px;">A second country is a seed, not a rewrite</li>
+          <li class="body" style="margin-bottom: 6px;">The auditor never sees a code</li>
+          <li class="body" style="margin-bottom: 6px;">Coverage becomes an explicit, queryable list rather than a fuzzy radius</li>
+          <li class="body">"Nobody covers Salford for lottery" becomes answerable</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #062134; padding: 20px 24px;">
+      <div class="meta" style="margin-bottom: 8px;">Doing it now, or later</div>
+      <p class="body" style="margin: 0 0 10px; max-width: 64ch;">
+        Later is more expensive than it looks. Every seeded audit, every auditor's coverage and every
+        matching test is written against postcode areas today — and the longer real audits accumulate
+        against a UK-only column, the more there is to backfill and the more history there is to get
+        wrong.
+      </p>
+      <p class="body" style="margin: 0; max-width: 64ch;">
+        Doing it now is one migration, one gazetteer seed and a rewrite of
+        <span class="mono">eligible_auditors</span>. There are eleven audits in the database and two
+        real auditors.
+      </p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
