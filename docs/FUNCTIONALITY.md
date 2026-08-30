@@ -51,6 +51,12 @@ reason. Deferred is a real answer and should stay populated.
 | Payout ledger + run builder | Built | `20260826320000_payout_runs.sql` | draft → approve → executed. Payable is decided by the payment gate, never by client approval. No CSV export yet |
 | Review gates | Partial | `review_gate`, `20260826310000_review_gates.sql` | TND-81. Six fixed triggers; payment and client-release resolve independently; most restrictive wins. **`timeout_days`/`on_timeout` are stored and displayed but nothing applies them** — there is no scheduler, so a hold lasts until a human opens the queue. No first-class review-outcome event either; the outcome lands in the mutable `audit.review_note` |
 | Risk register | Built | `risk`, `risk_advisory`, `assignment_override` | TND-82. Conflict hard-blocks; exposure warns and auto-raises a risk. The advisory is a separate record |
+| The sentence a screen opens with | Built | `core/lede.ts`, `core/dashboard.ts`, `core/admin-ledes.ts`, `core/eligibility.ts` | Derived once in the domain, never composed in a screen. The payouts screen shipped a headline contradicting its own list the first time both answered the same question separately |
+| Client-facing check prose | Built | `check_definition.client_finding` / `client_rationale` | Written as bare predicates so two findings join into one sentence. Not a catalogue version bump — describes the same test to a different audience |
+| How an audit has gone | Built | `core/timeline.ts` | Derived from timestamps the row already carried and nothing read. Never names the auditor |
+| Report read receipt | Built | `audit.report_read_at`, `mark_report_read()` | Security-definer function, not an UPDATE policy. Without it "ready to read" only ever grows |
+| Eligibility, test by test | Built | `assignment_console` booleans, `core/eligibility.ts` | `nearestFix` names one thing to do; it never names a conflict, which is not overridable |
+| Field surface roles | Built | `apps/field/src/surface.ts` | The field app is dark. Roles, not tokens — and a contrast test that was verified to fail on the bug that prompted it |
 
 ## Screens (design manifest)
 
@@ -62,9 +68,9 @@ reason. Deferred is a real answer and should stay populated.
 | S1.4 | Prep | Built |
 | S1.5b | Field session — stage stepper, per-stage capture | Built (stage list awaiting Jaz's walkthrough) |
 | S1.6 | Write-up | Built |
-| S1.7 | Review queue | Built |
-| S1.8 | Client report | Built |
-| S1.9 | Client dashboard | Built |
+| S1.7 | Review queue | Built — the two gates resolve separately on screen, beside what the auditor logged live during the shift |
+| S1.8 | Client report | Built — verdict first. Leads with what happened in a sentence, then the encounter in order; the weighted percentage is a footnote |
+| S1.9 | Client dashboard | Built — grouped by what each group means (ready / under way / waiting / finished), not by the status enum |
 | S2.1 | Offers list | Built |
 | S2.2 | Accept + conflict | Built (conflict declaration deferred) |
 | S2.3 | Field flag sheet | Built |
@@ -74,22 +80,27 @@ reason. Deferred is a real answer and should stay populated.
 | S2.7 | No-show flow | Built |
 | S3.1 | Booking deepened (A/V, lead time) | Built |
 | S3.2 | Auditor override picker | **Not built** — `app/book/choose-auditor/` is an empty directory, so the manifest route 404s and nothing calls `prefer_auditor()`. The conflict hard-block is enforced and tested in the database; no client can reach it or be told why it cannot be waived (TND-82) |
-| S3.3 | Audit list + detail | Built |
+| S3.3 | Audit list + detail | Built — detail answers "is anything expected of me" and shows how the audit has gone |
 | S3.4 | Report header — coded auditor | Built (naming is a flag, default off) |
 | S3.5 | Credits ledger | Built |
 | S3.6 | Complaint fork | Built |
-| S4.1 | Ops home | Built |
-| S4.2 | Assignment console | Built |
-| S4.3 | Auditor roster — vetting, coverage, capability | Built |
+| S4.1 | Ops home | Built — the queue leads and the counters are subordinate to it. Overdue is per kind |
+| S4.2 | Assignment console | Built — a table, one column per eligibility test. The one screen where the timeline pattern deliberately does not apply |
+| S4.3 | Auditor roster — vetting, coverage, capability | Built — a pending auditor opens out with a checklist. The auditor agreement shows as NOT RECORDED, because there is no field for it (TND-58) |
 | S4.4 | Audits — list and situation report | Built |
 | S4.5 | Clients — roster, balances, credit adjustments | Built |
-| S4.6 | Complaint — read, acknowledge, resolve | Built (minimal). TND-80 adds triage paths and PICK-authored rework beside it |
+| S4.6 | Complaint — read, acknowledge, resolve | Built — now gathers the evidence a decision needs: what they wrote, what the audit found, what was logged live. Still stops short of TND-80's three named outcomes, which need an outcome enum and a credit movement |
 | S4.7 | Payout runs | Built |
 | S4.8 | Risk register | Built |
 | S4.9 | Review gates | Built |
 | S5.1 | Invite an auditor | Built |
-| S5.2 | Welcome — accept an invitation | Built |
-| S5.3 | Auditor home | Built (parts 1–3; complaints deferred to TND-97) |
+| S5.2 | Welcome — accept an invitation | Built — coverage is a place, minutes and a mode of travel; the circle proposes places and the auditor confirms. Postcode areas appear nowhere |
+| S5.3 | Auditor home | Built (parts 1–3; complaints deferred to TND-97) — opens with what is due today |
+
+Every screen above now opens with the one thing the person came for and then
+lets them read down for the evidence — except the assignment console, which
+gets a table because six parallel eligibility rules have no order to read down.
+The sentence is always derived in `core`, never composed in the screen.
 
 Screens are wired as components and routes with tests at every level, with one
 exception: S3.2 above. A row here saying Built means a route a user can reach —
@@ -156,3 +167,9 @@ analytics dashboards
 | An audit detail screen in the field app | Home and My Audits both send an auditor to the thing that is *due* — prep, or the write-up. A read-only detail screen would be a second tap to nothing actionable. | An auditor needs something on it they cannot get from prep |
 | Public auditor sign-up (`/auditors/apply`) | Invite-only is smaller and matches how recruitment actually happens — one conversation at a time. The application form and `complete_auditor_profile` are already shared, so the public route is a second front door, not a second model. | Recruiting outgrows hand-sent invitations |
 | Emailing the invitation | `generateLink` returns a URL the admin sends however they already talk to that person. SMTP is a deployment concern with nothing to test against locally. | Invitations outgrow copy and paste |
+| Notifications | The absence underneath half the design drop: six of the eighteen screens say some version of "we will let you know" and none of them can. An offer expiring in four hours, a report going live, a write-up coming back, vetting finishing — all silent. It is a system with a scheduler, a channel and a preference model, not a screen, and TND-81's review timeouts need the same scheduler. **The screens work without it; the product does not.** | The scheduler exists (TND-81) — build both together or neither |
+| Timing promises in copy | The designs say "two or three working days" for vetting and "report expected Monday". Nothing measures either, and a promise the system cannot keep is worse than silence. Where a date is real — an audit window — it is shown. | Something measures turnaround |
+| PDF export of a report | A button that does nothing is worse than its absence, and print styles are not a substitute for a document a charity forwards to an agency. | A charity asks for one twice |
+| The coverage gap ("nobody covers SE for lottery") | Named on the ops home design and computed by nothing. It is a genuine query across coverage, capability and open audits — probably the single most useful sentence a marketplace operator can be told, and a real build rather than a set difference. The narrow version (an auditor being sole cover for a place) is built on S4.3. | Two charities book somewhere nobody covers |
+| An outcome enum on complaints (TND-80) | The three named paths — the finding stands, ask the auditor for more, uphold it and re-audit at our cost — include a credit movement. Half a vocabulary is a schema nobody agreed to. S4.6 gathers the evidence in the meantime. | TND-80 is specified |
+| Tracking the auditor agreement | S4.3 shows it as NOT RECORDED rather than as an unticked box, so the gap is visible where approving happens. Adding a field before TND-58 decides what the agreement says would be guessing at its shape. | TND-58 lands |

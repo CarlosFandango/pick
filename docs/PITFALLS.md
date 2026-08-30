@@ -218,3 +218,56 @@ gone".
 so the rollback undoes exactly one statement. Worth remembering whenever a
 helper both mutates and recovers transaction state: the recovery point has to be
 as narrow as the thing being recovered from.
+
+## A form left behind by its own server action
+**Symptom:** the invitation flow was tested at every layer and still could not
+be completed by a human. `pnpm test:rls` exercised
+`complete_auditor_profile`, `packages/core` exercised the zod schema, and the
+portal typechecked — but an auditor opening their invitation could not get past
+"Where do you set out from?".
+
+**Why it hid:** the places-not-postcodes change updated the schema, the database
+function and the server action together, and the form still posted
+`base_postcode` and `areas`. Nothing connects those two: `FormData` is
+stringly-typed on both sides, so the boundary between a form and the action it
+submits to is invisible to TypeScript, and every test sat on one side of it.
+
+**Caught now by:** a Playwright pass that signs in as an admin, creates an
+invitation, opens the link, fills the form and submits — in
+`scripts/snapshot/`. The general lesson is narrower than "write e2e tests":
+**a `FormData` field name is an untyped contract**, and a rename on one side of
+one is the single cheapest way to ship a screen that cannot be used.
+
+## Colour tokens that mean "background" being used as "text on a fill"
+**Symptom:** switching the field app to its dark surfaces turned the primary
+button on the home screen into dark navy on teal — 1.4:1, unreadable — along
+with the NEW chip on the offer board and three others.
+
+**Why it hid:** those labels were `color.bone`, which was correct while it was
+*also* the page background: bone-on-teal reads fine. Mapping the backgrounds to
+dark carried the label with them, because the token was doing two unrelated jobs
+under one name. Types cannot see it, and no test looked at a colour pair.
+
+There is a second half. The state colours — `semantics.pass`, `semantics.fail`,
+`color.link`, `color.auditingText` — are the brand's *deep* pairs, chosen to sit
+on a bone page. On `#041825` they measure 2.1–2.8:1, so every verdict, marker
+and EDIT link went effectively invisible. `pickselField` already carried
+on-navy equivalents and nothing had ever used them.
+
+**Caught now by:** `apps/field/test/surface.test.ts`, which checks every role
+against the surface it sits on, including text on the accent fill. It was
+verified to fail on the original bug before being kept. The general lesson: a
+colour token named for one role and used in another survives exactly until the
+theme changes, and **roles, not tokens, are what components should name**.
+
+## `pnpm check` fails on lint before it runs a single test
+**Symptom:** "Found 23 errors" and no test output, after a change that only
+added an import.
+
+**Why it hid:** `check` is `lint && typecheck && test`, so one unused import
+stops the command before anything informative runs — and 23 errors reads like
+something structural rather than three stale imports.
+
+**Caught now by:** nothing, and it does not need to be. Run `pnpm lint:fix`
+first whenever `check` goes red; if the count drops to zero, that was all it
+was.

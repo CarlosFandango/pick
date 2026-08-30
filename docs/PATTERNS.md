@@ -54,9 +54,33 @@ like before you open it.
 | Set a font family | `fontStack`, via the text role | naming a font in a component |
 | Add a brand | a new object satisfying `Theme` | overriding CSS, forking components |
 | Style a portal component | `color.*`/`radius.*` inline + the helpers in `portal/src/lib/theme.ts` | a CSS file with its own palette, `packages/ui` |
+| Share a portal component | `portal/src/components/` | `packages/ui` — see below |
 | Style a field component | the same token objects as RN styles | a parallel RN colour constant |
 | Convey pass/fail | colour **and** an icon or label | colour alone |
+| Open a screen | a `Lede` from `core`, then the evidence | a page title, a status chip, a percentage |
+| Compose the sentence a screen leads with | a function in `core` returning a `Lede` | building the string in the screen |
+| Say what a check found, to a charity | `check_definition.client_finding` | the auditor-facing `prompt`, a check code |
+| Show a sequence with a real order | `SequenceStep` / `SequenceCard` | a table |
+| Show parallel tests with no order | a table, one column per test | a timeline forced onto it |
+| Colour a field component | a role from `field/src/surface.ts` | `color.bone`, `color.ink`, `semantics` |
 | Size a field tap target | `touchTarget.comfortable` | an arbitrary height |
+
+## Two things this table is lying about slightly
+
+**`packages/ui` is dead.** It is declared as a dependency of the portal and no
+screen imports it. Its two components style themselves with CSS custom
+properties from `themeToCssVariables()`; every real screen styles itself with
+token objects and `portal/src/lib/theme.ts`. That is two patterns for one job,
+which this file exists to prevent — so shared portal components go in
+`portal/src/components/` with the pattern in use, and `packages/ui` should
+either be converted to that idiom or deleted. Not decided; not silently
+perpetuated either.
+
+**`Verdict` means two things.** `writeup.ts` calls a single check's
+pass/fail/note a `Verdict`, and `entities.ts` calls the same thing a
+`CheckOutcome`. One of them should go. The design pattern that leads a screen
+with a sentence is called verdict-first, but the type is `Lede`, precisely to
+stay out of the way of this.
 
 ## Naming
 
