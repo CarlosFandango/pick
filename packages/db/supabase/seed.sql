@@ -211,14 +211,31 @@ where not exists (
 -- a09 no team present             S2.7 · a credit handed back
 -- a10 released, other charity     tenant isolation is visible, not assumed
 -- ---------------------------------------------------------------------------
+-- `created_at`, `matched_at` and `started_at` are DERIVED from the window
+-- rather than written per row.
+--
+-- They were simply absent, so every audit was created "now" while its write-up
+-- was submitted three days ago — and the client's timeline, which reads these
+-- columns, showed the audit being booked after it was audited. Deriving them
+-- from `window_start_on` keeps the history coherent however the windows move,
+-- which is the point of a seed nobody has to maintain by hand.
 insert into public.audit (
   id, reference, client_organisation_id, auditor_id, status, audit_type, postcode,
   window_start_on, window_end_on, auditor_fee_minor_units, created_by,
   campaign_name, site_name, requires_review,
   submitted_at, completed_at, released_at, released_by, no_team_present_at,
-  session_started_at, session_ended_at, pitch_detail
+  session_started_at, session_ended_at, pitch_detail,
+  created_at, matched_at, started_at
 )
-select * from (values
+select v.*,
+       -- Booked a fortnight before the window opens.
+       (v.window_start_on - 14)::timestamptz + interval '9 hours',
+       -- An auditor took it the next day, where one has.
+       case when v.auditor_id is not null
+            then (v.window_start_on - 13)::timestamptz + interval '11 hours' end,
+       -- The shift itself, where it happened.
+       coalesce(v.session_started_at, v.no_team_present_at)
+from (values
   ('00000000-0000-7000-8000-00000000a001'::uuid, 'PS-000901', '00000000-0000-7000-8000-0000000000c1'::uuid,
    null::uuid, 'booked'::public.audit_status, 'street'::public.audit_type, 'N1 6AH',
    current_date + 12, current_date + 14, 10000, '00000000-0000-7000-8000-0000000000d1'::uuid,

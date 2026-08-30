@@ -19,4 +19,5 @@ export * from './review';
 export * from './scoring';
 export * from './stages';
 export * from './status';
+export * from './timeline';
 export * from './writeup';
