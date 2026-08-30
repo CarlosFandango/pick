@@ -47,6 +47,13 @@ function Tile({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
+      // The accessible name is the CHOICE, not the choice plus its
+      // explanation. A screen reader announcing "Street, public pavement, on a
+      // pitch" buries the option in its own footnote, and "Street" is a
+      // substring of "Residential streets", so a description in the name also
+      // makes two tiles ambiguous to anything matching on it.
+      aria-label={label}
+      aria-describedby={description ? `${label}-detail` : undefined}
       style={{
         flex: grow ?? 1,
         border: selected ? `2px solid ${color.teal}` : hairline,
@@ -64,6 +71,7 @@ function Tile({
       {label}
       {description ? (
         <span
+          id={`${label}-detail`}
           style={{
             display: 'block',
             marginTop: 3,
@@ -260,7 +268,21 @@ export function BookingForm({ credits, places }: { credits: number; places: Plac
             </>
           }
         >
-          <select name="placeId" required defaultValue="" style={inputStyle}>
+          {/*
+            The step heading is a `<span>` inside a disclosure, not a `<label>`,
+            so neither of these controls had an accessible name — a screen
+            reader announced "combobox" and "edit text" with nothing to say
+            what either was for. Naming them here rather than restructuring
+            `Step`, which is shared with the tile groups where the heading is a
+            legend and correct as it is.
+          */}
+          <select
+            name="placeId"
+            aria-label="Where the team is working"
+            required
+            defaultValue=""
+            style={inputStyle}
+          >
             <option value="" disabled>
               Choose a place
             </option>
@@ -272,6 +294,7 @@ export function BookingForm({ credits, places }: { credits: number; places: Plac
           </select>
           <input
             name="postcode"
+            aria-label="Address, as you would write it"
             required
             placeholder="Rye Lane, outside the station"
             style={{ ...inputStyle, marginTop: 8 }}

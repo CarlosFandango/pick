@@ -23,6 +23,21 @@ export function inDays(n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Fill in where the audit is happening.
+ *
+ * A place, chosen from the gazetteer, plus the address as written. It used to
+ * be one postcode field, and every booking test typed into it — so when
+ * coverage moved from postcode areas to places, ten tests failed on a
+ * `locator.fill` timeout against a field that had become a `<select>`.
+ *
+ * One helper, so the next change to this part of the form is one edit.
+ */
+export async function fillLocation(page: Page, address = 'Rye Lane, Peckham') {
+  await page.getByLabel('Where the team is working').selectOption({ index: 1 });
+  await page.locator('input[name="postcode"]').fill(address);
+}
+
 /** The credit count in the chrome, which the design keeps permanently visible. */
 export async function creditBalance(page: Page): Promise<number> {
   const text = await page.getByText(/CREDITS\s+\d+/).innerText();

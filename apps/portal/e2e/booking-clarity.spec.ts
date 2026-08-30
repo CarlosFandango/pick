@@ -15,7 +15,12 @@ test.describe('S1.1 explaining itself', () => {
   });
 
   test('every step can explain itself on demand', async ({ page }) => {
-    const steps = ['Audit type', 'Payment method on shift', 'Postcode of activity', 'Date window'];
+    const steps = [
+      'Audit type',
+      'Payment method on shift',
+      'Where the team is working',
+      'Date window',
+    ];
 
     for (const step of steps) {
       const hint = page.getByRole('group').filter({ hasText: step }).first();
@@ -65,23 +70,38 @@ test.describe('A/V evidence, which does not exist yet', () => {
 });
 
 test.describe('S1.9 reading the audit list', () => {
-  test('says what each column is', async ({ page }) => {
+  test('groups audits by what each group means, not by our status enum', async ({ page }) => {
     await signIn(page, 'client');
     await page.goto('/audits');
 
-    for (const heading of ['Reference', 'Type', 'Location', 'Window', 'Status']) {
-      await expect(page.getByRole('columnheader', { name: heading })).toBeVisible();
-    }
+    // This used to assert five column headings. The list is no longer a table
+    // — a fundraising director arrives asking "is anything waiting on me", and
+    // reading eight rows of BOOKED / ASSIGNED / IN REVIEW to answer it means
+    // knowing our vocabulary. What has to hold is the grouping, and that only
+    // one group ever contains an action.
+    // Exact, because "waiting for an auditor" is also the sentence under a
+    // row in that group — which is the grouping working, not an ambiguity.
+    await expect(page.getByText('Ready for you', { exact: true })).toBeVisible();
+    await expect(page.getByText('Waiting for an auditor', { exact: true })).toBeVisible();
   });
 
-  test('shows status as a labelled pill, never colour alone', async ({ page }) => {
+  test('opens with what the whole list amounts to', async ({ page }) => {
+    await signIn(page, 'client');
+    await page.goto('/audits');
+
+    // Never a count of rows to interpret. The heading is the answer.
+    const heading = page.getByRole('heading', { level: 1 });
+    await expect(heading).toContainText(/ready to read|nothing needs you|no audits/i);
+  });
+
+  test('says where each audit has got to in words, never colour alone', async ({ page }) => {
     await signIn(page, 'client');
     await page.goto('/audits');
 
     // The brand's pass-teal and fail-red are near-identical in greyscale, so a
-    // status that is only a colour is a status half the readers cannot read.
-    const statuses = page.getByRole('cell').filter({ hasText: /BOOKED|ASSIGNED|IN |RELEASED/ });
-    expect(await statuses.count()).toBeGreaterThan(0);
+    // state that is only a colour is a state half the readers cannot read.
+    const states = page.getByText(/Released|Being checked|Being worked|Booked|No team/);
+    expect(await states.count()).toBeGreaterThan(0);
   });
 });
 
@@ -94,12 +114,17 @@ test.describe('S3.5 running out of credits', () => {
 
     // The price list comes from credit_bundle, so this proves the query, the
     // policy that lets a client read it, and the seed — not just the markup.
-    const prices = page.getByRole('table').filter({ hasText: 'Credits' });
+    // Scoped to the bundle table: the ledger below it also prices in pounds,
+    // and £175 legitimately appears there as what a past credit cost.
+    const prices = page.getByRole('table').filter({ hasText: 'The more you buy' });
     await expect(prices.getByRole('cell', { name: '£250' })).toBeVisible();
     await expect(prices.getByRole('cell', { name: '£750 · £187.50 each' })).toBeVisible();
 
-    // The superseded figure, asserted absent on the screen where a charity
-    // decides what to spend.
-    await expect(page.getByText('£175')).toHaveCount(0);
+    // The superseded figure, asserted absent from the PRICE LIST — the thing a
+    // charity reads when deciding what to spend. It was asserted absent from
+    // the whole page, which stopped being right when the ledger below started
+    // showing what each past credit actually cost: £175 is a true statement
+    // about a purchase made at the old price, and hiding it would be the bug.
+    await expect(prices.getByText('£175')).toHaveCount(0);
   });
 });

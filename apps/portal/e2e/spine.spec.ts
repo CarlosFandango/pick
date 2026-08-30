@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { creditBalance, inDays, signIn } from './support';
+import { creditBalance, fillLocation, inDays, signIn } from './support';
 
 /**
  * The golden path, walked as three people.
@@ -16,7 +16,7 @@ test.describe('the spine, end to end', () => {
     await page.goto('/book');
     const before = await creditBalance(page);
 
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await fillLocation(page, 'SE15 4QL');
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(10));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
@@ -26,18 +26,26 @@ test.describe('the spine, end to end', () => {
     expect(reference).toMatch(/^PS-\d+$/);
     expect(await creditBalance(page)).toBe(before - 1);
 
-    // 2. It appears twice, on purpose: once in the confirmation banner and
-    //    once in the list beneath it.
-    await expect(page.getByText(reference as string)).toHaveCount(2);
-    await expect(page.getByText('booked').first()).toBeVisible();
+    // 2. The confirmation names it and links to it. It appears once: the list
+    //    below groups by what each group means to a charity and deliberately
+    //    prints no references — a director looking for "PS-000911" is looking
+    //    for something only we call it.
+    await expect(page.getByRole('link', { name: reference as string })).toBeVisible();
   });
 
   test('a booked audit is unassigned — the client never picks an auditor', async ({ page }) => {
     await signIn(page, 'client');
     await page.goto('/audits');
 
-    // Nothing on the client's list names or offers an auditor.
-    await expect(page.getByText(/auditor/i)).toHaveCount(0);
+    // Nothing on the client's list NAMES an auditor or offers a choice of one.
+    //
+    // This used to assert the word "auditor" appeared nowhere, which held only
+    // while the list was a bare table. It now says "we are matching this to an
+    // auditor who covers the area" — which is the rule being explained, not
+    // broken. What must never appear is an identity or a control.
+    await expect(page.getByText(/Auditor \d/)).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: /auditor/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /choose|pick|assign/i })).toHaveCount(0);
   });
 
   test('an auditor cannot reach the admin review queue', async ({ page }) => {
@@ -68,23 +76,26 @@ test.describe("S3.3 / S3.5 the client's world", () => {
 
   test('an audit shows where it has got to', async ({ page }) => {
     await page.goto('/book');
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await fillLocation(page, 'SE15 4QL');
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(9));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
+    await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);
 
-    await page
-      .getByText(/PS-\d+/)
-      .last()
-      .click();
+    const reference = new URL(page.url()).searchParams.get('booked') as string;
+    await page.getByRole('link', { name: reference }).click();
 
-    await expect(page.getByLabel('Audit progress')).toBeVisible();
-    // Booked is where it is; released is where it is going.
-    await expect(page.getByRole('listitem').filter({ hasText: 'BOOKED' })).toHaveAttribute(
-      'aria-current',
-      'step',
+    // Where it has got to, said as a sentence rather than shown as a rail of
+    // enum values. The question a charity arrives with is "is anything
+    // expected of me", and the answer is almost always no.
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      /matching this to an auditor|auditor is assigned/i,
     );
-    await expect(page.getByText('NO REPORT YET')).toBeVisible();
+    await expect(page.getByText('Nothing is needed from you.')).toBeVisible();
+
+    // And the history, oldest first, starting with the booking.
+    await expect(page.getByText('How this audit has gone')).toBeVisible();
+    await expect(page.getByText('You booked it')).toBeVisible();
   });
 
   test('the credits ledger adds up to the balance on screen', async ({ page }) => {
@@ -147,13 +158,19 @@ test.describe('S4.1 ops home', () => {
     await signIn(page, 'admin');
     await page.goto('/admin');
 
-    // Four counters are the entire summary.
-    await expect(page.getByText('Needs a human', { exact: true })).toBeVisible();
-    await expect(page.getByText('In flight today')).toBeVisible();
-    await expect(page.getByText('Offers awaiting accept')).toBeVisible();
-    await expect(page.getByText('Released this week')).toBeVisible();
+    // The queue IS the page. This used to assert four counters at the top and
+    // the queue under them; the counters are now below it and the "needs a
+    // human" tile is gone, because the heading says it in words. Two people
+    // running a marketplace need to know whether today is normal before they
+    // need to know that six audits are in flight.
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      /need a person|needs a person|nothing needs a person/i,
+    );
+    await expect(page.getByText('Worst first · clear this list and the day is done')).toBeVisible();
 
-    await expect(page.getByRole('heading', { name: 'Needs a human — worst first' })).toBeVisible();
+    // Still subordinate, still present.
+    await expect(page.getByText('The network, right now')).toBeVisible();
+    await expect(page.getByText('Audits in flight')).toBeVisible();
   });
 
   test('keeps a client out of the cockpit', async ({ page }) => {
@@ -171,7 +188,7 @@ test.describe('S4.1 ops home', () => {
   test('shows a booked audit whose window is nearly here as needing a human', async ({ page }) => {
     await signIn(page, 'client');
     await page.goto('/book');
-    await page.getByPlaceholder('SE15 4QL').fill('N16 8AA');
+    await fillLocation(page, 'N16 8AA');
     await page.locator('input[name="windowStartOn"]').fill(inDays(5));
     await page.locator('input[name="windowEndOn"]').fill(inDays(8));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
@@ -179,8 +196,15 @@ test.describe('S4.1 ops home', () => {
 
     await signIn(page, 'admin');
     await page.goto('/admin');
-    // Not yet urgent — the window is five days out, not two.
-    await expect(page.getByRole('heading', { name: /Needs a human/ })).toBeVisible();
+    // Not yet urgent — the window is five days out, not two — so it is in the
+    // queue without being overdue. The count is in the heading now, in words.
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      /need a person|needs a person/i,
+    );
+    // Deliberately not asserting that nothing on the page is overdue: the seed
+    // has a genuinely late write-up, and that is the queue working. What this
+    // test is about is that a booked audit five days out reaches the queue at
+    // all, without being dressed as urgent.
   });
 });
 
@@ -189,7 +213,7 @@ test.describe('S4.2 assignment console', () => {
     // Book something so there is an audit to assign.
     await signIn(page, 'client');
     await page.goto('/book');
-    await page.getByPlaceholder('SE15 4QL').fill('SW1A 1AA');
+    await fillLocation(page, 'SW1A 1AA');
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(10));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
@@ -205,10 +229,20 @@ test.describe('S4.2 assignment console', () => {
     await signIn(page, 'admin');
     await page.goto(`/admin/assignment/${auditId}`);
 
-    await expect(page.getByRole('heading', { name: /Eligible pool/ })).toBeVisible();
+    await expect(page.getByText('Everyone considered, and why')).toBeVisible();
+    // One column per eligibility test, so the first failing one is visible
+    // across the whole pool rather than buried in a sentence per auditor.
+    for (const test of ['Approved', 'Reachable', 'Capable', 'Available']) {
+      await expect(page.getByRole('columnheader', { name: test })).toBeVisible();
+    }
     await expect(page.getByText(/eligible of \d+ active/)).toBeVisible();
-    // An operator asking why an audit is stuck gets an answer, not a shorter list.
-    await expect(page.getByText('SET ASIDE').first()).toBeVisible();
+    // An operator asking why an audit is stuck gets an answer, not a shorter
+    // list. Every considered auditor is a row, and a row that fails a test
+    // says which one — "Out of reach", not a missing name.
+    await expect(page.getByRole('row')).not.toHaveCount(1);
+    await expect(
+      page.getByText(/Out of reach|Not vetted|Not signed off|Committed|Seen recently|Conflicted/),
+    ).not.toHaveCount(0);
   });
 
   test('keeps a client out of the assignment console', async ({ page }) => {

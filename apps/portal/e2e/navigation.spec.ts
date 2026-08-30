@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { inDays, signIn } from './support';
+import { fillLocation, inDays, signIn } from './support';
 
 /**
  * Getting back out.
@@ -12,14 +12,17 @@ import { inDays, signIn } from './support';
 /** Books an audit and returns to its detail page. Costs one credit. */
 async function bookAndOpen(page: import('@playwright/test').Page): Promise<string> {
   await page.goto('/book');
-  await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+  await fillLocation(page);
   await page.locator('input[name="windowStartOn"]').fill(inDays(7));
   await page.locator('input[name="windowEndOn"]').fill(inDays(10));
   await page.getByRole('button', { name: 'Confirm booking' }).click();
   await expect(page).toHaveURL(/\/audits\?booked=PS-\d+/);
 
+  // The confirmation links to what was just booked. The list itself does not
+  // show references — it groups by what each group means to a charity — so
+  // this is the route from "booked as PS-000911" to the audit itself.
   const reference = new URL(page.url()).searchParams.get('booked') as string;
-  await page.getByText(reference).last().click();
+  await page.getByRole('link', { name: reference }).click();
   await expect(page).toHaveURL(/\/audits\/[0-9a-f-]{36}/);
   return reference;
 }

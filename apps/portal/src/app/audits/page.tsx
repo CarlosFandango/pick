@@ -84,6 +84,10 @@ export default async function AuditsPage({
   for (const audit of audits) counts[groupOf(audit)] += 1;
   const lede = dashboardLede(counts);
   const firstReady = groups.find((g) => g.group === 'ready')?.audits[0];
+  // The audit that was just booked, so the confirmation can lead to it. A
+  // charity that has this second reads the reference and then has to find the
+  // row it belongs to, in a list that deliberately does not show references.
+  const justBooked = booked ? audits.find((audit) => audit.reference === booked) : undefined;
 
   return (
     <Chrome active="audits" organisationName={organisationName} credits={credits}>
@@ -100,8 +104,18 @@ export default async function AuditsPage({
               fontSize: 13,
             }}
           >
-            Booked as <b style={{ fontFamily: mono }}>{booked}</b>. We will match it to an auditor
-            who covers the area.
+            Booked as{' '}
+            {justBooked ? (
+              <Link
+                href={`/audits/${justBooked.id}`}
+                style={{ fontFamily: mono, fontWeight: 700, color: color.link }}
+              >
+                {booked}
+              </Link>
+            ) : (
+              <b style={{ fontFamily: mono }}>{booked}</b>
+            )}
+            . We will match it to an auditor who covers the area.
           </p>
         ) : null}
 

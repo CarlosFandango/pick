@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { creditBalance, inDays, signIn } from './support';
+import { creditBalance, fillLocation, inDays, signIn } from './support';
 
 /** S1.1 — Book an audit. */
 test.describe('S1.1 book an audit', () => {
@@ -28,11 +28,13 @@ test.describe('S1.1 book an audit', () => {
     // "No auditor choice anywhere" — assignment is the system's job, and a
     // client who picks their own auditor is not running a covert audit.
     //
-    // Asserted as the absence of a CONTROL, not of the word: the helper text
-    // legitimately says "the auditor uses".
+    // Asserted as the absence of an AUDITOR control, not of controls. This
+    // used to forbid every `select` on the form, which was a fair proxy while
+    // the form had none; the place picker is a select, so the proxy started
+    // failing for a reason that has nothing to do with the rule.
     const form = page.locator('form');
     await expect(form.locator('[name*="auditor" i]')).toHaveCount(0);
-    await expect(form.locator('select, [role="combobox"], [role="listbox"]')).toHaveCount(0);
+    await expect(form.getByRole('combobox', { name: /auditor/i })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /choose|pick|select/i })).toHaveCount(0);
   });
 
@@ -51,7 +53,7 @@ test.describe('S1.1 book an audit', () => {
   test('refuses a window shorter than three days, and spends nothing', async ({ page }) => {
     const before = await creditBalance(page);
 
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await fillLocation(page);
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(8));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
@@ -64,7 +66,7 @@ test.describe('S1.1 book an audit', () => {
   test('books an audit and spends exactly one credit', async ({ page }) => {
     const before = await creditBalance(page);
 
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await fillLocation(page);
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(9));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
@@ -74,13 +76,17 @@ test.describe('S1.1 book an audit', () => {
     expect(await creditBalance(page)).toBe(before - 1);
   });
 
-  test('rejects a postcode the schema does not recognise', async ({ page }) => {
-    await page.getByPlaceholder('SE15 4QL').fill('NOT A POSTCODE');
+  test('refuses to book without saying where', async ({ page }) => {
+    // This used to assert that a malformed POSTCODE was rejected. There is no
+    // postcode rule any more, and there should not be: the regex behind it
+    // rejected a Dublin address on insert, which is the whole reason coverage
+    // moved to places. What has to hold now is that an audit cannot be booked
+    // with nowhere to send an auditor.
     await page.locator('input[name="windowStartOn"]').fill(inDays(7));
     await page.locator('input[name="windowEndOn"]').fill(inDays(9));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
 
-    await expect(page.locator('form').getByRole('alert')).toBeVisible();
+    await expect(page).toHaveURL(/\/book/);
   });
 });
 
@@ -114,7 +120,7 @@ test.describe('S3.1 booking deepened', () => {
     // audit. The `min` attribute stops the browser submitting it at all, so
     // the assertion is that nothing happens — the server-side rule is covered
     // by the integration tests, which is where it actually has to hold.
-    await page.getByPlaceholder('SE15 4QL').fill('SE15 4QL');
+    await fillLocation(page);
     await page.locator('input[name="windowStartOn"]').fill(inDays(1));
     await page.locator('input[name="windowEndOn"]').fill(inDays(4));
     await page.getByRole('button', { name: 'Confirm booking' }).click();
