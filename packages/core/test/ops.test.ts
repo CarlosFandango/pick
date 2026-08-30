@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { OPS_PRESENTATION, type OpsItem, type OpsItemKind, waitingFor } from '../src/ops';
+import {
+  isOverdue,
+  OPS_PRESENTATION,
+  type OpsItem,
+  type OpsItemKind,
+  opsLede,
+  waitingFor,
+} from '../src/ops';
 
 const KINDS: OpsItemKind[] = [
   'offer_expiring',
@@ -65,5 +72,46 @@ describe('waitingFor', () => {
 
   it('says nothing when there is no timestamp to go on', () => {
     expect(waitingFor(item({ since: null }), now)).toBe('');
+  });
+});
+
+const NOW = new Date('2026-08-30T09:00:00Z');
+const hoursAgo = (h: number) => new Date(NOW.getTime() - h * 3_600_000);
+
+/**
+ * Waiting-times relative to NOW. The fixture above is fixed months in the
+ * past, which is fine for presentation but makes everything overdue here.
+ */
+const recent = (over: Partial<OpsItem> = {}): OpsItem => item({ since: hoursAgo(6), ...over });
+
+describe("PICK's day, in one line", () => {
+  it('says so plainly when there is nothing to do', () => {
+    const lede = opsLede([], NOW);
+    expect(lede.tone).toBe('clear');
+    expect(lede.headline).toBe('Nothing needs a person right now.');
+  });
+
+  it('counts what needs a person, and names the worst of it', () => {
+    const lede = opsLede([recent({ since: hoursAgo(60) }), recent({ kind: 'complaint' })], NOW);
+    expect(lede.headline).toBe('Two things need a person today. One is overdue.');
+    expect(lede.detail).toContain('PS-001231');
+  });
+
+  it('does not manufacture a reason when nothing is overdue', () => {
+    const lede = opsLede([recent(), recent({ kind: 'complaint' })], NOW);
+    expect(lede.headline).toBe('Two things need a person today.');
+    expect(lede.detail).toBe('');
+  });
+
+  it('measures overdue per kind, because the clocks are different', () => {
+    // Two days on a write-up is late. Two days on a complaint is inside the
+    // window we tell a charity we will answer in.
+    const twoDays = hoursAgo(50);
+    expect(isOverdue(recent({ kind: 'review_gate', since: twoDays }), NOW)).toBe(true);
+    expect(isOverdue(recent({ kind: 'complaint', since: twoDays }), NOW)).toBe(false);
+  });
+
+  it('does not call something overdue when we do not know how long it has waited', () => {
+    expect(isOverdue(recent({ since: null }), NOW)).toBe(false);
   });
 });

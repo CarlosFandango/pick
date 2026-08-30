@@ -1,10 +1,18 @@
-import { formatDay, OPS_PRESENTATION, type OpsItem, waitingFor } from '@picksel/core';
+import {
+  formatDay,
+  isOverdue,
+  OPS_PRESENTATION,
+  type OpsItem,
+  opsLede,
+  waitingFor,
+} from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import Link from 'next/link';
 import { AdminChrome } from '@/components/AdminChrome';
+import { Lede } from '@/components/Lede';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
-import { hairline, metaLabel, mono } from '@/lib/theme';
+import { adminPage, bodyText, hairline, metaLabel, mono } from '@/lib/theme';
 
 const TONE: Record<string, { fill?: string; ink: string }> = {
   // `ink` on the creative fill measures 5.62:1. The raw hex that was here
@@ -42,102 +50,113 @@ export default async function OpsHomePage() {
 
   const counts = Array.isArray(counters) ? counters[0] : counters;
 
-  const tiles = [
-    { label: 'Needs a human', value: counts?.needs_a_human ?? 0, lead: true },
-    { label: 'In flight today', value: counts?.in_flight_today ?? 0 },
+  // Subordinate to the queue, and deliberately below it. Two people running a
+  // marketplace need to know whether today is normal before they need to know
+  // that six audits are in flight.
+  const network = [
+    { label: 'Audits in flight', value: counts?.in_flight_today ?? 0 },
     { label: 'Offers awaiting accept', value: counts?.offers_awaiting ?? 0 },
     { label: 'Released this week', value: counts?.released_this_week ?? 0 },
   ];
 
   return (
     <AdminChrome who={session.fullName} queuePosition={formatDay(now).toUpperCase()}>
-      <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', gap: 14 }}>
-          {tiles.map((tile) => (
-            <div
-              key={tile.label}
-              style={{
-                flex: 1,
-                background: color.paper,
-                border: hairline,
-                borderTop: tile.lead ? `5px solid ${color.auditing}` : hairline,
-                borderRadius: radius.tile,
-                padding: '14px 16px',
-              }}
-            >
-              <div style={{ ...metaLabel, color: tile.lead ? color.auditingText : color.muted }}>
-                {tile.label}
-              </div>
-              <div style={{ fontWeight: 800, fontSize: 30, marginTop: 2 }}>{tile.value}</div>
+      <div style={adminPage}>
+        <Lede {...opsLede(items, now)} />
+
+        {items.length === 0 ? null : (
+          <section>
+            <div style={{ ...metaLabel, marginBottom: 8 }}>
+              Worst first · clear this list and the day is done
             </div>
-          ))}
-        </div>
-
-        <section
-          style={{
-            background: color.paper,
-            border: hairline,
-            borderRadius: radius.tile,
-            padding: '16px 20px',
-          }}
-        >
-          <h2 style={{ ...metaLabel, margin: '0 0 10px' }}>Needs a human — worst first</h2>
-
-          {items.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 13, color: color.muted }}>
-              Nothing waiting. The network is running itself.
-            </p>
-          ) : (
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {items.map((item, i) => {
                 const presentation = OPS_PRESENTATION[item.kind];
-                const tone = TONE[presentation.tone] ?? TONE.neutral;
+                const overdue = isOverdue(item, now);
+                const tone = overdue ? TONE.urgent : (TONE[presentation.tone] ?? TONE.neutral);
 
                 return (
                   <li
                     key={`${item.kind}-${item.targetId ?? i}`}
                     style={{
                       display: 'flex',
-                      gap: 14,
+                      gap: 16,
                       alignItems: 'center',
-                      padding: '11px 0',
-                      borderBottom: i < items.length - 1 ? hairline : 'none',
-                      fontSize: 13,
+                      background: color.paper,
+                      border: hairline,
+                      // The rail is the only place overdue is stated at full
+                      // strength; the chip beside it carries the word, because
+                      // colour on its own is not a message.
+                      borderLeft: `3px solid ${overdue ? color.creativeText : tone?.fill ?? color.oat}`,
+                      borderRadius: radius.tile,
+                      padding: '13px 18px',
                     }}
                   >
                     <span
                       style={{
-                        background: tone?.fill ?? 'transparent',
-                        border: tone?.fill ? 'none' : hairline,
-                        borderRadius: radius.pill,
-                        padding: '4px 10px',
-                        fontFamily: mono,
-                        fontSize: 9.5,
-                        letterSpacing: '0.1em',
-                        color: tone?.ink,
+                        ...metaLabel,
+                        color: overdue ? color.creativeText : color.muted,
+                        width: 92,
                         flex: 'none',
                       }}
                     >
-                      {presentation.chip}
+                      {overdue ? 'Overdue' : waitingFor(item, now) || presentation.chip}
                     </span>
-                    <span style={{ flex: 1 }}>
-                      <span style={{ fontFamily: mono, color: color.muted }}>{item.reference}</span>{' '}
-                      · {item.summary}
-                      {item.since ? (
-                        <span style={{ color: color.muted }}> · {waitingFor(item, now)}</span>
-                      ) : null}
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em' }}>
+                        {presentation.title}
+                      </span>
+                      <span style={{ ...bodyText, display: 'block', fontSize: 12.5 }}>
+                        <span style={{ fontFamily: mono }}>{item.reference}</span> · {item.summary}
+                      </span>
                     </span>
                     <Link
                       href={presentation.href(item)}
-                      style={{ fontWeight: 700, color: color.link, textDecoration: 'none' }}
+                      style={{
+                        flex: 'none',
+                        background: overdue ? color.creativeText : color.teal,
+                        color: color.bone,
+                        borderRadius: radius.pill,
+                        padding: '9px 20px',
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                      }}
                     >
-                      {presentation.action} →
+                      {presentation.action}
                     </Link>
                   </li>
                 );
               })}
             </ul>
-          )}
+          </section>
+        )}
+
+        <section style={{ marginTop: 8 }}>
+          <div style={{ ...metaLabel, marginBottom: 8 }}>The network, right now</div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {network.map((tile) => (
+              <div
+                key={tile.label}
+                style={{
+                  flex: 1,
+                  minWidth: 180,
+                  background: color.paper,
+                  border: hairline,
+                  borderRadius: radius.tile,
+                  padding: '14px 18px',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 11,
+                }}
+              >
+                <span style={{ fontWeight: 800, fontSize: 21, letterSpacing: '-0.03em' }}>
+                  {tile.value}
+                </span>
+                <span style={{ ...bodyText, fontSize: 12.5 }}>{tile.label}</span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </AdminChrome>
