@@ -65,7 +65,7 @@ from (values
    'The Code requires a fundraiser to disengage. This is the failure that most often becomes a news story.'),
   ('OPN-01',
    'Did not give their own name and the charity''s full name.',
-   'An unnamed person asking for a bank details is what the public are repeatedly warned about.'),
+   'An unnamed person asking for bank details is exactly what the public are repeatedly warned about.'),
   ('OPN-02',
    'Did not say they were paid, or name the agency.',
    'Somebody being asked for money has a right to know the person asking is employed to ask. This is the most common cause of an upheld complaint.'),
