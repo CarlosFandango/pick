@@ -120,7 +120,9 @@ export function auditTimeline(input: TimelineInput): TimelineEvent[] {
   // is in flight, the newest thing that happened is where it is now, and the
   // rail should say so rather than implying something else is due to appear.
   const settled =
-    input.status === 'released' || input.status === 'cancelled' || input.status === 'no_team_present';
+    input.status === 'released' ||
+    input.status === 'cancelled' ||
+    input.status === 'no_team_present';
   const last = events[events.length - 1];
   if (last && !settled && last.tone === 'done') last.tone = 'now';
 

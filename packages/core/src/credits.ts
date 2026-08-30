@@ -142,11 +142,7 @@ export function valueLabel(entry: CreditEntry): string {
  * the thing they most often ring up about — credits committed to audits that
  * have not arrived yet look like credits they still have.
  */
-export function creditsLede(input: {
-  balance: number;
-  purchased: number;
-  consumed: number;
-}): Lede {
+export function creditsLede(input: { balance: number; purchased: number; consumed: number }): Lede {
   const { balance, purchased, consumed } = input;
   const reserved = purchased - consumed - balance;
 
@@ -164,7 +160,9 @@ export function creditsLede(input: {
       tone: 'attention',
       meta: 'None available',
       headline: 'You have no credits left to book with.',
-      detail: detail.length ? `${sentence(detail)}. Nothing expires.` : 'Order more to book an audit.',
+      detail: detail.length
+        ? `${sentence(detail)}. Nothing expires.`
+        : 'Order more to book an audit.',
     };
   }
 
@@ -178,11 +176,24 @@ export function creditsLede(input: {
 
 /** Small numbers read better as words in a sentence; large ones do not. */
 function spell(n: number): string {
-  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const words = [
+    'no',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+  ];
   return words[n] ?? String(n);
 }
 
 function sentence(parts: string[]): string {
-  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}` : parts[0];
+  const joined =
+    parts.length > 1 ? `${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}` : parts[0];
   return (joined ?? '').charAt(0).toUpperCase() + (joined ?? '').slice(1);
 }

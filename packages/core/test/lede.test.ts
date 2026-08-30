@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  encounterSequence,
-  type ReportableFinding,
-  reportLede,
-  waitingLede,
-} from '../src/lede';
+import { encounterSequence, type ReportableFinding, reportLede, waitingLede } from '../src/lede';
 
 const finding = (over: Partial<ReportableFinding> = {}): ReportableFinding => ({
   code: 'OPN-02',
@@ -20,7 +15,10 @@ describe('what a charity is told first', () => {
     // "…or name the agency and kept asking" parses as a longer list on the
     // first read, every time.
     const v = reportLede(
-      [finding(), finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' })],
+      [
+        finding(),
+        finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' }),
+      ],
       29,
     );
     expect(v.headline).toContain(', and kept asking');
@@ -45,7 +43,10 @@ describe('what a charity is told first', () => {
 
   it('joins two breaches into one sentence', () => {
     const v = reportLede(
-      [finding(), finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' })],
+      [
+        finding(),
+        finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' }),
+      ],
       29,
     );
     expect(v.headline).toBe(

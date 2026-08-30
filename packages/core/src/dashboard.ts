@@ -82,7 +82,11 @@ export function dashboardLede(counts: Record<AuditGroup, number>): Lede {
   const { ready, underway, waiting } = counts;
 
   const background = [
-    clause(waiting, 'audit is booked and waiting for an auditor', 'audits are booked and waiting for an auditor'),
+    clause(
+      waiting,
+      'audit is booked and waiting for an auditor',
+      'audits are booked and waiting for an auditor',
+    ),
     clause(underway, 'is being worked or checked', 'are being worked or checked'),
   ]
     .filter(Boolean)

@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { clientsLede, payoutsLede, risksLede } from '../src/admin-ledes';
 
 describe('money out', () => {
-  const base = { readyCount: 2, readyMinorUnits: 25000, auditorCount: 2, heldCount: 1, currency: 'GBP' as const };
+  const base = {
+    readyCount: 2,
+    readyMinorUnits: 25000,
+    auditorCount: 2,
+    heldCount: 1,
+    currency: 'GBP' as const,
+  };
 
   it('leads with what can go out today, not what is owed in total', () => {
     const lede = payoutsLede(base);

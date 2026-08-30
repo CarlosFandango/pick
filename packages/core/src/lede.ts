@@ -90,10 +90,7 @@ function asClause(finding: string): string {
  * scroll to learn what happened. Beyond two, naming them all makes a sentence
  * nobody finishes, so the headline counts them and says where they were.
  */
-export function reportLede(
-  failures: readonly ReportableFinding[],
-  totalChecked: number,
-): Lede {
+export function reportLede(failures: readonly ReportableFinding[], totalChecked: number): Lede {
   const critical = failures.filter((f) => f.isCritical);
   const inOrder = totalChecked - failures.length;
 

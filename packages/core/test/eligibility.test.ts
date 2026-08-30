@@ -14,7 +14,12 @@ const auditor = (over: Partial<Considered> = {}): Considered => {
   return {
     ...row,
     eligible:
-      row.approved && row.reachable && row.capable && row.available && row.exposureOk && row.noConflict,
+      row.approved &&
+      row.reachable &&
+      row.capable &&
+      row.available &&
+      row.exposureOk &&
+      row.noConflict,
   };
 };
 
@@ -43,7 +48,11 @@ describe('who can take this audit', () => {
 describe('the nearest fix', () => {
   it('is the column the most blocked auditors fail', () => {
     expect(
-      nearestFix([auditor({ capable: false }), auditor({ capable: false }), auditor({ available: false })]),
+      nearestFix([
+        auditor({ capable: false }),
+        auditor({ capable: false }),
+        auditor({ available: false }),
+      ]),
     ).toBe('capable');
   });
 

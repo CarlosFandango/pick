@@ -2,7 +2,7 @@ import {
   AUDIT_TYPE_LABELS,
   formatDay,
   formatDayLong,
-  TRAVEL_MODE_LABELS,
+  type TRAVEL_MODE_LABELS,
   TRAVEL_MODE_THIRD_PERSON,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
@@ -77,7 +77,16 @@ function Check({
         }}
       >
         {done && !untracked ? (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={color.bone} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={color.bone}
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <title>{''}</title>
             <path d="m5 13 4 4L19 7" />
           </svg>
@@ -89,7 +98,9 @@ function Check({
           {untracked ? ' — not recorded' : done ? ' — done' : ' — outstanding'}
         </span>
       </span>
-      <span style={{ ...bodyText, fontSize: 12.5, color: untracked ? color.auditingText : color.muted }}>
+      <span
+        style={{ ...bodyText, fontSize: 12.5, color: untracked ? color.auditingText : color.muted }}
+      >
         {detail}
       </span>
     </div>
@@ -126,7 +137,9 @@ export function VettingCard({
           {subject.fullName || subject.email}
         </h2>
         <span style={metaLabel}>
-          {subject.appliedAt ? `Applied ${formatDayLong(new Date(subject.appliedAt))}` : 'Applied —'}
+          {subject.appliedAt
+            ? `Applied ${formatDayLong(new Date(subject.appliedAt))}`
+            : 'Applied —'}
         </span>
       </div>
 

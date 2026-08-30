@@ -36,29 +36,35 @@ export const TEST_LABELS: Record<EligibilityTest, string> = {
 };
 
 /** What a failure in this column means, and what would clear it. */
-export const TEST_FAILURES: Record<
-  EligibilityTest,
-  { says: string; plural: string; fix: string }
-> = {
-  approved: { says: 'Not vetted', plural: 'have not been vetted', fix: 'vetting them' },
-  reachable: { says: 'Out of reach', plural: 'do not cover this place', fix: "widening somebody's travel" },
-  capable: {
-    says: 'Not signed off',
-    plural: 'are not signed off for this methodology',
-    fix: 'signing an approved auditor off for this methodology',
-  },
-  available: { says: 'Committed', plural: 'are already committed in this window', fix: 'moving the window' },
-  exposure_ok: {
-    says: 'Seen recently',
-    plural: 'have audited this charity too recently',
-    fix: 'accepting the exposure and overriding',
-  },
-  no_conflict: {
-    says: 'Conflicted',
-    plural: 'have declared a conflict',
-    fix: 'nothing — a declared conflict is not overridable',
-  },
-};
+export const TEST_FAILURES: Record<EligibilityTest, { says: string; plural: string; fix: string }> =
+  {
+    approved: { says: 'Not vetted', plural: 'have not been vetted', fix: 'vetting them' },
+    reachable: {
+      says: 'Out of reach',
+      plural: 'do not cover this place',
+      fix: "widening somebody's travel",
+    },
+    capable: {
+      says: 'Not signed off',
+      plural: 'are not signed off for this methodology',
+      fix: 'signing an approved auditor off for this methodology',
+    },
+    available: {
+      says: 'Committed',
+      plural: 'are already committed in this window',
+      fix: 'moving the window',
+    },
+    exposure_ok: {
+      says: 'Seen recently',
+      plural: 'have audited this charity too recently',
+      fix: 'accepting the exposure and overriding',
+    },
+    no_conflict: {
+      says: 'Conflicted',
+      plural: 'have declared a conflict',
+      fix: 'nothing — a declared conflict is not overridable',
+    },
+  };
 
 export interface Considered {
   eligible: boolean;

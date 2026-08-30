@@ -62,7 +62,9 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
     ? await Promise.all([
         supabase
           .from('check_result')
-          .select('id, outcome, note, occurred_at, check_definition(id, moment, prompt, is_critical)')
+          .select(
+            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, is_critical)',
+          )
           .eq('audit_id', complaint.audit_id)
           .neq('outcome', 'pass')
           .order('occurred_at', { ascending: false }),
@@ -150,7 +152,14 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
                       </span>
                       {definition.is_critical ? ' · critical' : ''}
                     </div>
-                    <p style={{ margin: '0 0 6px', fontSize: 13.5, fontWeight: 600, lineHeight: 1.4 }}>
+                    <p
+                      style={{
+                        margin: '0 0 6px',
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        lineHeight: 1.4,
+                      }}
+                    >
                       {definition.prompt}
                     </p>
                     {row.note ? (
@@ -176,7 +185,15 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
                   key={observation.id}
                   style={{ display: 'flex', gap: 14, ...card, padding: '10px 16px' }}
                 >
-                  <span style={{ fontFamily: mono, fontSize: 11, color: color.muted, flex: 'none', width: 46 }}>
+                  <span
+                    style={{
+                      fontFamily: mono,
+                      fontSize: 11,
+                      color: color.muted,
+                      flex: 'none',
+                      width: 46,
+                    }}
+                  >
                     {new Date(observation.occurred_at).toLocaleTimeString('en-GB', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -189,7 +206,8 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
                     style={{
                       ...bodyText,
                       flexGrow: 1,
-                      color: observation.severity === 'wrong' ? color.creativeText : color.bodyBrown,
+                      color:
+                        observation.severity === 'wrong' ? color.creativeText : color.bodyBrown,
                     }}
                   >
                     {observation.body}

@@ -139,15 +139,15 @@ export default async function AuditorsPage() {
           auditors={onNetwork
             .filter((a) => a.approval_status !== 'pending')
             .map((a) => ({
-            auditorId: a.auditor_id,
-            fullName: a.full_name,
-            approvalStatus: a.approval_status,
-            basePostcode: a.base_postcode,
-            avCapable: a.av_capable,
-            areas: a.areas,
-            methodologies: a.audit_types.map((t) => AUDIT_TYPE_LABELS[t]),
-            auditsCompleted: a.audits_completed,
-            openConflicts: a.open_conflicts,
+              auditorId: a.auditor_id,
+              fullName: a.full_name,
+              approvalStatus: a.approval_status,
+              basePostcode: a.base_postcode,
+              avCapable: a.av_capable,
+              areas: a.areas,
+              methodologies: a.audit_types.map((t) => AUDIT_TYPE_LABELS[t]),
+              auditsCompleted: a.audits_completed,
+              openConflicts: a.open_conflicts,
             }))}
           actions={(auditor) => (
             <AuditorActions auditorId={auditor.auditorId} status={auditor.approvalStatus} />

@@ -43,26 +43,31 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
   if (!audit) notFound();
 
-  const [{ data: results }, { data: gate }, { data: organisation }, { count: queueSize }, { data: observations }] =
-    await Promise.all([
-      supabase
-        .from('check_result')
-        .select(
-          'id, outcome, note, occurred_at, check_definition(id, moment, prompt, sort_order, is_critical, client_finding)',
-        )
-        .eq('audit_id', id)
-        .order('occurred_at', { ascending: false }),
-      supabase.rpc('review_gate_reason', { p_audit_id: id }),
-      supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
-      supabase.from('audit').select('id', { count: 'exact', head: true }).eq('status', 'in_review'),
-      // What the auditor logged during the shift. Append-only evidence, so
-      // this is read in the order it happened and never edited here.
-      supabase
-        .from('observation_log')
-        .select('id, kind, moment, body, severity, occurred_at')
-        .eq('audit_id', id)
-        .order('occurred_at', { ascending: true }),
-    ]);
+  const [
+    { data: results },
+    { data: gate },
+    { data: organisation },
+    { count: queueSize },
+    { data: observations },
+  ] = await Promise.all([
+    supabase
+      .from('check_result')
+      .select(
+        'id, outcome, note, occurred_at, check_definition(id, moment, prompt, sort_order, is_critical, client_finding)',
+      )
+      .eq('audit_id', id)
+      .order('occurred_at', { ascending: false }),
+    supabase.rpc('review_gate_reason', { p_audit_id: id }),
+    supabase.from('organisation').select('name').eq('id', audit.client_organisation_id).single(),
+    supabase.from('audit').select('id', { count: 'exact', head: true }).eq('status', 'in_review'),
+    // What the auditor logged during the shift. Append-only evidence, so
+    // this is read in the order it happened and never edited here.
+    supabase
+      .from('observation_log')
+      .select('id, kind, moment, body, severity, occurred_at')
+      .eq('audit_id', id)
+      .order('occurred_at', { ascending: true }),
+  ]);
 
   // check_result is append-only, so the newest row per check is the current
   // one — the query orders by occurred_at descending and the first wins.
@@ -115,9 +120,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
         <Lede
           tone="attention"
-          meta={breaches > 0 ? `${breaches} of ${total} a breach` : `${total} checks, none a breach`}
+          meta={
+            breaches > 0 ? `${breaches} of ${total} a breach` : `${total} checks, none a breach`
+          }
           headline={
-            typeof gate === 'string' && gate ? gate : 'Held for review before it reaches the charity.'
+            typeof gate === 'string' && gate
+              ? gate
+              : 'Held for review before it reaches the charity.'
           }
           detail="Client release only — the auditor was paid on submission and is not waiting on you."
         />
@@ -197,7 +206,14 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                     {/* The auditor's own question, so a reviewer judges the
                         answer against what was asked — not against the
                         charity-facing sentence, which is a different job. */}
-                    <p style={{ margin: '0 0 6px', fontSize: 13.5, fontWeight: 600, lineHeight: 1.4 }}>
+                    <p
+                      style={{
+                        margin: '0 0 6px',
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        lineHeight: 1.4,
+                      }}
+                    >
                       {exception.prompt}
                     </p>
                     {exception.note ? (
@@ -257,7 +273,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                         style={{
                           ...bodyText,
                           flexGrow: 1,
-                          color: observation.severity === 'wrong' ? color.creativeText : color.bodyBrown,
+                          color:
+                            observation.severity === 'wrong' ? color.creativeText : color.bodyBrown,
                         }}
                       >
                         {observation.body}

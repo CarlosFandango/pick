@@ -131,9 +131,7 @@ export function opsLede(items: readonly OpsItem[], now: Date): Lede {
     // The detail names WHY today is not routine, rather than repeating the
     // top of the queue that sits directly underneath it. When nothing is
     // overdue there is no why, and the sentence stops.
-    detail: overdue.length
-      ? `${describe(overdue.slice(0, 2))}.`
-      : '',
+    detail: overdue.length ? `${describe(overdue.slice(0, 2))}.` : '',
   };
 }
 
@@ -165,11 +163,24 @@ function describe(items: readonly OpsItem[]): string {
     const title = OPS_PRESENTATION[item.kind].title;
     return `${title.charAt(0).toLowerCase()}${title.slice(1)} — ${item.reference}`;
   });
-  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}` : parts[0];
+  const joined =
+    parts.length > 1 ? `${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}` : parts[0];
   return `${(joined ?? '').charAt(0).toUpperCase()}${(joined ?? '').slice(1)}`;
 }
 
 function spellOut(n: number): string {
-  const words = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  const words = [
+    'No',
+    'One',
+    'Two',
+    'Three',
+    'Four',
+    'Five',
+    'Six',
+    'Seven',
+    'Eight',
+    'Nine',
+    'Ten',
+  ];
   return words[n] ?? String(n);
 }

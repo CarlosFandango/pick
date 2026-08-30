@@ -125,7 +125,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   const score = scoreAudit(
     // `guidance` is auditor-facing and never fetched for a report, but the
     // scoring type expects the whole definition.
-    rows.flatMap((row) => (row.check_definition ? [{ ...row.check_definition, guidance: null }] : [])),
+    rows.flatMap((row) =>
+      row.check_definition ? [{ ...row.check_definition, guidance: null }] : [],
+    ),
     rows.map((row) => ({
       id: row.id,
       check_definition_id: row.check_definition?.id ?? '',

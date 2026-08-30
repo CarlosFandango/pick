@@ -121,7 +121,13 @@ export function SequenceCard({
     >
       {meta ? (
         <div
-          style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 7, flexWrap: 'wrap' }}
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 10,
+            marginBottom: 7,
+            flexWrap: 'wrap',
+          }}
         >
           {meta}
         </div>

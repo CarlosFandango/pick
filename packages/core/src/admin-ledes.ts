@@ -128,9 +128,7 @@ export function clientsLede(input: {
         runningLow.length === 1
           ? 'One charity will run out of credits after their next booking.'
           : `${runningLow.length} charities are close to running out of credits.`,
-      detail: first
-        ? `${first.name} has ${first.balance === 1 ? 'one' : first.balance} left.`
-        : '',
+      detail: first ? `${first.name} has ${first.balance === 1 ? 'one' : first.balance} left.` : '',
     };
   }
 

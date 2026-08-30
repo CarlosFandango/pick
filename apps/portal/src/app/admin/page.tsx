@@ -69,7 +69,16 @@ export default async function OpsHomePage() {
             <div style={{ ...metaLabel, marginBottom: 8 }}>
               Worst first · clear this list and the day is done
             </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
               {items.map((item, i) => {
                 const presentation = OPS_PRESENTATION[item.kind];
                 const overdue = isOverdue(item, now);
@@ -87,7 +96,7 @@ export default async function OpsHomePage() {
                       // The rail is the only place overdue is stated at full
                       // strength; the chip beside it carries the word, because
                       // colour on its own is not a message.
-                      borderLeft: `3px solid ${overdue ? color.creativeText : tone?.fill ?? color.oat}`,
+                      borderLeft: `3px solid ${overdue ? color.creativeText : (tone?.fill ?? color.oat)}`,
                       borderRadius: radius.tile,
                       padding: '13px 18px',
                     }}
@@ -103,7 +112,14 @@ export default async function OpsHomePage() {
                       {overdue ? 'Overdue' : waitingFor(item, now) || presentation.chip}
                     </span>
                     <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ display: 'block', fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em' }}>
+                      <span
+                        style={{
+                          display: 'block',
+                          fontSize: 14,
+                          fontWeight: 600,
+                          letterSpacing: '-0.01em',
+                        }}
+                      >
                         {presentation.title}
                       </span>
                       <span style={{ ...bodyText, display: 'block', fontSize: 12.5 }}>

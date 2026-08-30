@@ -15,9 +15,7 @@ const RELEASED = '00000000-0000-7000-8000-0000000a0f01';
  * the shared fixture: other suites count the audits they can see, and a third
  * one appearing globally would change what they assert without saying why.
  */
-const arrangeReleased = async (
-  db: Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>,
-) => {
+const arrangeReleased = async (db: Awaited<Parameters<Parameters<typeof withDatabase>[0]>[0]>) => {
   await db.arrange(
     `insert into audit (id, client_organisation_id, auditor_id, status, postcode, place_id)
      values ($1, $2, $3, 'released', 'SW1A 1AA',

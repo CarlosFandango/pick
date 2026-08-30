@@ -232,7 +232,9 @@ export function CoverageChooser({
                     style={{ width: 17, height: 17, accentColor: color.teal }}
                   />
                   <span style={{ flexGrow: 1, minWidth: 0 }}>
-                    <span style={{ display: 'block', fontFamily: sans, fontSize: 14, fontWeight: 600 }}>
+                    <span
+                      style={{ display: 'block', fontFamily: sans, fontSize: 14, fontWeight: 600 }}
+                    >
                       {place.name}
                     </span>
                     <span style={{ ...bodyText, display: 'block', fontSize: 11.5 }}>

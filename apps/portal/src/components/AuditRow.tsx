@@ -32,7 +32,14 @@ const TONE = {
   attention: color.creativeText,
 } as const;
 
-export function AuditRow({ href, state, title, subtitle, trailing, tone = 'neutral' }: AuditRowProps) {
+export function AuditRow({
+  href,
+  state,
+  title,
+  subtitle,
+  trailing,
+  tone = 'neutral',
+}: AuditRowProps) {
   return (
     <Link
       href={href}
