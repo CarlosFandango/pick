@@ -931,7 +931,7 @@ $$;
 ALTER FUNCTION "public"."approve_payout_run"("p_run_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RETURNS TABLE("auditor_id" "uuid", "eligible" boolean, "reasons" "text"[], "warnings" "public"."eligibility_flag"[], "offer_state" "text")
+CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RETURNS TABLE("auditor_id" "uuid", "eligible" boolean, "reasons" "text"[], "warnings" "public"."eligibility_flag"[], "offer_state" "text", "approved" boolean, "reachable" boolean, "capable" boolean, "available" boolean, "exposure_ok" boolean, "no_conflict" boolean, "av_ok" boolean)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -992,7 +992,14 @@ CREATE OR REPLACE FUNCTION "public"."assignment_console"("p_audit_id" "uuid") RE
     ], null),
     case when familiar and exposure_ok then array['familiarity']::public.eligibility_flag[]
          else '{}'::public.eligibility_flag[] end,
-    offer_state
+    offer_state,
+    approved,
+    reachable,
+    capable,
+    available,
+    exposure_ok,
+    no_conflict,
+    av_ok
   from assessed
   order by 2 desc, 1;
 $$;

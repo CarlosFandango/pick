@@ -4,6 +4,7 @@ export * from './credits';
 export * from './dashboard';
 export * from './dates';
 export * from './earnings';
+export * from './eligibility';
 export * from './entities';
 export * from './features';
 export * from './ids';

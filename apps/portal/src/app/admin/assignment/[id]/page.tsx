@@ -1,19 +1,36 @@
-import { AUDIT_TYPE_LABELS } from '@picksel/core';
+import {
+  assignmentLede,
+  AUDIT_TYPE_LABELS,
+  type Considered,
+  ELIGIBILITY_TESTS,
+  passes,
+  TEST_FAILURES,
+  TEST_LABELS,
+} from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { notFound } from 'next/navigation';
 import { AdminChrome } from '@/components/AdminChrome';
 import { BackLink } from '@/components/BackLink';
+import { Lede } from '@/components/Lede';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
-import { hairline, metaLabel, mono } from '@/lib/theme';
+import { adminPage, bodyText, hairline, metaLabel, mono } from '@/lib/theme';
 import { OfferButton } from './OfferButton';
 
 /**
  * S4.2 — the assignment console.
  *
- * The algorithm shows its work: everyone considered, and the reason each was
- * set aside. An operator asking why an audit has not been taken gets an
- * answer, not a shorter list.
+ * The algorithm shows its work: everyone considered, and which of the six
+ * tests each one failed.
+ *
+ * THE ONE SCREEN IN THE DROP THAT GETS A TABLE. The verdict-first pattern
+ * needs the content to have a real order, and six independent eligibility
+ * rules have none — there is no chronology to read down. Forcing a timeline
+ * onto them would be worse than the flat list this replaces.
+ *
+ * What the columns buy: five auditors each failing the SAME test is a fact
+ * about the network — nobody covers this place — and it was invisible when
+ * every row read as its own sentence of excuses.
  */
 export default async function AssignmentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,13 +51,27 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
 
   const rows = pool ?? [];
   const eligible = rows.filter((row) => row.eligible);
+  const considered: (Considered & { auditorId: string; offerState: string | null })[] = rows.map(
+    (row) => ({
+      auditorId: row.auditor_id,
+      offerState: row.offer_state,
+      eligible: row.eligible,
+      approved: row.approved,
+      reachable: row.reachable,
+      capable: row.capable,
+      available: row.available,
+      exposureOk: row.exposure_ok,
+      noConflict: row.no_conflict,
+    }),
+  );
+  const offered = rows.filter((row) => row.offer_state === 'offered').length;
 
   return (
     <AdminChrome
       who={session.fullName}
       queuePosition={`ASSIGNMENT · ${audit.reference} · ${audit.postcode}`}
     >
-      <div style={{ padding: '22px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={adminPage}>
         <BackLink href="/admin" label="Ops home" />
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
@@ -58,70 +89,83 @@ export default async function AssignmentPage({ params }: { params: Promise<{ id:
 
         {audit.status === 'booked' ? <OfferButton auditId={audit.id} /> : null}
 
-        <section
-          style={{
-            background: color.paper,
-            border: hairline,
-            borderRadius: radius.tile,
-            padding: '16px 20px',
-          }}
-        >
-          <h2 style={{ ...metaLabel, margin: '0 0 10px' }}>
-            Eligible pool — and who was set aside
-          </h2>
+        <Lede {...assignmentLede(considered, offered)} />
 
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {rows.map((row, i) => (
-              <li
-                key={row.auditor_id}
-                style={{
-                  display: 'flex',
-                  gap: 14,
-                  alignItems: 'flex-start',
-                  padding: '11px 0',
-                  borderBottom: i < rows.length - 1 ? hairline : 'none',
-                  fontSize: 13,
-                  opacity: row.eligible ? 1 : 0.75,
-                }}
-              >
-                <span
-                  style={{
-                    background: row.eligible ? color.teal : 'transparent',
-                    border: row.eligible ? 'none' : hairline,
-                    borderRadius: radius.pill,
-                    padding: '4px 10px',
-                    fontFamily: mono,
-                    fontSize: 9.5,
-                    letterSpacing: '0.1em',
-                    color: row.eligible ? color.bone : color.muted,
-                    flex: 'none',
-                  }}
-                >
-                  {row.eligible ? 'ELIGIBLE' : 'SET ASIDE'}
-                </span>
+        <section>
+          <div style={{ ...metaLabel, marginBottom: 4 }}>Everyone considered, and why</div>
+          <p style={{ ...bodyText, margin: '0 0 12px', maxWidth: '68ch' }}>
+            Six independent tests. An auditor has to pass all of them — the first column that fails
+            is the one to fix.
+          </p>
 
-                <span style={{ flex: 1 }}>
-                  <span style={{ fontFamily: mono, fontSize: 11 }}>
-                    {row.auditor_id.slice(-6).toUpperCase()}
-                  </span>
-                  {row.reasons.length > 0 ? (
-                    <span style={{ display: 'block', color: color.bodyBrown, marginTop: 2 }}>
-                      {row.reasons.join(' · ')}
-                    </span>
-                  ) : null}
-                  {row.warnings.length > 0 ? (
-                    <span style={{ display: 'block', color: color.auditingText, marginTop: 2 }}>
-                      {row.warnings.join(', ')}
-                    </span>
-                  ) : null}
-                </span>
-
-                {row.offer_state ? (
-                  <span style={{ ...metaLabel, color: color.bodyBrown }}>{row.offer_state}</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          <div style={{ overflowX: 'auto' }}>
+            <table
+              style={{
+                width: '100%',
+                minWidth: 760,
+                borderCollapse: 'collapse',
+                fontSize: 13,
+                textAlign: 'left',
+              }}
+            >
+              <thead>
+                <tr>
+                  <th scope="col" style={{ ...metaLabel, padding: '0 12px 8px 0' }}>
+                    Auditor
+                  </th>
+                  {ELIGIBILITY_TESTS.map((test) => (
+                    <th key={test} scope="col" style={{ ...metaLabel, padding: '0 12px 8px 0' }}>
+                      {TEST_LABELS[test]}
+                    </th>
+                  ))}
+                  <th scope="col" style={{ ...metaLabel, padding: '0 0 8px' }}>
+                    <span style={{ position: 'absolute', left: -9999 }}>Action</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {considered.map((row) => (
+                  <tr key={row.auditorId} style={{ borderTop: hairline }}>
+                    <td style={{ padding: '11px 12px 11px 0', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontFamily: mono, fontSize: 11.5 }}>
+                        {row.auditorId.slice(-6).toUpperCase()}
+                      </span>
+                    </td>
+                    {ELIGIBILITY_TESTS.map((test) => {
+                      const ok = passes(row, test);
+                      return (
+                        <td key={test} style={{ padding: '11px 12px 11px 0' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              border: `1px solid ${ok ? color.oat : color.creativeText}`,
+                              background: ok ? 'transparent' : color.paper,
+                              color: ok ? color.muted : color.creativeText,
+                              borderRadius: radius.pill,
+                              padding: '3px 10px',
+                              fontFamily: mono,
+                              fontSize: 10,
+                              letterSpacing: '0.06em',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {ok ? 'Yes' : TEST_FAILURES[test].says}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td style={{ padding: '11px 0', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {row.offerState ? (
+                        <span style={{ ...metaLabel }}>{row.offerState}</span>
+                      ) : row.eligible ? (
+                        <span style={{ ...metaLabel, color: color.teal }}>Eligible</span>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </AdminChrome>

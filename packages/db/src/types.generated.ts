@@ -1687,9 +1687,16 @@ export type Database = {
       assignment_console: {
         Args: { p_audit_id: string }
         Returns: {
+          approved: boolean
           auditor_id: string
+          av_ok: boolean
+          available: boolean
+          capable: boolean
           eligible: boolean
+          exposure_ok: boolean
+          no_conflict: boolean
           offer_state: string
+          reachable: boolean
           reasons: string[]
           warnings: Database["public"]["Enums"]["eligibility_flag"][]
         }[]
