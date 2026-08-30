@@ -25,8 +25,13 @@
       "Bash(pnpm check:secrets:*)",
       "Bash(pnpm db:types:*)",
       "Bash(pnpm db:schema:*)",
-      "Bash(pnpm db:generate:*)"
+      "Bash(pnpm db:generate:*)",
+      "Bash(git push origin main)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)"
     ]
   },
-  "enabledMcpjsonServers": ["linear"]
+  "enabledMcpjsonServers": [
+    "linear"
+  ]
 }
