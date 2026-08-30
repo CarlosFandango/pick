@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { AuditorApplicationForm } from '@/components/AuditorApplicationForm';
 import { supabaseServer } from '@/lib/supabase';
 import { bodyText, hairline, metaLabel, pageTitle, sans } from '@/lib/theme';
-import { completeProfile } from './actions';
+import { completeProfile, proposePlaces } from './actions';
 
 /**
  * S5.2 — the first thing a new auditor sees.
@@ -53,7 +53,7 @@ export default async function WelcomePage() {
           border: hairline,
           borderRadius: radius.tile,
           padding: 34,
-          maxWidth: 560,
+          maxWidth: 720,
           width: '100%',
           marginTop: 40,
         }}
@@ -65,6 +65,7 @@ export default async function WelcomePage() {
 
         <AuditorApplicationForm
           action={completeProfile}
+          propose={proposePlaces}
           email={profile.email}
           places={places ?? []}
         />

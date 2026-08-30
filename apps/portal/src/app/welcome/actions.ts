@@ -6,6 +6,32 @@ import type { ApplicationState } from '@/components/AuditorApplicationForm';
 import { supabaseServer } from '@/lib/supabase';
 
 /**
+ * The places within reach of a starting point.
+ *
+ * A thin wrapper over `places_within_reach` so the geometry stays in the
+ * database and the form can ask for a new proposal as the auditor changes
+ * their mind. Read-only, scoped by the caller's own session, and it proposes
+ * — what gets stored is whatever they confirm.
+ */
+export async function proposePlaces(
+  basePlaceId: string,
+  minutes: number,
+  mode: string,
+): Promise<{ id: string; name: string; minutes: number }[]> {
+  const supabase = await supabaseServer();
+  const { data } = await supabase.rpc('places_within_reach', {
+    p_place_id: basePlaceId,
+    p_minutes: minutes,
+    p_mode: mode as never,
+  });
+  return (data ?? []).map((row) => ({
+    id: row.place_id,
+    name: row.name,
+    minutes: Math.round(row.minutes),
+  }));
+}
+
+/**
  * Accepting an invitation.
  *
  * Runs as the signed-in invitee, not the service role: `complete_auditor_profile`

@@ -3,6 +3,7 @@
 import { AUDIT_TYPE_LABELS } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState } from 'react';
+import { CoverageChooser, type Place, type ReachablePlace } from '@/components/CoverageChooser';
 import { bodyText, hairline, metaLabel, pillButton, sans } from '@/lib/theme';
 
 export interface ApplicationState {
@@ -16,23 +17,20 @@ export interface ApplicationState {
  * ask exactly these questions. When that arrives it renders this and passes a
  * different action; nothing here needs to know which door someone came in by.
  *
- * Coverage is area letters, and the field says so — an auditor who types
- * "SW1A" would be accepted by nothing and offered nothing, with no error to
- * explain the silence.
+ * Coverage is a place, a number of minutes and a mode of travel — never a
+ * postcode area. See CoverageChooser for why that took three attempts.
  */
-export interface PlaceOption {
-  id: string;
-  name: string;
-  region: string | null;
-}
+export type PlaceOption = Place;
 
 export function AuditorApplicationForm({
   action,
+  propose,
   email,
   places,
   needsPassword = true,
 }: {
   action: (previous: ApplicationState, form: FormData) => Promise<ApplicationState>;
+  propose: (basePlaceId: string, minutes: number, mode: string) => Promise<ReachablePlace[]>;
   email: string;
   places: PlaceOption[];
   needsPassword?: boolean;
@@ -68,19 +66,7 @@ export function AuditorApplicationForm({
         <input type="text" name="full_name" required style={field} />
       </label>
 
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={metaLabel}>Where you set out from</span>
-        <input type="text" name="base_postcode" required placeholder="SW1A 1AA" style={field} />
-      </label>
-
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={metaLabel}>Postcode areas you cover</span>
-        <input type="text" name="areas" required placeholder="SW, EC, N" style={field} />
-        <span style={{ ...bodyText }}>
-          Letters only, separated by commas — SW, not SW1A. This is what decides which audits reach
-          you.
-        </span>
-      </label>
+      <CoverageChooser places={places} propose={propose} />
 
       <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
         <legend style={{ ...metaLabel, padding: 0 }}>What you can run</legend>
