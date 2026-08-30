@@ -2,7 +2,7 @@ import { color, radius, space } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { formatMoney, type PayLine, payBreakdown, totalMinorUnits } from '@/format/money';
 import { expiresIn, offerArea, windowLabel } from '@/format/offer';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 export interface OfferView {
   auditTypeLabel: string;
@@ -38,15 +38,15 @@ export function OfferScreen({
   const total = totalMinorUnits(offer.pay);
 
   return (
-    <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: space.md, paddingTop: 68 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.4 }}>
+        <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
           NEW OFFER · {expiresIn(offer.expiresAt, now)}
         </Text>
 
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 26, color: color.ink, marginTop: space.sm }}
+          style={{ ...text('display'), fontSize: 26, color: surface.title, marginTop: space.sm }}
         >
           {offer.auditTypeLabel}
         </Text>
@@ -59,9 +59,9 @@ export function OfferScreen({
         <View
           style={{
             marginTop: space.lg,
-            backgroundColor: color.paper,
+            backgroundColor: surface.sheet,
             borderWidth: 1,
-            borderColor: color.oat,
+            borderColor: surface.line,
             borderRadius: radius.tile,
             padding: space.md,
             gap: space.sm,
@@ -72,7 +72,7 @@ export function OfferScreen({
             value={offerArea(offer.postcodeOutward, offer.locality)}
             hint="Exact pitch shared after accepting"
           />
-          <View style={{ borderTopWidth: 1, borderTopColor: color.oat, paddingTop: space.sm }}>
+          <View style={{ borderTopWidth: 1, borderTopColor: surface.line, paddingTop: space.sm }}>
             <Fact
               label="Date window"
               value={windowLabel(offer.windowStart, offer.windowEnd)}
@@ -89,19 +89,19 @@ export function OfferScreen({
             padding: space.md,
           }}
         >
-          <Text style={{ ...text('caption'), color: color.onDarkMuted, letterSpacing: 1.4 }}>
+          <Text style={{ ...text('caption'), color: surface.body, letterSpacing: 1.4 }}>
             TOTAL PAY
           </Text>
           <Text
             accessibilityLabel={`Total pay ${formatMoney(total)}`}
-            style={{ ...text('display'), fontSize: 34, color: color.onDark, marginTop: 6 }}
+            style={{ ...text('display'), fontSize: 34, color: surface.title, marginTop: 6 }}
           >
             {formatMoney(total)}
           </Text>
-          <Text style={{ ...text('caption'), color: color.onDarkMuted, marginTop: 6 }}>
+          <Text style={{ ...text('caption'), color: surface.body, marginTop: 6 }}>
             {payBreakdown(offer.pay)}
           </Text>
-          <Text style={{ ...text('caption'), color: color.onDarkMuted }}>
+          <Text style={{ ...text('caption'), color: surface.body }}>
             Shown in full before you accept.
           </Text>
         </View>
@@ -119,16 +119,22 @@ export function OfferScreen({
               opacity: busy ? 0.5 : 1,
             }}
           >
-            <Text style={{ ...text('title'), fontSize: 15, color: color.bone }}>Accept offer</Text>
+            <Text style={{ ...text('title'), fontSize: 15, color: surface.onAccent }}>
+              Accept offer
+            </Text>
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
             disabled={busy}
             onPress={onDecline}
-            style={{ alignSelf: 'center', borderBottomWidth: 1.5, borderBottomColor: color.ink }}
+            style={{
+              alignSelf: 'center',
+              borderBottomWidth: 1.5,
+              borderBottomColor: surface.title,
+            }}
           >
-            <Text style={{ ...text('body'), fontWeight: '600', color: color.ink }}>
+            <Text style={{ ...text('body'), fontWeight: '600', color: surface.title }}>
               Not this time
             </Text>
           </Pressable>
@@ -144,7 +150,7 @@ function Chip({ label, fill, ink }: { label: string; fill?: string; ink?: string
       style={{
         backgroundColor: fill ?? 'transparent',
         borderWidth: fill ? 0 : 1,
-        borderColor: color.oat,
+        borderColor: surface.line,
         borderRadius: radius.pill,
         paddingVertical: 5,
         paddingHorizontal: 11,
@@ -155,7 +161,7 @@ function Chip({ label, fill, ink }: { label: string; fill?: string; ink?: string
           ...text('caption'),
           fontSize: 9.5,
           letterSpacing: 1,
-          color: ink ?? color.bodyBrown,
+          color: ink ?? surface.body,
         }}
       >
         {label.toUpperCase()}
@@ -167,13 +173,13 @@ function Chip({ label, fill, ink }: { label: string; fill?: string; ink?: string
 function Fact({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     <View>
-      <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.2 }}>
+      <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.2 }}>
         {label.toUpperCase()}
       </Text>
-      <Text style={{ ...text('title'), fontSize: 16, color: color.ink, marginTop: 3 }}>
+      <Text style={{ ...text('title'), fontSize: 16, color: surface.title, marginTop: 3 }}>
         {value}
       </Text>
-      <Text style={{ ...text('caption'), color: color.muted, marginTop: 2 }}>{hint}</Text>
+      <Text style={{ ...text('caption'), color: surface.muted, marginTop: 2 }}>{hint}</Text>
     </View>
   );
 }

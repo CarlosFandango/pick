@@ -11,7 +11,7 @@ import {
 } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 const VERDICTS: Verdict[] = ['pass', 'fail', 'note'];
 
@@ -48,7 +48,7 @@ export function WriteUpScreen({
   onSubmit: () => void;
 }) {
   return (
-    <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 66 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: space.md, paddingTop: 66 }}>
       <View
         style={{
           backgroundColor: color.navy,
@@ -59,11 +59,11 @@ export function WriteUpScreen({
           justifyContent: 'space-between',
         }}
       >
-        <Text style={{ ...text('caption'), color: color.onDarkMuted, letterSpacing: 1.2 }}>
+        <Text style={{ ...text('caption'), color: surface.body, letterSpacing: 1.2 }}>
           {DRAFT_LABELS[writeUp.state]}
         </Text>
         {savedAt ? (
-          <Text style={{ ...text('caption'), color: color.onDarkMuted, letterSpacing: 1.2 }}>
+          <Text style={{ ...text('caption'), color: surface.body, letterSpacing: 1.2 }}>
             AUTOSAVED {clockTime(savedAt)}
           </Text>
         ) : null}
@@ -71,7 +71,7 @@ export function WriteUpScreen({
 
       <Text
         accessibilityRole="header"
-        style={{ ...text('display'), fontSize: 22, color: color.ink, marginTop: 12 }}
+        style={{ ...text('display'), fontSize: 22, color: surface.title, marginTop: 12 }}
       >
         {title}
       </Text>
@@ -95,7 +95,9 @@ export function WriteUpScreen({
         onPress={onSubmit}
         style={{
           marginTop: 12,
-          backgroundColor: writeUp.canSubmit ? color.teal : color.oat,
+          backgroundColor: writeUp.canSubmit ? surface.accent : 'transparent',
+          borderWidth: writeUp.canSubmit ? 0 : 1,
+          borderColor: surface.line,
           borderRadius: radius.pill,
           paddingVertical: 16,
           alignItems: 'center',
@@ -107,7 +109,7 @@ export function WriteUpScreen({
           style={{
             ...text('title'),
             fontSize: 15,
-            color: writeUp.canSubmit ? color.bone : color.paper,
+            color: writeUp.canSubmit ? surface.onAccent : surface.muted,
           }}
         >
           {submitLabel(writeUp)}
@@ -135,26 +137,33 @@ function MomentBlock({
   return (
     <View
       style={{
-        backgroundColor: color.paper,
+        backgroundColor: surface.sheet,
         borderWidth: expanded ? 2 : 1,
-        borderColor: expanded ? color.auditing : color.oat,
+        borderColor: expanded ? surface.warn : surface.line,
         borderRadius: radius.tile,
         padding: 14,
         gap: expanded ? 12 : 0,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Text style={{ ...text('caption'), color: color.muted }}>
+        <Text style={{ ...text('caption'), color: surface.muted }}>
           {String(moment.index).padStart(2, '0')}
         </Text>
-        <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>
+        <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>
           {MOMENT_LABELS[moment.moment]}
         </Text>
         <Text
           style={{
             ...text('caption'),
             marginLeft: 'auto',
-            color: moment.counts.fail > 0 ? color.creativeText : color.teal,
+            // Nothing answered yet is not a pass. An unstarted moment reading
+            // in the same colour as a clean one is the sort of thing an
+            // auditor glances at once and gets wrong.
+            color: !moment.complete
+              ? surface.muted
+              : moment.counts.fail > 0
+                ? surface.fail
+                : surface.pass,
           }}
         >
           {momentSummary(moment)}
@@ -165,13 +174,13 @@ function MomentBlock({
             accessibilityLabel={`Edit ${MOMENT_LABELS[moment.moment]}`}
             onPress={onOpen}
           >
-            <Text style={{ ...text('caption'), color: color.link, letterSpacing: 1 }}>EDIT</Text>
+            <Text style={{ ...text('caption'), color: surface.link, letterSpacing: 1 }}>EDIT</Text>
           </Pressable>
         ) : null}
       </View>
 
       {moment.markers.length > 0 && expanded ? (
-        <Text style={{ ...text('caption'), color: color.auditingText }}>
+        <Text style={{ ...text('caption'), color: surface.warn }}>
           {moment.markers.map((m) => `MARKER ${clockTime(m)}`).join(' · ')}
         </Text>
       ) : null}
@@ -182,7 +191,9 @@ function MomentBlock({
             return (
               <View key={check.id} style={{ gap: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Text style={{ ...text('body'), fontWeight: '600', flex: 1, color: color.ink }}>
+                  <Text
+                    style={{ ...text('body'), fontWeight: '600', flex: 1, color: surface.title }}
+                  >
                     {check.prompt}
                   </Text>
                   <View
@@ -190,7 +201,7 @@ function MomentBlock({
                     style={{
                       flexDirection: 'row',
                       borderWidth: 1,
-                      borderColor: color.oat,
+                      borderColor: surface.line,
                       borderRadius: radius.pill,
                       overflow: 'hidden',
                     }}
@@ -212,7 +223,7 @@ function MomentBlock({
                           <Text
                             style={{
                               ...text('caption'),
-                              color: selected ? color.bone : color.muted,
+                              color: selected ? surface.onAccent : surface.muted,
                             }}
                           >
                             {verdict.toUpperCase()}
@@ -231,12 +242,12 @@ function MomentBlock({
                   multiline
                   style={{
                     borderWidth: 1,
-                    borderColor: color.oat,
-                    backgroundColor: color.bone,
+                    borderColor: surface.line,
+                    backgroundColor: surface.ground,
                     borderRadius: 4,
                     padding: 12,
                     fontSize: 12.5,
-                    color: color.bodyBrown,
+                    color: surface.body,
                   }}
                 />
               </View>

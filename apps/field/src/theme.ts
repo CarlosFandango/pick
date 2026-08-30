@@ -30,3 +30,5 @@ const PLATFORM: FontPlatform = Platform.OS === 'android' ? 'android' : 'ios';
 export function text(role: TextRole): ResolvedTextStyle {
   return nativeTextStyle(role, PLATFORM);
 }
+
+export { surface } from './surface';

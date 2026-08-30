@@ -2,7 +2,7 @@ import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /**
  * Scaffolding, not a designed screen.
@@ -31,13 +31,13 @@ export default function SignIn() {
     <View
       style={{
         flex: 1,
-        backgroundColor: color.fieldBg,
+        backgroundColor: surface.ground,
         padding: 24,
         justifyContent: 'center',
         gap: space.md,
       }}
     >
-      <Text style={{ ...text('title'), color: color.onDark, letterSpacing: 2 }}>PICKSEL</Text>
+      <Text style={{ ...text('title'), color: surface.title, letterSpacing: 2 }}>PICKSEL</Text>
 
       <TextInput
         accessibilityLabel="Email"
@@ -77,7 +77,7 @@ export default function SignIn() {
           opacity: busy ? 0.5 : 1,
         }}
       >
-        <Text style={{ ...text('title'), fontSize: 15, color: color.onDark }}>
+        <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>
           {busy ? 'Signing in…' : 'Sign in'}
         </Text>
       </Pressable>
@@ -87,9 +87,9 @@ export default function SignIn() {
 
 const field = {
   borderWidth: 1,
-  borderColor: color.fieldDim,
+  borderColor: surface.line,
   borderRadius: radius.tile,
   padding: space.md,
-  color: color.onDark,
+  color: surface.title,
   minHeight: touchTarget.comfortable,
 } as const;

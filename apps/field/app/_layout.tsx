@@ -1,9 +1,8 @@
-import { color, pickselDark, pickselLight } from '@picksel/tokens';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import { AuthProvider, useAuth } from '@/lib/session';
+import { surface } from '@/theme';
 
 /**
  * Sends an auditor to sign in, and only once we know they are not already.
@@ -32,13 +31,16 @@ function AuthGate() {
 
 /** Headers match the field surface: this app is read on a street, at night. */
 const darkHeader = {
-  headerStyle: { backgroundColor: color.fieldSheet },
-  headerTintColor: color.onDark,
+  headerStyle: { backgroundColor: surface.sheet },
+  headerTintColor: surface.title,
   headerShadowVisible: false,
 } as const;
 
 export default function RootLayout() {
-  const { colors } = useColorScheme() === 'dark' ? pickselDark : pickselLight;
+  // The field app does not follow the device scheme. It is dark because an
+  // auditor is running a mystery shop and a bright screen is conspicuous —
+  // see `surface` for the whole argument. Following the OS would put half of
+  // them on a white page in the one situation where that matters most.
 
   return (
     <AuthProvider>
@@ -55,7 +57,7 @@ export default function RootLayout() {
           // The default header titles each screen after its filename ("index").
           // Screens that need one set it explicitly.
           headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: surface.ground },
         }}
       >
         {/*

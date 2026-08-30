@@ -211,12 +211,23 @@ component library (react-native-web or similar) — one `<Button>` for both woul
 need an abstraction over two genuinely different rendering models, and every
 component would pay for it forever to save duplicating a handful of small views.
 
-## 2026-08-25 — success/danger separated in luminance, not just hue
-Verified by test: red-green is the common colour-blindness pair and this is a
-pass/fail product, so the two must differ in greyscale. Palette values were
-chosen by searching for pairs that also keep AA text contrast on the fill.
-*Rejected:* the original palette — it looked right and had a 1.04 contrast ratio
-between pass and fail, i.e. indistinguishable without colour.
+## 2026-08-25 — success and danger are NOT separable in greyscale, and that is mitigated in components
+Corrected 2026-08-30. This entry previously claimed the opposite — that the two
+were separated in luminance and that a test verified it. The test says the
+reverse and always has: `packages/tokens/test/theme.test.ts` asserts
+`contrast(success, danger) < 1.5` and explains why.
+
+Red-green is the common colour-blindness pair and this is a pass/fail product,
+so greyscale separation would be the thing to want. We do not get it: teal and
+the deep creative red sit at almost the same luminance (~1.1:1 light, ~1.1:1
+field), they are the brand's own colours, and this repo does not nudge brand
+values. *So the mitigation is mandatory at the component layer* — a verdict
+always carries a word or an icon, and colour is never the message. No token
+test can enforce that; it is on whoever writes the component.
+
+The same fact is pinned for the field app in `apps/field/test/surface.test.ts`,
+so that nobody reads `surface.pass` and `surface.fail` sitting side by side and
+assumes they are distinguishable.
 
 ## 2026-08-25 — Biome instead of ESLint + Prettier
 One binary, one config, no plugin version churn. At 10–15 hrs/week, toolchain

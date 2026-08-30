@@ -12,7 +12,7 @@ import {
 } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /**
  * S1.5b — the field session, stage by stage (TND-83).
@@ -63,14 +63,14 @@ export function FieldSessionScreen({
   const running = elapsedSince(session.startedAt, session.endedAt ?? now);
 
   return (
-    <View style={{ flex: 1, backgroundColor: color.fieldBg, padding: 22, paddingTop: 68 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: 22, paddingTop: 68 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
+        <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
           {areaLabel.toUpperCase()}
         </Text>
         <Text
           accessibilityLabel={`Session running ${running}`}
-          style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}
+          style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}
         >
           {running}
         </Text>
@@ -96,7 +96,7 @@ export function FieldSessionScreen({
             <Text
               style={{
                 ...text('caption'),
-                color: row.state === 'current' ? color.auditing : color.fieldMuted,
+                color: row.state === 'current' ? surface.warn : surface.muted,
                 width: 20,
               }}
             >
@@ -121,7 +121,7 @@ export function FieldSessionScreen({
               style={{
                 ...text('caption'),
                 marginLeft: 'auto',
-                color: row.state === 'current' ? color.auditing : color.fieldMuted,
+                color: row.state === 'current' ? surface.warn : surface.muted,
                 letterSpacing: row.state === 'current' ? 1 : 0,
               }}
             >
@@ -152,17 +152,17 @@ export function FieldSessionScreen({
                 flex: 1,
                 borderRadius: radius.tile,
                 borderWidth: 1,
-                borderColor: color.fieldDim,
+                borderColor: surface.line,
                 paddingVertical: 12,
                 alignItems: 'center',
                 minHeight: touchTarget.comfortable,
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ ...text('title'), fontSize: 22, color: color.onDark }}>
+              <Text style={{ ...text('title'), fontSize: 22, color: surface.title }}>
                 {tallyCount(session, current.key, counter.key)}
               </Text>
-              <Text style={{ ...text('caption'), color: color.fieldMuted }}>{counter.label}</Text>
+              <Text style={{ ...text('caption'), color: surface.muted }}>{counter.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -170,7 +170,7 @@ export function FieldSessionScreen({
 
       {current && !allowed.tallies ? (
         <Text
-          style={{ ...text('caption'), color: color.fieldDim, marginBottom: 14, letterSpacing: 1 }}
+          style={{ ...text('caption'), color: surface.line, marginBottom: 14, letterSpacing: 1 }}
         >
           NOTHING TO RECORD NOW — WRITE IT UP AFTERWARDS
         </Text>
@@ -190,7 +190,7 @@ export function FieldSessionScreen({
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...text('title'), fontSize: 15, color: color.onDark }}>
+          <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>
             {finished ? 'END SESSION' : 'NEXT STAGE'}
           </Text>
         </Pressable>
@@ -209,7 +209,7 @@ export function FieldSessionScreen({
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...text('caption'), color: color.onDark }}>FLAG</Text>
+          <Text style={{ ...text('caption'), color: surface.title }}>FLAG</Text>
         </Pressable>
       </View>
     </View>
@@ -239,9 +239,9 @@ export function FlagSheet({
   return (
     <View
       accessibilityLabel="Flag this stage"
-      style={{ backgroundColor: color.fieldSheet, padding: space.md, gap: space.sm }}
+      style={{ backgroundColor: surface.sheet, padding: space.md, gap: space.sm }}
     >
-      <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
+      <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
         FLAG THIS STAGE
       </Text>
       {SEVERITIES.map((severity) => (
@@ -252,16 +252,16 @@ export function FlagSheet({
           style={{
             borderRadius: radius.tile,
             borderWidth: 1,
-            borderColor: color.fieldDim,
+            borderColor: surface.line,
             padding: space.md,
             minHeight: touchTarget.comfortable,
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...text('title'), fontSize: 16, color: color.onDark }}>
+          <Text style={{ ...text('title'), fontSize: 16, color: surface.title }}>
             {severity.label}
           </Text>
-          <Text style={{ ...text('caption'), color: color.fieldMuted }}>{severity.hint}</Text>
+          <Text style={{ ...text('caption'), color: surface.muted }}>{severity.hint}</Text>
         </Pressable>
       ))}
       <Pressable
@@ -269,7 +269,7 @@ export function FlagSheet({
         onPress={onCancel}
         style={{ alignSelf: 'center', padding: space.sm }}
       >
-        <Text style={{ ...text('body'), color: color.fieldMuted }}>Cancel</Text>
+        <Text style={{ ...text('body'), color: surface.muted }}>Cancel</Text>
       </Pressable>
     </View>
   );

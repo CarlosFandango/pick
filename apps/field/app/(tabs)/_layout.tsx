@@ -2,7 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { color, touchTarget } from '@picksel/tokens';
 import { Tabs } from 'expo-router';
 import { Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /**
  * The three places an auditor lives.
@@ -26,13 +26,13 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: color.fieldSheet,
-          borderTopColor: color.fieldDim,
+          backgroundColor: surface.sheet,
+          borderTopColor: surface.line,
           height: touchTarget.comfortable + 34,
           paddingTop: 6,
         },
-        tabBarActiveTintColor: color.onDark,
-        tabBarInactiveTintColor: color.fieldMuted,
+        tabBarActiveTintColor: surface.title,
+        tabBarInactiveTintColor: surface.muted,
         tabBarLabel: () => null,
       }}
     >

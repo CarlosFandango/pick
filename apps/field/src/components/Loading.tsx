@@ -1,6 +1,6 @@
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /**
  * Waiting, or failed.
@@ -32,7 +32,7 @@ export function Loading({
     <View
       style={{
         flex: 1,
-        backgroundColor: color.fieldBg,
+        backgroundColor: surface.ground,
         alignItems: 'center',
         justifyContent: 'center',
         padding: space.lg,
@@ -41,10 +41,10 @@ export function Loading({
     >
       {error ? (
         <>
-          <Text style={{ ...text('title'), color: color.onDark, textAlign: 'center' }}>
+          <Text style={{ ...text('title'), color: surface.title, textAlign: 'center' }}>
             Could not load that
           </Text>
-          <Text style={{ ...text('body'), color: color.fieldMuted, textAlign: 'center' }}>
+          <Text style={{ ...text('body'), color: surface.muted, textAlign: 'center' }}>
             Nothing you have recorded is lost.
           </Text>
           <Pressable
@@ -53,14 +53,14 @@ export function Loading({
             style={{
               borderRadius: radius.pill,
               borderWidth: 1.5,
-              borderColor: color.fieldDim,
+              borderColor: surface.line,
               paddingHorizontal: space.lg,
               minHeight: touchTarget.comfortable,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Text style={{ ...text('title'), fontSize: 15, color: color.onDark }}>Try again</Text>
+            <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>Try again</Text>
           </Pressable>
 
           {onHome ? (
@@ -73,12 +73,12 @@ export function Loading({
                 paddingHorizontal: space.md,
               }}
             >
-              <Text style={{ ...text('body'), color: color.fieldMuted }}>Back to home</Text>
+              <Text style={{ ...text('body'), color: surface.muted }}>Back to home</Text>
             </Pressable>
           ) : null}
         </>
       ) : (
-        <Text style={{ ...text('body'), color: color.fieldMuted }}>Loading…</Text>
+        <Text style={{ ...text('body'), color: surface.muted }}>Loading…</Text>
       )}
     </View>
   );

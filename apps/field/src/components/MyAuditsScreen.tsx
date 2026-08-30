@@ -7,7 +7,7 @@ import {
 } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 export interface MyAuditRow {
   id: string;
@@ -19,10 +19,10 @@ export interface MyAuditRow {
 }
 
 const TONE: Record<StatusTone, { fill?: string; ink: string }> = {
-  neutral: { ink: color.muted },
+  neutral: { ink: surface.muted },
   progress: { fill: color.auditing, ink: color.auditingInk },
-  good: { fill: color.teal, ink: color.bone },
-  info: { fill: color.navy, ink: color.onDarkMuted },
+  good: { fill: color.teal, ink: surface.onAccent },
+  info: { fill: color.navy, ink: surface.body },
 };
 
 /**
@@ -41,17 +41,17 @@ export function MyAuditsScreen({
   onOpen?: (audit: MyAuditRow) => void;
 }) {
   return (
-    <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: space.md, paddingTop: 68 }}>
       <Text
         accessibilityRole="header"
-        style={{ ...text('display'), fontSize: 24, color: color.ink }}
+        style={{ ...text('display'), fontSize: 24, color: surface.title }}
       >
         My audits
       </Text>
 
       <ScrollView style={{ marginTop: space.md }} contentContainerStyle={{ gap: 10 }}>
         {audits.length === 0 ? (
-          <Text style={{ ...text('body'), color: color.muted }}>
+          <Text style={{ ...text('body'), color: surface.muted }}>
             Nothing yet. Accepted offers appear here.
           </Text>
         ) : null}
@@ -67,9 +67,9 @@ export function MyAuditsScreen({
               accessibilityLabel={`${audit.title}, ${chip.label}`}
               onPress={onOpen ? () => onOpen(audit) : undefined}
               style={{
-                backgroundColor: color.paper,
+                backgroundColor: surface.sheet,
                 borderWidth: 1,
-                borderColor: color.oat,
+                borderColor: surface.line,
                 borderRadius: radius.tile,
                 padding: 14,
                 minHeight: touchTarget.comfortable,
@@ -79,10 +79,10 @@ export function MyAuditsScreen({
               }}
             >
               <View style={{ flex: 1 }}>
-                <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>
+                <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>
                   {audit.title}
                 </Text>
-                <Text style={{ ...text('body'), fontSize: 12, color: color.muted, marginTop: 2 }}>
+                <Text style={{ ...text('body'), fontSize: 12, color: surface.muted, marginTop: 2 }}>
                   {auditSubtitle([
                     audit.dateLabel,
                     audit.feeMinorUnits === null ? null : formatMoney(audit.feeMinorUnits),
@@ -95,7 +95,7 @@ export function MyAuditsScreen({
                 style={{
                   backgroundColor: tone.fill ?? 'transparent',
                   borderWidth: tone.fill ? 0 : 1,
-                  borderColor: color.oat,
+                  borderColor: surface.line,
                   borderRadius: radius.pill,
                   paddingVertical: 4,
                   paddingHorizontal: 10,
@@ -112,14 +112,14 @@ export function MyAuditsScreen({
 
       <View
         style={{
-          backgroundColor: color.paper,
+          backgroundColor: surface.sheet,
           borderWidth: 1,
-          borderColor: color.oat,
+          borderColor: surface.line,
           borderRadius: radius.tile,
           padding: 14,
         }}
       >
-        <Text style={{ ...text('body'), fontSize: 12, color: color.muted }}>
+        <Text style={{ ...text('body'), fontSize: 12, color: surface.muted }}>
           No team present counts as a completed job — paid in full, never against your record.
         </Text>
       </View>

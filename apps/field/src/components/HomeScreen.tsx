@@ -1,7 +1,7 @@
 import { type AuditStatus, formatMoney, type PaymentState } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 export interface HomeAudit {
   id: string;
@@ -55,7 +55,7 @@ export function HomeScreen({
   onOpen?: (audit: HomeAudit) => void;
 }) {
   return (
-    <View style={{ flex: 1, backgroundColor: color.bone }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground }}>
       <ScrollView
         contentContainerStyle={{
           padding: space.md,
@@ -66,7 +66,7 @@ export function HomeScreen({
       >
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 24, color: color.ink }}
+          style={{ ...text('display'), fontSize: 24, color: surface.title }}
         >
           Today
         </Text>
@@ -75,17 +75,17 @@ export function HomeScreen({
         {next ? (
           <View
             style={{
-              backgroundColor: color.paper,
+              backgroundColor: surface.sheet,
               borderRadius: radius.tile,
               padding: space.md,
               gap: 6,
             }}
           >
-            <Text style={{ ...text('caption'), color: color.muted }}>NEXT AUDIT</Text>
-            <Text style={{ ...text('title'), color: color.ink }}>{next.title}</Text>
-            <Text style={{ ...text('body'), color: color.bodyBrown }}>{next.dateLabel}</Text>
+            <Text style={{ ...text('caption'), color: surface.muted }}>NEXT AUDIT</Text>
+            <Text style={{ ...text('title'), color: surface.title }}>{next.title}</Text>
+            <Text style={{ ...text('body'), color: surface.body }}>{next.dateLabel}</Text>
             {next.windowLabel ? (
-              <Text style={{ ...text('body'), color: color.bodyBrown }}>{next.windowLabel}</Text>
+              <Text style={{ ...text('body'), color: surface.body }}>{next.windowLabel}</Text>
             ) : null}
 
             {/*
@@ -112,12 +112,12 @@ export function HomeScreen({
                   marginTop: 10,
                 }}
               >
-                <Text style={{ ...text('body'), color: color.bone }}>{next.action}</Text>
+                <Text style={{ ...text('body'), color: surface.onAccent }}>{next.action}</Text>
               </Pressable>
             ) : null}
           </View>
         ) : (
-          <Text style={{ ...text('body'), color: color.muted }}>
+          <Text style={{ ...text('body'), color: surface.muted }}>
             Nothing booked in. Anything you accept from Offers shows up here.
           </Text>
         )}
@@ -125,7 +125,7 @@ export function HomeScreen({
         {/* 2 — enough per row to plan a week around. */}
         {upcoming.length > 0 ? (
           <View style={{ gap: 8 }}>
-            <Text style={{ ...text('caption'), color: color.muted }}>COMING UP</Text>
+            <Text style={{ ...text('caption'), color: surface.muted }}>COMING UP</Text>
             {upcoming.map((audit) => (
               <Pressable
                 key={audit.id}
@@ -133,15 +133,15 @@ export function HomeScreen({
                 accessibilityLabel={`${audit.title}, ${audit.dateLabel}`}
                 onPress={onOpen ? () => onOpen(audit) : undefined}
                 style={{
-                  backgroundColor: color.paper,
+                  backgroundColor: surface.sheet,
                   borderRadius: radius.tile,
                   padding: space.md,
                   minHeight: touchTarget.comfortable,
                   gap: 2,
                 }}
               >
-                <Text style={{ ...text('body'), color: color.ink }}>{audit.title}</Text>
-                <Text style={{ ...text('caption'), color: color.muted }}>
+                <Text style={{ ...text('body'), color: surface.title }}>{audit.title}</Text>
+                <Text style={{ ...text('caption'), color: surface.muted }}>
                   {audit.dateLabel}
                   {audit.windowLabel ? ` · ${audit.windowLabel}` : ''}
                 </Text>
@@ -153,22 +153,22 @@ export function HomeScreen({
         {/* 3 — the question auditors ask most. */}
         {payments.length > 0 ? (
           <View style={{ gap: 8 }}>
-            <Text style={{ ...text('caption'), color: color.muted }}>SUBMITTED</Text>
+            <Text style={{ ...text('caption'), color: surface.muted }}>SUBMITTED</Text>
             {payments.map((payment) => (
               <View
                 key={payment.auditId}
                 style={{
-                  backgroundColor: color.paper,
+                  backgroundColor: surface.sheet,
                   borderRadius: radius.tile,
                   padding: space.md,
                   gap: 4,
                 }}
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                  <Text style={{ ...text('body'), color: color.ink, flex: 1 }}>
+                  <Text style={{ ...text('body'), color: surface.title, flex: 1 }}>
                     {payment.title}
                   </Text>
-                  <Text style={{ ...text('body'), color: color.ink }}>
+                  <Text style={{ ...text('body'), color: surface.title }}>
                     {formatMoney(payment.amountMinorUnits, 'GBP')}
                   </Text>
                 </View>
@@ -177,7 +177,7 @@ export function HomeScreen({
                   outdoors in daylight, and "paid" and "held" must not depend on
                   telling two chips apart.
                 */}
-                <Text style={{ ...text('caption'), color: color.muted }}>
+                <Text style={{ ...text('caption'), color: surface.muted }}>
                   {payment.dateLabel} · {payment.stateLabel}
                   {payment.reference ? ` · ${payment.reference}` : ''}
                 </Text>

@@ -1,7 +1,7 @@
 import { elapsedSince, type StagedSession } from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /** How long an auditor waits before it counts as nobody turning up. */
 export const WAIT_MINUTES = 45;
@@ -41,7 +41,7 @@ export function NoShowScreen({
       <View
         style={{
           flex: 1,
-          backgroundColor: color.fieldBg,
+          backgroundColor: surface.ground,
           padding: 22,
           paddingTop: 68,
           justifyContent: 'center',
@@ -50,11 +50,11 @@ export function NoShowScreen({
       >
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 26, color: color.onDark }}
+          style={{ ...text('display'), fontSize: 26, color: surface.title }}
         >
           Logged. Thank you.
         </Text>
-        <Text style={{ ...text('body'), color: color.fieldMuted }}>
+        <Text style={{ ...text('body'), color: surface.muted }}>
           You are paid in full for this shift. It does not count against your record, and the
           charity&rsquo;s credit has been returned.
         </Text>
@@ -63,22 +63,20 @@ export function NoShowScreen({
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: color.fieldBg, padding: 22, paddingTop: 68 }}>
-      <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: 22, paddingTop: 68 }}>
+      <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
         {areaLabel.toUpperCase()} · WAITING
       </Text>
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 2 }}>
-          WAITED
-        </Text>
+        <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 2 }}>WAITED</Text>
         <Text
           accessibilityLabel={`Waited ${elapsedSince(session.startedAt, session.endedAt ?? now)}`}
-          style={{ ...text('display'), fontSize: 56, color: color.onDark }}
+          style={{ ...text('display'), fontSize: 56, color: surface.title }}
         >
           {elapsedSince(session.startedAt, session.endedAt ?? now)}
         </Text>
-        <Text style={{ ...text('caption'), color: color.fieldMuted, letterSpacing: 1.4 }}>
+        <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
           {canReport ? `${WAIT_MINUTES} MINUTES REACHED` : `${remaining} MIN UNTIL YOU CAN REPORT`}
         </Text>
       </View>
@@ -101,7 +99,7 @@ export function NoShowScreen({
             style={{
               ...text('title'),
               fontSize: 15,
-              color: canReport ? color.onDark : color.fieldDim,
+              color: canReport ? surface.title : surface.line,
             }}
           >
             Report no team present
@@ -113,7 +111,7 @@ export function NoShowScreen({
           onPress={onKeepWaiting}
           style={{ alignSelf: 'center' }}
         >
-          <Text style={{ ...text('body'), color: color.fieldMuted }}>They have arrived</Text>
+          <Text style={{ ...text('body'), color: surface.muted }}>They have arrived</Text>
         </Pressable>
       </View>
     </View>

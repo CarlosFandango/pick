@@ -8,7 +8,7 @@ import {
 } from '@picksel/core';
 import { color, radius, space } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { text } from '@/theme';
+import { surface, text } from '@/theme';
 
 /**
  * S1.4 — prep.
@@ -29,21 +29,21 @@ export function PrepScreen({
   onAgain: (card: PrepCard) => void;
 }) {
   return (
-    <View style={{ flex: 1, backgroundColor: color.bone, padding: space.md, paddingTop: 68 }}>
-      <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.4 }}>
+    <View style={{ flex: 1, backgroundColor: surface.ground, padding: space.md, paddingTop: 68 }}>
+      <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.4 }}>
         {kicker.toUpperCase()}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm, marginTop: 8 }}>
         <Text
           accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 22, color: color.ink }}
+          style={{ ...text('display'), fontSize: 22, color: surface.title }}
         >
           Know the shift
         </Text>
         <Text
           accessibilityLabel={`${plan.learnt} of ${plan.total} learnt`}
-          style={{ ...text('caption'), color: color.auditingText, marginLeft: 'auto' }}
+          style={{ ...text('caption'), color: surface.warn, marginLeft: 'auto' }}
         >
           {plan.learnt} / {plan.total} LEARNT
         </Text>
@@ -84,19 +84,19 @@ function MomentRow({
   return (
     <View
       style={{
-        backgroundColor: color.paper,
+        backgroundColor: surface.sheet,
         borderWidth: active ? 2 : 1,
-        borderColor: active ? color.auditing : color.oat,
+        borderColor: active ? surface.warn : surface.line,
         borderRadius: radius.tile,
         padding: active ? space.md : 12,
         gap: active ? space.sm : 0,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Text style={{ ...text('caption'), color: color.muted, width: 20 }}>
+        <Text style={{ ...text('caption'), color: surface.muted, width: 20 }}>
           {String(index).padStart(2, '0')}
         </Text>
-        <Text style={{ ...text('title'), fontSize: 14, color: color.ink }}>
+        <Text style={{ ...text('title'), fontSize: 14, color: surface.title }}>
           {MOMENT_LABELS[progress.moment]}
         </Text>
         <Text
@@ -104,7 +104,7 @@ function MomentRow({
           style={{
             ...text('caption'),
             marginLeft: 'auto',
-            color: complete ? color.teal : progress.learnt > 0 ? color.auditingText : color.muted,
+            color: complete ? surface.pass : progress.learnt > 0 ? surface.warn : surface.muted,
           }}
         >
           {progress.learnt}/{progress.total}
@@ -112,11 +112,15 @@ function MomentRow({
       </View>
 
       {active && card ? (
-        <View style={{ backgroundColor: color.bone, borderRadius: 4, padding: space.md, gap: 10 }}>
-          <Text style={{ ...text('caption'), color: color.muted, letterSpacing: 1.2 }}>
+        <View
+          style={{ backgroundColor: surface.ground, borderRadius: 4, padding: space.md, gap: 10 }}
+        >
+          <Text style={{ ...text('caption'), color: surface.muted, letterSpacing: 1.2 }}>
             CARD {cardPosition(progress, card)} OF {progress.total}
           </Text>
-          <Text style={{ ...text('title'), fontSize: 15, color: color.ink }}>{card.prompt}</Text>
+          <Text style={{ ...text('title'), fontSize: 15, color: surface.title }}>
+            {card.prompt}
+          </Text>
 
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
             <Pressable
@@ -130,7 +134,9 @@ function MomentRow({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ ...text('body'), fontWeight: '700', color: color.bone }}>Got it</Text>
+              <Text style={{ ...text('body'), fontWeight: '700', color: surface.onAccent }}>
+                Got it
+              </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -138,13 +144,15 @@ function MomentRow({
               style={{
                 flex: 1,
                 borderWidth: 1.5,
-                borderColor: color.ink,
+                borderColor: surface.title,
                 borderRadius: radius.pill,
                 paddingVertical: 9,
                 alignItems: 'center',
               }}
             >
-              <Text style={{ ...text('body'), fontWeight: '700', color: color.ink }}>Again</Text>
+              <Text style={{ ...text('body'), fontWeight: '700', color: surface.title }}>
+                Again
+              </Text>
             </Pressable>
           </View>
         </View>
