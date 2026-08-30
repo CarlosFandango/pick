@@ -1,6 +1,8 @@
+import { DEFAULT_CURRENCY, isPayableNow, payoutsLede } from '@picksel/core';
 import { AdminChrome } from '@/components/AdminChrome';
 import { PayableList, RunList } from '@/components/admin/PayoutRuns';
 import { BackLink } from '@/components/BackLink';
+import { Lede } from '@/components/Lede';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { adminPage, metaLabel, pageTitle } from '@/lib/theme';
@@ -44,6 +46,13 @@ export default async function PayoutsPage() {
     linesPerRun.set(line.payout_run_id, (linesPerRun.get(line.payout_run_id) ?? 0) + 1);
   }
 
+  // What can go out today, which is what this screen is for. The predicate is
+  // in core so the list below and the sentence above cannot disagree.
+  const rowsPayable = payable ?? [];
+  const ready = rowsPayable.filter((row) => isPayableNow(row.gate));
+  const readyTotal = ready.reduce((sum, row) => sum + Number(row.amount_minor_units), 0);
+  const auditorCount = new Set(ready.map((row) => row.auditor_name)).size;
+
   const today = new Date();
   const monthAgo = new Date(today.getTime() - 30 * 86_400_000);
   const asDate = (d: Date) => d.toISOString().slice(0, 10);
@@ -57,6 +66,16 @@ export default async function PayoutsPage() {
           <h1 style={pageTitle}>Payouts</h1>
           <span style={metaLabel}>Paid on QA, never on client approval</span>
         </div>
+
+        <Lede
+          {...payoutsLede({
+            readyCount: ready.length,
+            readyMinorUnits: readyTotal,
+            auditorCount,
+            heldCount: rowsPayable.length - ready.length,
+            currency: DEFAULT_CURRENCY,
+          })}
+        />
 
         <PayableList
           payable={(payable ?? []).map((row) => ({

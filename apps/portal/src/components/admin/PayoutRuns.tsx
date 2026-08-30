@@ -1,4 +1,4 @@
-import { formatMoney } from '@picksel/core';
+import { formatMoney, isPayableNow } from '@picksel/core';
 import { color } from '@picksel/tokens';
 import type { ReactNode } from 'react';
 import { card, hairline, metaLabel, mono } from '@/lib/theme';
@@ -35,8 +35,8 @@ export function PayableList({ payable }: { payable: readonly PayableRow[] }) {
     return <p style={{ fontSize: 13, color: color.muted }}>Nothing is owed right now.</p>;
   }
 
-  const held = payable.filter((p) => p.gate === 'hold');
-  const ready = payable.filter((p) => p.gate !== 'hold');
+  const ready = payable.filter((p) => isPayableNow(p.gate));
+  const held = payable.filter((p) => !isPayableNow(p.gate));
   const total = ready.reduce((sum, p) => sum + p.amountMinorUnits, 0);
 
   return (
@@ -59,14 +59,14 @@ export function PayableList({ payable }: { payable: readonly PayableRow[] }) {
               gap: 14,
               padding: '9px 0',
               borderTop: hairline,
-              opacity: line.gate === 'hold' ? 0.6 : 1,
+              opacity: isPayableNow(line.gate) ? 1 : 0.6,
             }}
           >
             <span style={{ fontFamily: mono, fontSize: 12 }}>{line.reference}</span>
             <span style={{ fontSize: 13 }}>{line.auditorName}</span>
-            {line.gate === 'hold' ? (
+            {isPayableNow(line.gate) ? null : (
               <span style={{ ...metaLabel, color: color.auditingText }}>HELD FOR REVIEW</span>
-            ) : null}
+            )}
             <span style={{ marginLeft: 'auto', fontFamily: mono, fontWeight: 700, fontSize: 13 }}>
               {formatMoney(line.amountMinorUnits)}
             </span>

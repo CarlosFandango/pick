@@ -1,7 +1,8 @@
-import { formatDay } from '@picksel/core';
+import { formatDay, risksLede } from '@picksel/core';
 import { color } from '@picksel/tokens';
 import { AdminChrome } from '@/components/AdminChrome';
 import { BackLink } from '@/components/BackLink';
+import { Lede } from '@/components/Lede';
 import { requireRole } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
 import { adminPage, card, metaLabel, mono, pageTitle } from '@/lib/theme';
@@ -44,17 +45,31 @@ export default async function RisksPage() {
     if (!advisedFor.has(advisory.risk_id)) advisedFor.set(advisory.risk_id, advisory);
   }
 
+  // "Open" and "unadvised" are not the same thing. A risk can be open and
+  // already put to the charity in writing — waiting on their answer — and that
+  // is the register working, not a failure. The one that costs something is a
+  // risk nobody has told them about.
+  const unadvised = open.filter((risk) => !advisedFor.has(risk.id));
+
   return (
-    <AdminChrome who={session.fullName} queuePosition={`${open.length} UNADVISED`}>
+    <AdminChrome who={session.fullName} queuePosition={`${unadvised.length} UNADVISED`}>
       <div style={{ ...adminPage, maxWidth: 860 }}>
         <BackLink href="/admin" label="Ops home" />
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
           <h1 style={pageTitle}>Risk register</h1>
           <span style={metaLabel}>
-            {rows.length} recorded · {open.length} not yet advised
+            {rows.length} recorded · {unadvised.length} not yet advised
           </span>
         </div>
+
+        <Lede
+          {...risksLede({
+            open: open.length,
+            advised: rows.filter((risk) => advisedFor.has(risk.id)).length,
+            unadvised: unadvised.length,
+          })}
+        />
 
         {rows.length === 0 ? (
           <p style={{ fontSize: 13, color: color.muted }}>
