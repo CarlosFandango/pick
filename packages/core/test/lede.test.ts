@@ -16,10 +16,31 @@ const finding = (over: Partial<ReportableFinding> = {}): ReportableFinding => ({
 });
 
 describe('what a charity is told first', () => {
+  it('puts a comma before the and when a clause already has one', () => {
+    // "…or name the agency and kept asking" parses as a longer list on the
+    // first read, every time.
+    const v = reportLede(
+      [finding(), finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' })],
+      29,
+    );
+    expect(v.headline).toContain(', and kept asking');
+  });
+
   it('names the breach rather than counting it, when there is one', () => {
     const v = reportLede([finding()], 29);
     expect(v.headline).toBe('Did not say they were paid, or name the agency.');
     expect(v.tone).toBe('breach');
+  });
+
+  it('names them in the order the encounter ran, not the order the rows arrived', () => {
+    const v = reportLede(
+      [
+        finding({ code: 'ASK-01', moment: 'ask', finding: 'Kept asking after a clear refusal.' }),
+        finding(),
+      ],
+      29,
+    );
+    expect(v.headline.indexOf('Did not say')).toBeLessThan(v.headline.indexOf('kept asking'));
   });
 
   it('joins two breaches into one sentence', () => {
@@ -28,7 +49,7 @@ describe('what a charity is told first', () => {
       29,
     );
     expect(v.headline).toBe(
-      'Did not say they were paid, or name the agency and kept asking after a clear refusal.',
+      'Did not say they were paid, or name the agency, and kept asking after a clear refusal.',
     );
     expect(v.meta).toBe('2 breaches · action needed');
   });

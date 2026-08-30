@@ -50,6 +50,20 @@ export function joinWords(words: readonly string[]): string {
   return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
 }
 
+/**
+ * Join clauses into one sentence.
+ *
+ * Like `joinWords`, except that a clause with its own comma in it needs an
+ * Oxford comma before the "and" or the sentence reads as a longer list:
+ * "did not say they were paid, or name the agency and kept asking" parses
+ * wrongly on the first attempt, every time.
+ */
+function joinClauses(clauses: readonly string[]): string {
+  if (clauses.length <= 1) return clauses[0] ?? '';
+  const separator = clauses.some((c) => c.includes(',')) ? ', and ' : ' and ';
+  return `${clauses.slice(0, -1).join(', ')}${separator}${clauses[clauses.length - 1]}`;
+}
+
 /** "1 breach", "3 breaches" — the counted noun, without inventing a total. */
 function count(n: number, singular: string, plural = `${singular}es`): string {
   return `${n} ${n === 1 ? singular : plural}`;
@@ -57,8 +71,9 @@ function count(n: number, singular: string, plural = `${singular}es`): string {
 
 /**
  * Lower-case the first letter of a finding so it can be joined into a
- * sentence. Findings are stored as standalone sentences ("Did not say they
- * were paid…") because most of the time they are read as one.
+ * sentence. Findings are stored as bare predicates ("Did not say they were
+ * paid…") with the fundraiser as the implied subject, which is what lets two
+ * of them become one sentence here and stand alone in a card.
  */
 function asClause(finding: string): string {
   const trimmed = finding.replace(/\.$/, '');
@@ -94,7 +109,10 @@ export function reportLede(
     };
   }
 
-  const naming = critical.length > 0 ? critical : failures;
+  // In the order the encounter ran, not the order the rows came back. A
+  // sentence that says "kept asking after a refusal, and did not say they were
+  // paid" describes the shift backwards.
+  const naming = inEncounterOrder(critical.length > 0 ? critical : failures);
   const tone: LedeTone = critical.length > 0 ? 'breach' : 'attention';
   const [noun, nouns] = critical.length > 0 ? ['breach', 'breaches'] : ['issue', 'issues'];
   const meta =
@@ -104,7 +122,7 @@ export function reportLede(
 
   const headline =
     naming.length <= 2
-      ? `${capitalise(joinWords(naming.map((f) => asClause(f.finding))))}.`
+      ? `${capitalise(joinClauses(naming.map((f) => asClause(f.finding))))}.`
       : `${count(naming.length, noun, nouns)} in ${joinWords(
           momentsOf(naming).map((m) => MOMENT_LABELS[m]),
         )}.`;
@@ -123,6 +141,13 @@ export function reportLede(
 
 function capitalise(sentence: string): string {
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
+
+/** Findings, in the order the encounter runs through them. */
+export function inEncounterOrder(findings: readonly ReportableFinding[]): ReportableFinding[] {
+  return [...findings].sort(
+    (a, b) => AUDIT_MOMENTS.indexOf(a.moment) - AUDIT_MOMENTS.indexOf(b.moment),
+  );
 }
 
 /** The moments those findings fall in, in the order the encounter runs. */

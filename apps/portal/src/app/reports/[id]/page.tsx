@@ -1,35 +1,44 @@
 import {
   AUDIT_TYPE_LABELS,
+  type AuditMoment,
   auditorCode,
   auditorLabel,
-  countsLine,
   DEFAULT_REPORT_SETTINGS,
+  encounterSequence,
+  formatWindow,
+  MOMENT_DESCRIPTIONS,
   MOMENT_LABELS,
-  momentTag,
-  type ReviewResult,
-  reviewSummary,
+  type ReportableFinding,
+  reportLede,
   scoreAudit,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BackLink } from '@/components/BackLink';
 import { Chrome } from '@/components/Chrome';
+import { Lede } from '@/components/Lede';
+import { SequenceCard, SequenceHeading, SequenceStep } from '@/components/Sequence';
 import { requireSession } from '@/lib/auth';
 import { supabaseServer } from '@/lib/supabase';
-import { clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
+import { bodyText, clientColumn, hairline, metaLabel } from '@/lib/theme';
 
 /**
  * S1.8 — the client report.
  *
+ * Verdict first, then read down. The screen opens with what a fundraising
+ * director came to find out — which of their fundraisers did what — and only
+ * then walks the encounter in the order it happened.
+ *
+ * The weighted percentage is deliberately at the bottom. It was the first
+ * thing on the page and it is the one number nobody outside PICK can situate:
+ * 89.7% is either excellent or a disaster depending on which check was missed,
+ * and the reader has no way to know which. It stays because it is the number
+ * an agency will be asked about, not because it is the answer.
+ *
  * Only a released audit has a report. Before that the client can see the audit
  * exists — they booked it — but not what it found.
  */
-/** "Opening and Ask", "Opening, Pitch and Ask" — a list a person would say. */
-function joinWords(words: readonly string[]): string {
-  if (words.length <= 1) return words[0] ?? '';
-  return `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`;
-}
-
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await requireSession();
@@ -37,7 +46,9 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   const { data: audit } = await supabase
     .from('audit')
-    .select('id, reference, status, audit_type, postcode, released_at, client_organisation_id')
+    .select(
+      'id, reference, status, audit_type, postcode, released_at, client_organisation_id, window_start_on, window_end_on',
+    )
     .eq('id', id)
     .maybeSingle();
 
@@ -50,7 +61,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       ? supabase
           .from('check_result')
           .select(
-            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code, compliance_category, sort_order, version)',
+            'id, outcome, note, occurred_at, check_definition(id, moment, prompt, weight, is_critical, code, compliance_category, sort_order, version, client_finding, client_rationale)',
           )
           .eq('audit_id', id)
           .order('occurred_at', { ascending: false })
@@ -70,30 +81,47 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
     if (!definition || latest.has(definition.id)) continue;
     latest.set(definition.id, row);
   }
+  const rows = [...latest.values()];
 
-  const reviewResults: ReviewResult[] = [...latest.values()].flatMap((row) => {
+  // What a charity is told, never the auditor's question and never our code.
+  // `client_finding` is written for this; the prompt is the fallback so a check
+  // added without prose renders something true rather than nothing.
+  const findings: ReportableFinding[] = rows.flatMap((row) => {
     const d = row.check_definition;
-    if (!d) return [];
+    if (!d || row.outcome !== 'fail') return [];
     return [
       {
-        checkId: d.id,
+        code: d.code,
         moment: d.moment,
-        momentIndex: Object.keys(MOMENT_LABELS).indexOf(d.moment) + 1,
-        prompt: d.prompt,
-        verdict: row.outcome as ReviewResult['verdict'],
-        note: row.note,
+        finding: d.client_finding ?? d.prompt,
+        rationale: d.client_rationale ?? '',
+        isCritical: d.is_critical,
       },
     ];
   });
 
-  const summary = reviewSummary(reviewResults);
+  // A NOTE is recorded but unscored, so it is neither a breach nor silence.
+  const notes = rows.flatMap((row) => {
+    const d = row.check_definition;
+    if (!d || row.outcome !== 'note' || !row.note) return [];
+    return [{ moment: d.moment, note: row.note }];
+  });
+
+  const scored = rows.filter((row) => row.outcome !== 'note');
+  const checkedByMoment = new Map<AuditMoment, number>();
+  for (const row of scored) {
+    const moment = row.check_definition?.moment;
+    if (!moment) continue;
+    checkedByMoment.set(moment, (checkedByMoment.get(moment) ?? 0) + 1);
+  }
+
+  const lede = reportLede(findings, scored.length);
+  const sequence = encounterSequence(checkedByMoment, findings);
   const score = scoreAudit(
     // `guidance` is auditor-facing and never fetched for a report, but the
     // scoring type expects the whole definition.
-    [...latest.values()].flatMap((row) =>
-      row.check_definition ? [{ ...row.check_definition, guidance: null }] : [],
-    ),
-    [...latest.values()].map((row) => ({
+    rows.flatMap((row) => (row.check_definition ? [{ ...row.check_definition, guidance: null }] : [])),
+    rows.map((row) => ({
       id: row.id,
       check_definition_id: row.check_definition?.id ?? '',
       outcome: row.outcome as never,
@@ -111,80 +139,93 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         <div style={{ marginBottom: 16 }}>
           <BackLink href={`/audits/${audit.id}`} label="Back to the audit" />
         </div>
-        <div style={metaLabel}>
-          {audit.reference} · {audit.postcode} · {AUDIT_TYPE_LABELS[audit.audit_type]}
+        <div style={{ ...metaLabel, marginBottom: 8 }}>
+          {audit.reference} · {AUDIT_TYPE_LABELS[audit.audit_type]} · {audit.postcode} ·{' '}
+          {formatWindow(audit.window_start_on, audit.window_end_on)}
         </div>
-        <h1
-          style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '8px 0 4px' }}
-        >
-          Audit report
-        </h1>
-        <p style={{ margin: 0, fontSize: 13, color: color.muted }}>
-          {auditorLabel(DEFAULT_REPORT_SETTINGS, { code: auditorCode(audit.reference) })}
-        </p>
 
         {!released ? (
-          <p
-            style={{
-              marginTop: 20,
-              background: color.paper,
-              border: hairline,
-              borderRadius: radius.tile,
-              padding: '14px 18px',
-              fontSize: 13,
-              color: color.bodyBrown,
-            }}
-          >
-            This audit has not been released yet. Reports are checked by PICK before you see them.
-          </p>
+          <Lede
+            tone="waiting"
+            meta="Not released"
+            headline="We are still checking this write-up."
+            detail="Every report is read by PICK before you see it. Nothing is needed from you."
+          />
         ) : (
           <>
-            <section
-              style={{
-                marginTop: 20,
-                background: color.paper,
-                border: hairline,
-                borderTop: `5px solid ${score.criticalFailures.length ? color.creativeText : color.teal}`,
-                borderRadius: radius.tile,
-                padding: 20,
-              }}
-            >
-              <div style={metaLabel}>Result</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 6 }}>
-                <span style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em' }}>
-                  {score.overall.percentage === null ? '—' : `${score.overall.percentage}%`}
-                </span>
-                <span style={{ fontFamily: mono, fontSize: 11, color: color.bodyBrown }}>
-                  {countsLine(summary)}
-                </span>
+            <Lede {...lede} />
+
+            <div style={{ marginTop: 30 }}>
+              <SequenceHeading label="The encounter, in order">
+                Our auditor watched the shift, then approached the fundraiser as a member of the
+                public. This is what happened, step by step.
+              </SequenceHeading>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {sequence.map((step, index) => {
+                  const last = index === sequence.length - 1;
+                  const gutter = `${String(step.position).padStart(2, '0')} ${step.label}`;
+
+                  if (step.findings.length === 0) {
+                    return (
+                      <SequenceStep
+                        key={step.moment}
+                        label={gutter}
+                        summary={MOMENT_DESCRIPTIONS[step.moment]}
+                        note={`${step.checked} of ${step.checked} in order`}
+                        last={last}
+                      />
+                    );
+                  }
+
+                  return (
+                    <SequenceStep
+                      key={step.moment}
+                      label={gutter}
+                      tone={step.findings.some((f) => f.isCritical) ? 'breach' : 'attention'}
+                      last={last}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {step.findings.map((f) => (
+                          <SequenceCard
+                            key={f.code}
+                            tone={f.isCritical ? 'breach' : 'attention'}
+                            title={f.finding}
+                            meta={
+                              <>
+                                <span
+                                  style={{
+                                    ...metaLabel,
+                                    color: f.isCritical ? color.creativeText : color.auditingText,
+                                  }}
+                                >
+                                  {f.isCritical ? 'Breach' : 'Worth a look'}
+                                </span>
+                                <span style={metaLabel}>
+                                  {step.inOrder} of {step.checked} in order
+                                </span>
+                              </>
+                            }
+                          >
+                            {f.rationale ? (
+                              <p style={{ ...bodyText, margin: 0 }}>{f.rationale}</p>
+                            ) : null}
+                          </SequenceCard>
+                        ))}
+                      </div>
+                    </SequenceStep>
+                  );
+                })}
               </div>
+            </div>
 
-              {score.criticalMoments.length > 0 ? (
-                <p style={{ margin: '10px 0 0', fontSize: 13, color: color.creativeText }}>
-                  {/*
-                    Moments, never check codes. "OPN-02" is our catalogue key
-                    and means nothing to a charity — it was doing the work of a
-                    sentence on the line that tells a fundraising director two
-                    critical things went wrong (TND-100).
-                  */}
-                  Critical {score.criticalMoments.length === 1 ? 'failure' : 'failures'} in{' '}
-                  {joinWords(score.criticalMoments.map((m) => MOMENT_LABELS[m]))} — read these
-                  before the total.
-                </p>
-              ) : null}
-            </section>
-
-            <section style={{ marginTop: 14 }}>
-              <div style={{ ...metaLabel, marginBottom: 8 }}>What we found</div>
-              {summary.exceptions.length === 0 ? (
-                <p style={{ fontSize: 13, color: color.bodyBrown }}>
-                  Nothing outside the code of practice was observed on this shift.
-                </p>
-              ) : (
+            {notes.length > 0 ? (
+              <section style={{ marginTop: 26 }}>
+                <div style={{ ...metaLabel, marginBottom: 8 }}>Also worth knowing</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {summary.exceptions.map((exception) => (
+                  {notes.map((n) => (
                     <div
-                      key={exception.checkId}
+                      key={`${n.moment}-${n.note}`}
                       style={{
                         background: color.paper,
                         border: hairline,
@@ -192,31 +233,107 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
                         padding: '12px 16px',
                         display: 'flex',
                         gap: 12,
-                        fontSize: 13,
                       }}
                     >
                       <span style={{ ...metaLabel, width: 78, flex: 'none' }}>
-                        {momentTag(exception)}
+                        {MOMENT_LABELS[n.moment]}
                       </span>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          flex: 'none',
-                          color:
-                            exception.verdict === 'fail' ? color.creativeText : color.auditingText,
-                        }}
-                      >
-                        {exception.verdict.toUpperCase()}
-                      </span>
-                      <span style={{ color: color.bodyBrown }}>
-                        {exception.prompt}
-                        {exception.note ? ` — ${exception.note}` : ''}
-                      </span>
+                      <span style={{ ...bodyText, margin: 0 }}>{n.note}</span>
                     </div>
                   ))}
                 </div>
-              )}
+                <p style={{ ...bodyText, margin: '8px 0 0', fontSize: 12.5, color: color.muted }}>
+                  Recorded by the auditor but not counted against the shift.
+                </p>
+              </section>
+            ) : null}
+
+            <div style={{ marginTop: 26, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  flexGrow: 1,
+                  minWidth: 240,
+                  background: color.paper,
+                  border: hairline,
+                  borderRadius: radius.tile,
+                  padding: '15px 18px',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 11,
+                }}
+              >
+                <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.03em' }}>
+                  {scored.length}
+                </span>
+                <span style={{ ...bodyText, fontSize: 13 }}>
+                  points of the code of practice checked
+                </span>
+              </div>
+              <div
+                style={{
+                  flex: 'none',
+                  width: 230,
+                  background: color.paper,
+                  border: hairline,
+                  borderRadius: radius.tile,
+                  padding: '15px 18px',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 11,
+                }}
+              >
+                <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.03em' }}>
+                  {score.overall.percentage === null ? '—' : `${score.overall.percentage}%`}
+                </span>
+                <span style={metaLabel}>weighted score</span>
+              </div>
+            </div>
+
+            <section
+              style={{
+                marginTop: 24,
+                padding: '20px 24px',
+                background: color.navy,
+                borderRadius: radius.tile,
+              }}
+            >
+              <div style={{ ...metaLabel, color: color.onDarkMuted, marginBottom: 8 }}>
+                What happens next
+              </div>
+              <p
+                style={{
+                  margin: '0 0 14px',
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: color.onDark,
+                  maxWidth: '62ch',
+                  textWrap: 'pretty',
+                }}
+              >
+                Send this to your agency and ask what they will change before the next shift. If you
+                think a finding is wrong, tell us — we investigate it, not the agency.
+              </p>
+              <Link
+                href={`/complaint?audit=${audit.id}`}
+                style={{
+                  display: 'inline-block',
+                  border: `1px solid ${color.fieldDim}`,
+                  color: color.onDark,
+                  borderRadius: radius.pill,
+                  padding: '11px 22px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
+              >
+                Raise a concern
+              </Link>
             </section>
+
+            <div style={{ ...metaLabel, marginTop: 18 }}>
+              {auditorLabel(DEFAULT_REPORT_SETTINGS, { code: auditorCode(audit.reference) })} ·
+              independent of your agency · checked by PICK before release
+            </div>
           </>
         )}
       </div>

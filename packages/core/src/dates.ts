@@ -65,3 +65,15 @@ export function formatMoment(date: Date): string {
     minute: '2-digit',
   })}`;
 }
+
+/**
+ * An audit window straight off a database row.
+ *
+ * Every screen holds these as nullable ISO strings, because that is what
+ * Supabase returns, and each one was about to write its own `new Date()` and
+ * its own answer for a missing date. A window with no dates is "—", once.
+ */
+export function formatWindow(start: string | null, end: string | null): string {
+  if (!start || !end) return '—';
+  return formatDateRange(new Date(start), new Date(end));
+}
