@@ -105,6 +105,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -151,6 +152,7 @@ export type Database = {
           reference?: string
           released_at?: string | null
           released_by?: string | null
+          report_read_at?: string | null
           requested_at?: string | null
           requires_av?: boolean
           requires_review?: boolean
@@ -197,6 +199,7 @@ export type Database = {
           reference?: string
           released_at?: string | null
           released_by?: string | null
+          report_read_at?: string | null
           requested_at?: string | null
           requires_av?: boolean
           requires_review?: boolean
@@ -1557,6 +1560,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -1761,6 +1765,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -1912,6 +1917,7 @@ export type Database = {
         }
       }
       exposure_window_days: { Args: never; Returns: number }
+      mark_report_read: { Args: { p_audit_id: string }; Returns: undefined }
       matching_review_gates: {
         Args: { p_audit_id: string }
         Returns: {
@@ -2040,6 +2046,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -2126,6 +2133,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -2185,6 +2193,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -2244,6 +2253,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -2327,6 +2337,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean
@@ -2412,6 +2423,7 @@ export type Database = {
           reference: string
           released_at: string | null
           released_by: string | null
+          report_read_at: string | null
           requested_at: string | null
           requires_av: boolean
           requires_review: boolean

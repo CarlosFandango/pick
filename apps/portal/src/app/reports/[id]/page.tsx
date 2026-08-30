@@ -56,6 +56,11 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
 
   const released = audit.status === 'released';
 
+  // Opening the report is what moves it out of "ready for you" on the list.
+  // Fire-and-forget: the receipt is useful, not load-bearing, and a charity
+  // must never be shown an error because we failed to record that they looked.
+  if (released) await supabase.rpc('mark_report_read', { p_audit_id: id });
+
   const [{ data: results }, { data: organisation }, { data: balance }] = await Promise.all([
     released
       ? supabase

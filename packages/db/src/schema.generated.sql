@@ -616,6 +616,7 @@ CREATE TABLE IF NOT EXISTS "public"."audit" (
     "preferred_auditor_id" "uuid",
     "stage_set_version" integer DEFAULT 1 NOT NULL,
     "place_id" "uuid",
+    "report_read_at" timestamp with time zone,
     CONSTRAINT "assigned_when_matched" CHECK ((("status" = ANY (ARRAY['draft'::"public"."audit_status", 'booked'::"public"."audit_status", 'cancelled'::"public"."audit_status"])) OR ("auditor_id" IS NOT NULL))),
     CONSTRAINT "session_ordered" CHECK ((("session_ended_at" IS NULL) OR ("session_started_at" IS NULL) OR ("session_ended_at" >= "session_started_at"))),
     CONSTRAINT "status_in_pipeline" CHECK (("status" = ANY (ARRAY['draft'::"public"."audit_status", 'booked'::"public"."audit_status", 'assigned'::"public"."audit_status", 'in_progress'::"public"."audit_status", 'in_review'::"public"."audit_status", 'released'::"public"."audit_status", 'no_team_present'::"public"."audit_status", 'cancelled'::"public"."audit_status"]))),
@@ -631,6 +632,10 @@ COMMENT ON COLUMN "public"."audit"."postcode" IS 'The address as written, in wha
 
 
 COMMENT ON COLUMN "public"."audit"."place_id" IS 'Resolved when the audit is booked. What auditor matching joins on.';
+
+
+
+COMMENT ON COLUMN "public"."audit"."report_read_at" IS 'When the client organisation first opened the released report. Null until then.';
 
 
 
@@ -1516,6 +1521,27 @@ CREATE OR REPLACE FUNCTION "public"."exposure_window_days"() RETURNS integer
 
 
 ALTER FUNCTION "public"."exposure_window_days"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."mark_report_read"("p_audit_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+begin
+  -- Only the charity that paid for it, and only once it has a report to read.
+  -- An admin viewing a report is not the charity reading it, so this
+  -- deliberately does nothing for them: the receipt would be a lie.
+  update public.audit
+     set report_read_at = now()
+   where id = p_audit_id
+     and status = 'released'
+     and report_read_at is null
+     and client_organisation_id = app.current_org();
+end;
+$$;
+
+
+ALTER FUNCTION "public"."mark_report_read"("p_audit_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."matching_review_gates"("p_audit_id" "uuid") RETURNS TABLE("trigger" "public"."review_gate_trigger", "mode" "public"."review_gate_mode", "scope" "public"."review_gate_scope", "reason" "text")
@@ -3933,6 +3959,12 @@ GRANT ALL ON FUNCTION "public"."execute_payout_run"("p_run_id" "uuid", "p_extern
 GRANT ALL ON FUNCTION "public"."exposure_window_days"() TO "anon";
 GRANT ALL ON FUNCTION "public"."exposure_window_days"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."exposure_window_days"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."mark_report_read"("p_audit_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."mark_report_read"("p_audit_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."mark_report_read"("p_audit_id" "uuid") TO "service_role";
 
 
 
