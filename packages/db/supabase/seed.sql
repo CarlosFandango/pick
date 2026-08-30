@@ -265,14 +265,14 @@ from (values
    '00000000-0000-7000-8000-0000000000d2', 'in_progress', 'street', 'SW9 8PS',
    current_date - 1, current_date + 1, 11500, '00000000-0000-7000-8000-0000000000d1',
    'Winter appeal', 'Brixton', true,
-   null, null, null, null, null, now() - interval '2 hours', null, 'Outside the market'),
+   null, null, null, null, null, date_trunc('day', now()) + interval '13 hours', null, 'Outside the market'),
 
   ('00000000-0000-7000-8000-00000000a006', 'PS-000906', '00000000-0000-7000-8000-0000000000c1',
    '00000000-0000-7000-8000-0000000000d2', 'in_review', 'street', 'E1 6AN',
    current_date - 6, current_date - 4, 11500, '00000000-0000-7000-8000-0000000000d1',
    'Winter appeal', 'Whitechapel', true,
    now() - interval '3 days', now() - interval '3 days', null, null, null,
-   now() - interval '5 days', now() - interval '5 days' + interval '1 hour', 'Outside the station'),
+   date_trunc('day', now()) - interval '5 days' + interval '14 hours', date_trunc('day', now()) - interval '5 days' + interval '15 hours', 'Outside the station'),
 
   ('00000000-0000-7000-8000-00000000a007', 'PS-000907', '00000000-0000-7000-8000-0000000000c1',
    '00000000-0000-7000-8000-0000000000d2', 'released', 'lottery', 'EH2 2BY',
@@ -280,7 +280,7 @@ from (values
    'Lottery recruitment', 'Princes Street', true,
    now() - interval '17 days', now() - interval '17 days', now() - interval '15 days',
    '00000000-0000-7000-8000-0000000000d3', null,
-   now() - interval '19 days', now() - interval '19 days' + interval '1 hour', 'Princes Street'),
+   date_trunc('day', now()) - interval '19 days' + interval '14 hours', date_trunc('day', now()) - interval '19 days' + interval '15 hours', 'Princes Street'),
 
   ('00000000-0000-7000-8000-00000000a008', 'PS-000908', '00000000-0000-7000-8000-0000000000c1',
    '00000000-0000-7000-8000-0000000000d2', 'released', 'street', 'SE1 7PB',
@@ -288,7 +288,7 @@ from (values
    'Autumn appeal', 'South Bank', true,
    now() - interval '42 days', now() - interval '42 days', now() - interval '40 days',
    '00000000-0000-7000-8000-0000000000d3', null,
-   now() - interval '44 days', now() - interval '44 days' + interval '1 hour', 'South Bank'),
+   date_trunc('day', now()) - interval '44 days' + interval '14 hours', date_trunc('day', now()) - interval '44 days' + interval '15 hours', 'South Bank'),
 
   ('00000000-0000-7000-8000-00000000a009', 'PS-000909', '00000000-0000-7000-8000-0000000000c1',
    '00000000-0000-7000-8000-0000000000d2', 'no_team_present', 'street', 'SW1A 1AA',
@@ -303,7 +303,7 @@ from (values
    'Spring appeal', 'Old Street', true,
    now() - interval '27 days', now() - interval '27 days', now() - interval '25 days',
    '00000000-0000-7000-8000-0000000000d3', null,
-   now() - interval '29 days', now() - interval '29 days' + interval '1 hour', 'Old Street roundabout')
+   date_trunc('day', now()) - interval '29 days' + interval '14 hours', date_trunc('day', now()) - interval '29 days' + interval '15 hours', 'Old Street roundabout')
 ) as v(id, reference, client_organisation_id, auditor_id, status, audit_type, postcode,
        window_start_on, window_end_on, auditor_fee_minor_units, created_by,
        campaign_name, site_name, requires_review,
@@ -546,3 +546,46 @@ from (values
   ('00000000-0000-7000-8000-00000000a010', 'Islington')
 ) as v(audit_id, place_name)
 where a.id = v.audit_id and a.place_id is null;
+
+-- ---------------------------------------------------------------------------
+-- What the auditor captured live, during the shift.
+--
+-- `observation_log` had no seed rows at all, so the review screen's
+-- corroboration panel — the thing that lets PICK tell a breach noticed at
+-- 14:22 from one remembered afterwards — had nothing to show, and the field
+-- session screen's output was invisible everywhere downstream.
+--
+-- Bodies here describe the FUNDRAISER and the interaction, never the member of
+-- the public: an observation body in production describes somebody who was
+-- approached in the street and never agreed to be recorded by us, so the seed
+-- models the shape it should take rather than the shape it must not.
+--
+-- Times are relative to each audit's own session, so they line up with the
+-- shift on screen instead of with the day the seed ran.
+-- ---------------------------------------------------------------------------
+insert into public.observation_log (id, audit_id, auditor_id, kind, moment, body, severity, occurred_at)
+select v.id, v.audit_id, a.auditor_id, v.kind::public.observation_kind, v.moment::public.audit_moment,
+       v.body, v.severity::public.flag_severity,
+       a.session_started_at + v.offset_minutes * interval '1 minute'
+from (values
+  ('00000000-0000-7000-8000-0000000f0001'::uuid, '00000000-0000-7000-8000-00000000a006'::uuid,
+   'timing', 'walk_up', 'Team of four on the pitch, two tabards not showing the agency name.', null, 9),
+  ('00000000-0000-7000-8000-0000000f0002', '00000000-0000-7000-8000-00000000a006',
+   'incident', 'opening', 'Opened with the charity name only. No mention of being paid.', 'wrong', 24),
+  ('00000000-0000-7000-8000-0000000f0003', '00000000-0000-7000-8000-00000000a006',
+   'incident', 'ask', 'Third ask after a clear no, then followed two paces.', 'wrong', 37),
+  ('00000000-0000-7000-8000-0000000f0004', '00000000-0000-7000-8000-00000000a006',
+   'note', 'close', 'Courteous at the end despite the earlier persistence.', null, 44),
+
+  ('00000000-0000-7000-8000-0000000f0005', '00000000-0000-7000-8000-00000000a007',
+   'incident', 'opening', 'No solicitation statement given at any point in the approach.', 'wrong', 18),
+  ('00000000-0000-7000-8000-0000000f0006', '00000000-0000-7000-8000-00000000a007',
+   'incident', 'ask', 'Continued asking after a refusal, twice.', 'wrong', 31),
+  ('00000000-0000-7000-8000-0000000f0007', '00000000-0000-7000-8000-00000000a007',
+   'note', 'tablet', 'Screen angled away from the pavement throughout. Done well.', null, 39),
+
+  ('00000000-0000-7000-8000-0000000f0008', '00000000-0000-7000-8000-00000000a005',
+   'timing', 'approach', 'Pitch set up on the agreed spot, badges visible.', null, 4)
+) as v(id, audit_id, kind, moment, body, severity, offset_minutes)
+join public.audit a on a.id = v.audit_id and a.session_started_at is not null
+where not exists (select 1 from public.observation_log o where o.id = v.id);

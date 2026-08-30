@@ -11,12 +11,10 @@ type Panel = 'none' | 'return' | 'void';
 /** The three actions. Approve is primary; the others are deliberate detours. */
 export function ReviewActions({
   auditId,
-  gateReason,
   organisationName,
   submittedAt,
 }: {
   auditId: string;
-  gateReason: string | null;
   organisationName: string;
   submittedAt: string | null;
 }) {
@@ -32,23 +30,6 @@ export function ReviewActions({
 
   return (
     <aside style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, fontFamily: sans }}>
-      {gateReason ? (
-        <div
-          style={{
-            background: color.paper,
-            border: hairline,
-            borderTop: `5px solid ${color.auditing}`,
-            borderRadius: radius.tile,
-            padding: 16,
-          }}
-        >
-          <div style={{ ...metaLabel, marginBottom: 6 }}>Why it&rsquo;s held</div>
-          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: color.bodyBrown }}>
-            {gateReason}
-          </p>
-        </div>
-      ) : null}
-
       <div
         style={{
           background: color.paper,
