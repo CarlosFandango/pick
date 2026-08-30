@@ -2,6 +2,7 @@ import {
   CREDIT_REASON_LABELS,
   type CreditBundle,
   type CreditEntry,
+  creditsLede,
   currentBalance,
   deltaLabel,
   formatDay,
@@ -11,8 +12,9 @@ import {
 import { color, radius } from '@picksel/tokens';
 import { BuyCredits } from '@/components/BuyCredits';
 import { Chrome } from '@/components/Chrome';
+import { Lede } from '@/components/Lede';
 import { clientPage } from '@/lib/client-page';
-import { clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
+import { bodyText, clientColumn, hairline, metaLabel, mono } from '@/lib/theme';
 
 const cell = {
   padding: '12px 16px',
@@ -78,43 +80,17 @@ export default async function CreditsPage() {
   return (
     <Chrome active="credits" organisationName={organisationName} credits={balance}>
       <div style={clientColumn}>
-        <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: '0 0 4px' }}>
-          Credits
-        </h1>
-        <p style={{ margin: '0 0 20px', fontSize: 13, color: color.muted }}>
-          One credit books one audit. Credits are sold in bundles, and the price per audit falls as
-          the bundle grows.
-        </p>
+        <Lede
+          {...creditsLede({
+            balance,
+            purchased: position?.purchased ?? balance,
+            consumed: position?.consumed ?? 0,
+          })}
+        />
 
-        <div
-          style={{
-            background: color.paper,
-            border: hairline,
-            borderTop: `5px solid ${color.teal}`,
-            borderRadius: radius.tile,
-            padding: 20,
-            marginBottom: 20,
-          }}
-        >
-          <div style={metaLabel}>Available</div>
-          <div style={{ fontWeight: 800, fontSize: 34, letterSpacing: '-0.03em', marginTop: 4 }}>
-            {balance}
-          </div>
-          {position ? (
-            <div style={{ marginTop: 8, fontSize: 13, color: color.bodyBrown }}>
-              {position.purchased} bought · {position.consumed} used on audits you have received
-              {balance !== position.purchased - position.consumed ? (
-                <>
-                  {' '}
-                  · {position.purchased - position.consumed - balance} set aside for audits under
-                  way
-                </>
-              ) : null}
-            </div>
-          ) : null}
+        <div style={{ marginTop: 24 }}>
+          <BuyCredits bundles={bundles} />
         </div>
-
-        <BuyCredits bundles={bundles} />
 
         {lines.length === 0 ? (
           <p style={{ fontSize: 13, color: color.muted }}>No credit movements yet.</p>
@@ -128,8 +104,12 @@ export default async function CreditsPage() {
               textAlign: 'left',
             }}
           >
-            <caption style={{ ...metaLabel, textAlign: 'left', paddingBottom: 8 }}>
-              Every credit movement, newest first
+            <caption style={{ textAlign: 'left', paddingBottom: 8 }}>
+              <span style={{ ...metaLabel, display: 'block' }}>Every movement</span>
+              <span style={{ ...bodyText, display: 'block', marginTop: 4 }}>
+                Newest first. The balance on the right is the running total, so you can check ours
+                against yours.
+              </span>
             </caption>
             <thead>
               <tr>

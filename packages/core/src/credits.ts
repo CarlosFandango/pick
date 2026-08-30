@@ -1,3 +1,4 @@
+import type { Lede } from './lede';
 import { type CurrencyCode, DEFAULT_CURRENCY, formatMoney } from './money';
 
 /**
@@ -131,4 +132,57 @@ export function deltaLabel(delta: number): string {
 export function valueLabel(entry: CreditEntry): string {
   if (!entry.unitPriceMinorUnits || entry.reason !== 'purchase') return '';
   return formatMoney(entry.unitPriceMinorUnits * entry.delta);
+}
+
+/**
+ * What the balance means, rather than what it is.
+ *
+ * "4" is a number a charity has to convert; "enough for four more audits" is
+ * the answer they came for. The distinction between reserved and available is
+ * the thing they most often ring up about — credits committed to audits that
+ * have not arrived yet look like credits they still have.
+ */
+export function creditsLede(input: {
+  balance: number;
+  purchased: number;
+  consumed: number;
+}): Lede {
+  const { balance, purchased, consumed } = input;
+  const reserved = purchased - consumed - balance;
+
+  const detail = [
+    reserved > 0
+      ? `${reserved} ${reserved === 1 ? 'is' : 'are'} set aside for audits already booked`
+      : '',
+    consumed > 0
+      ? `${consumed} ${consumed === 1 ? 'has' : 'have'} been used on audits you have received`
+      : '',
+  ].filter(Boolean);
+
+  if (balance === 0) {
+    return {
+      tone: 'attention',
+      meta: 'None available',
+      headline: 'You have no credits left to book with.',
+      detail: detail.length ? `${sentence(detail)}. Nothing expires.` : 'Order more to book an audit.',
+    };
+  }
+
+  return {
+    tone: 'clear',
+    meta: 'Available',
+    headline: `Enough for ${spell(balance)} more ${balance === 1 ? 'audit' : 'audits'}.`,
+    detail: detail.length ? `${sentence(detail)}. Nothing expires.` : 'Nothing expires.',
+  };
+}
+
+/** Small numbers read better as words in a sentence; large ones do not. */
+function spell(n: number): string {
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  return words[n] ?? String(n);
+}
+
+function sentence(parts: string[]): string {
+  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')}, and ${parts.at(-1)}` : parts[0];
+  return (joined ?? '').charAt(0).toUpperCase() + (joined ?? '').slice(1);
 }

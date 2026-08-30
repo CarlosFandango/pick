@@ -43,9 +43,29 @@ export const AUDIT_TYPE_LABELS: Record<z.infer<typeof auditType>, string> = {
   lottery: 'Lottery',
 };
 
+/**
+ * What each kind of fundraising actually is.
+ *
+ * A fundraising director knows their own programme; they do not necessarily
+ * know which of our four words it falls under, and picking the wrong one sends
+ * an auditor to the wrong sort of shift.
+ */
+export const AUDIT_TYPE_DESCRIPTIONS: Record<z.infer<typeof auditType>, string> = {
+  street: 'Public pavement, on a pitch',
+  door_to_door: 'Residential streets',
+  private_site: 'Shopping centre, station, supermarket',
+  lottery: 'Weekly draw sign-ups',
+};
+
 export const SHIFT_PAYMENT_LABELS: Record<z.infer<typeof shiftPaymentMethod>, string> = {
   direct_debit: 'Direct debit',
   contactless: 'Contactless / one-off',
+};
+
+/** How the public are asked to give, which changes what an auditor watches. */
+export const SHIFT_PAYMENT_DESCRIPTIONS: Record<z.infer<typeof shiftPaymentMethod>, string> = {
+  direct_debit: 'Regular gift, signed up on a tablet',
+  contactless: 'A single tap, no sign-up',
 };
 
 /** The window a client may book. Never a single date — see BUILD-GUIDE.md. */

@@ -1,17 +1,19 @@
 'use client';
 
 import {
+  AUDIT_TYPE_DESCRIPTIONS,
   AUDIT_TYPE_LABELS,
   BOOKING_LEAD_DAYS,
   earliestWindowStart,
   isEnabled,
   MINIMUM_WINDOW_DAYS,
+  SHIFT_PAYMENT_DESCRIPTIONS,
   SHIFT_PAYMENT_LABELS,
 } from '@picksel/core';
 import { color, radius } from '@picksel/tokens';
 import { useActionState, useState } from 'react';
 import { InfoHint } from '@/components/InfoHint';
-import { hairline, metaLabel, mono, pillButton, sans } from '@/lib/theme';
+import { bodyText, clientColumn, hairline, metaLabel, mono, pageTitle, pillButton, sans } from '@/lib/theme';
 import { type BookingState, bookAudit } from './actions';
 
 type AuditTypeKey = keyof typeof AUDIT_TYPE_LABELS;
@@ -20,11 +22,13 @@ type PaymentKey = keyof typeof SHIFT_PAYMENT_LABELS;
 /** A selectable tile. Selected is a 2px teal border — the design's only cue. */
 function Tile({
   label,
+  description,
   selected,
   onSelect,
   grow,
 }: {
   label: string;
+  description?: string;
   selected: boolean;
   onSelect: () => void;
   grow?: number;
@@ -49,6 +53,20 @@ function Tile({
       }}
     >
       {label}
+      {description ? (
+        <span
+          style={{
+            display: 'block',
+            marginTop: 3,
+            fontSize: 11.5,
+            fontWeight: 400,
+            lineHeight: 1.4,
+            color: color.muted,
+          }}
+        >
+          {description}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -118,17 +136,24 @@ export function BookingForm({ credits, places }: { credits: number; places: Plac
     <form
       action={action}
       style={{
-        flex: 1,
-        padding: '26px 32px',
+        // Centred, like every other client screen. This form declared a
+        // measure and never centred it, so it rendered hard against the left
+        // edge of a 1440px window — the same bug the design pass fixed on five
+        // other pages (TND-101) and missed here.
+        ...clientColumn,
+        maxWidth: 680,
         display: 'flex',
         flexDirection: 'column',
         gap: 20,
-        maxWidth: 640,
       }}
     >
-      <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: '-0.03em', margin: 0 }}>
-        Book an audit
-      </h1>
+      <div>
+        <h1 style={{ ...pageTitle, marginBottom: 8 }}>Book an audit</h1>
+        <p style={{ ...bodyText, margin: 0, maxWidth: '58ch' }}>
+          One credit. We will not tell your agency it is happening, and you choose a three-day
+          window rather than a date so the shift cannot be staged for us.
+        </p>
+      </div>
 
       <input type="hidden" name="auditType" value={auditType} />
       <input type="hidden" name="shiftPaymentMethod" value={payment} />
@@ -149,6 +174,7 @@ export function BookingForm({ credits, places }: { credits: number; places: Plac
             <Tile
               key={key}
               label={AUDIT_TYPE_LABELS[key]}
+              description={AUDIT_TYPE_DESCRIPTIONS[key]}
               selected={auditType === key}
               onSelect={() => setAuditType(key)}
             />
@@ -176,6 +202,7 @@ export function BookingForm({ credits, places }: { credits: number; places: Plac
             <Tile
               key={key}
               label={SHIFT_PAYMENT_LABELS[key]}
+              description={SHIFT_PAYMENT_DESCRIPTIONS[key]}
               selected={payment === key}
               onSelect={() => setPayment(key)}
             />
