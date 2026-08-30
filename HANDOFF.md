@@ -67,6 +67,24 @@ node scripts/snapshot/invite-flow.mjs out.jpg submit   # the whole invite → on
 That last one exists because the invitation form was broken for a week and
 every layer's tests passed. See PITFALLS.
 
+## What is designed but not built
+
+Six artboards in `design/mockups/` have no implementation, and four field
+screens have the dark theme without their individual designs. Each has a
+ticket written to be executed without this session's context — the design
+file, what already exists, what has to hold, and what is explicitly out of
+scope.
+
+| Ticket | | Why it matters |
+|---|---|---|
+| TND-111 | Rework | The machinery exists and the message does not. A returned write-up waits on somebody who has not been told. **Cheapest of the six, most costly to leave.** |
+| TND-112 | Arrival | One button means both "I am here" and "the audit is running", and the 45-minute no-show clock runs from it. A real bug. |
+| TND-113 | Concern | A charity types into a box and never hears anything again. The PICK side was built; the charity side was not. |
+| TND-114 | Accept | Nothing ever invites an auditor to declare a conflict we do not already know about. Independence is the product. |
+| TND-115 | Field designs | Offers, Prep, Session, Write-up have the theme, not the design. Session is the one to read first. |
+| TND-116 | History | One report says a fundraiser did wrong; four say the agency has a training problem. All the data exists; nothing reads across it. |
+| TND-117 | ClientWelcome | A charity's first screen is an unstyled password box. |
+
 ## What is deliberately not built
 
 Notifications, TND-80's three outcomes, S3.2's auditor picker, PDF export, the
