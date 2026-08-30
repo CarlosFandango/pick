@@ -271,3 +271,22 @@ something structural rather than three stale imports.
 **Caught now by:** nothing, and it does not need to be. Run `pnpm lint:fix`
 first whenever `check` goes red; if the count drops to zero, that was all it
 was.
+
+## `pnpm check` is not the gate; `pnpm verify` is
+**Symptom:** CI went red on a push where lint, typecheck, unit tests, RLS and
+the production build had all been run and were all green.
+
+**Why it hid:** `check` is `lint && typecheck && test` — fast, and the right
+thing to run in a loop. `verify` is `check:secrets && lint && typecheck &&
+test && build && test:rls && test:e2e`, and **Playwright is the only suite
+that opens a page as a person**. Eighteen e2e tests were failing, half of them
+since a merge two commits earlier, and nothing else in the toolchain could see
+it: every one of them was a rule expressed against a layout that had moved.
+
+**Caught now by:** nothing automatic before a push. The rule is simply that
+`check` is for the loop and **`verify` is what you run before pushing** — it
+takes about five minutes, and it is the same set CI runs.
+
+Worth pairing with the note above about `FormData`: both are cases where the
+gap between "every layer passes" and "a person can use it" is exactly one
+suite wide.

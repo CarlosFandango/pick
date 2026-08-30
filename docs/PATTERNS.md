@@ -42,6 +42,9 @@ like before you open it.
 | Test a policy | impersonate `authenticated` in `packages/db/test` | checking as postgres, service_role or anon |
 | Handle a failure | let it throw at the boundary and surface it | retry loops, backoff, circuit breakers |
 | Test domain logic | Vitest in `packages/core/test`, no I/O | a test that needs a database or device |
+| Test what a screen guarantees | the rule — grouping, absence of a control, what the heading answers | a column heading, a chip's words, a placeholder |
+| Reach a form control in e2e | a role plus its accessible name | a placeholder, a `nth()`, a CSS class |
+| Check before pushing | `pnpm verify` — it includes e2e, which `check` does not | `pnpm check` alone |
 | Test app logic that touches a platform | depend on a narrow interface, pass a double | mocking `expo-sqlite`, booting a simulator |
 | Keep logic testable | pure module beside the platform binding | logic inside the file that imports the SDK |
 | Change the schema | a new migration, then `pnpm db:generate` | editing a pushed migration, `db execute`, an unexported Studio change |
