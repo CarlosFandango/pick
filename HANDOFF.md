@@ -1,16 +1,18 @@
 # Where things stand — 30 August 2026
 
 Written for whoever opens this repo next, including a future me with no memory
-of last night. Delete it once the branch is merged.
+of last night. Delete it once someone has read it and the four decisions below
+have an answer.
 
 ## The one thing to know
 
-`design-implementation` is 16 commits of design work, **unmerged and unpushed**.
-It contains the two branches that were already waiting (`worktree-design-pass`
-and `places-not-postcodes`), so it is everything.
+`main` now carries 18 commits of design work done in one overnight session.
+The three branches that were in flight — `worktree-design-pass`,
+`places-not-postcodes` and `design-implementation` — are all merged and
+deleted, and the `design-pass` worktree is gone. There is one branch.
 
 ```bash
-git log --oneline main..design-implementation   # what happened, and why
+git log --oneline 4ff23f5..HEAD   # what happened, and why
 ```
 
 The commit messages are the real record. Each one says what changed, what it
