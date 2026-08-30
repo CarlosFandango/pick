@@ -198,10 +198,25 @@ export const evidenceAttachment = z.object({
  */
 export const travelMode = z.enum(['public_transport', 'own_vehicle', 'either']);
 
+/**
+ * How an auditor gets to a shift, in the auditor's own voice.
+ *
+ * These sit on a form somebody fills in about themselves, so "I drive" is
+ * right there and wrong everywhere else — PICK reading a roster is reading
+ * about a third person, and "45 min · i drive" is what you get from
+ * lower-casing the first person into a sentence.
+ */
 export const TRAVEL_MODE_LABELS: Record<z.infer<typeof travelMode>, string> = {
   public_transport: 'Public transport',
   own_vehicle: 'I drive',
   either: 'Either',
+};
+
+/** The same three, said about somebody else. For PICK's screens. */
+export const TRAVEL_MODE_THIRD_PERSON: Record<z.infer<typeof travelMode>, string> = {
+  public_transport: 'public transport',
+  own_vehicle: 'own vehicle',
+  either: 'either',
 };
 
 export const auditorApplication = z.object({

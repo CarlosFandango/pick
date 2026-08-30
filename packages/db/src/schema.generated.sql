@@ -1042,7 +1042,7 @@ $$;
 ALTER FUNCTION "public"."auditor_code_for"("p_auditor_id" "uuid", "p_organisation_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "email" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "base_place" "text", "max_travel_minutes" integer, "travel_mode" "public"."travel_mode", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer)
+CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id" "uuid", "full_name" "text", "email" "text", "approval_status" "public"."auditor_approval_status", "user_status" "public"."user_status", "approved_at" timestamp with time zone, "base_postcode" "text", "base_place" "text", "max_travel_minutes" integer, "travel_mode" "public"."travel_mode", "av_capable" boolean, "areas" "text"[], "audit_types" "public"."audit_type"[], "audits_completed" integer, "open_conflicts" integer, "right_to_work_checked_on" "date", "dbs_checked_on" "date", "applied_at" timestamp with time zone)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
@@ -1066,7 +1066,10 @@ CREATE OR REPLACE FUNCTION "public"."auditor_roster"() RETURNS TABLE("auditor_id
               from public.auditor_capability k where k.auditor_id = p.user_id), '{}'),
     (select count(*)::integer from public.audit a
       where a.auditor_id = p.user_id and a.status = 'released'),
-    (select count(*)::integer from public.auditor_conflict f where f.auditor_id = p.user_id)
+    (select count(*)::integer from public.auditor_conflict f where f.auditor_id = p.user_id),
+    p.right_to_work_checked_on,
+    p.dbs_checked_on,
+    p.created_at
   from public.auditor_profile p
   join public.user_profile u on u.id = p.user_id
   left join public.place bp on bp.id = p.base_place_id

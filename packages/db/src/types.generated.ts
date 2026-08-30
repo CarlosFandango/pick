@@ -1708,6 +1708,7 @@ export type Database = {
       auditor_roster: {
         Args: never
         Returns: {
+          applied_at: string
           approval_status: Database["public"]["Enums"]["auditor_approval_status"]
           approved_at: string
           areas: string[]
@@ -1717,10 +1718,12 @@ export type Database = {
           av_capable: boolean
           base_place: string
           base_postcode: string
+          dbs_checked_on: string
           email: string
           full_name: string
           max_travel_minutes: number
           open_conflicts: number
+          right_to_work_checked_on: string
           travel_mode: Database["public"]["Enums"]["travel_mode"]
           user_status: Database["public"]["Enums"]["user_status"]
         }[]
