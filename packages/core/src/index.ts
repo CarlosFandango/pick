@@ -5,6 +5,7 @@ export * from './earnings';
 export * from './entities';
 export * from './features';
 export * from './ids';
+export * from './lede';
 export * from './moments';
 export * from './money';
 export * from './offers';

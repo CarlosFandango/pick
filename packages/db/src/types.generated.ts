@@ -631,6 +631,8 @@ export type Database = {
       }
       check_definition: {
         Row: {
+          client_finding: string | null
+          client_rationale: string | null
           code: string
           compliance_category: Database["public"]["Enums"]["compliance_category"]
           created_at: string
@@ -645,6 +647,8 @@ export type Database = {
           weight: number
         }
         Insert: {
+          client_finding?: string | null
+          client_rationale?: string | null
           code: string
           compliance_category: Database["public"]["Enums"]["compliance_category"]
           created_at?: string
@@ -659,6 +663,8 @@ export type Database = {
           weight?: number
         }
         Update: {
+          client_finding?: string | null
+          client_rationale?: string | null
           code?: string
           compliance_category?: Database["public"]["Enums"]["compliance_category"]
           created_at?: string

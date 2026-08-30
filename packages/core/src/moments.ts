@@ -63,3 +63,22 @@ export const CATEGORY_LABELS: Record<ComplianceCategory, string> = {
 export function momentOrder(moment: AuditMoment): number {
   return AUDIT_MOMENTS.indexOf(moment);
 }
+
+/**
+ * What each moment is, said to somebody who was not there.
+ *
+ * `MOMENT_LABELS` is the noun a report prints in its gutter; this is the line
+ * beside it. A fundraising director reads "Getting someone's attention", not
+ * "walk_up", and neither of those is a category — the split between the two
+ * homes of a check is unaffected by this.
+ */
+export const MOMENT_DESCRIPTIONS: Record<AuditMoment, string> = {
+  approach: 'Arriving and setting up',
+  walk_up: "Getting someone's attention",
+  opening: 'Saying who they are and who they work for',
+  pitch: 'Making the case for the charity',
+  ask: 'Asking for a regular gift',
+  tablet: 'Taking personal and payment details',
+  sign_up: 'Confirming what has been agreed',
+  close: 'Ending the conversation',
+};

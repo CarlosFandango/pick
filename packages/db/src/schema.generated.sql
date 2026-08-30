@@ -2531,11 +2531,21 @@ CREATE TABLE IF NOT EXISTS "public"."check_definition" (
     "sort_order" integer DEFAULT 0 NOT NULL,
     "is_active" boolean DEFAULT true NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "client_finding" "text",
+    "client_rationale" "text",
     CONSTRAINT "weight_positive" CHECK (("weight" > 0))
 );
 
 
 ALTER TABLE "public"."check_definition" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."check_definition"."client_finding" IS 'What a charity is told when this check fails, as a statement of fact. Never shown to an auditor.';
+
+
+
+COMMENT ON COLUMN "public"."check_definition"."client_rationale" IS 'Why the failure matters, in terms a fundraising director recognises.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."check_result" (
