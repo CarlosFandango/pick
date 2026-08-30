@@ -261,3 +261,52 @@ export function encounterSequence(
     ];
   });
 }
+
+/**
+ * An auditor's day, in one line.
+ *
+ * The home screen opened with "Today", which is a page title rather than an
+ * answer. An auditor checks this on the way somewhere, one-handed, and the
+ * question is always the same: is anything due from me right now.
+ *
+ * Deliberately narrow. This says what is DUE, not what exists — an offer
+ * expiring in four hours is on the offer board, and a shift next Tuesday is
+ * further down the same screen. Putting everything in the sentence is how it
+ * stops being an answer.
+ */
+export function auditorDayLede(input: {
+  /** "Write up", "Prep" — whatever the next audit is asking for, or null. */
+  dueAction: string | null;
+  upcoming: number;
+  owedMinorUnits: number;
+}): Lede {
+  const { dueAction, upcoming, owedMinorUnits } = input;
+
+  if (dueAction) {
+    return {
+      tone: 'attention',
+      meta: 'Due today',
+      headline: `One ${dueAction.toLowerCase()} due today.`,
+      detail: upcoming > 0 ? `${upcoming} more booked in.` : '',
+    };
+  }
+
+  if (upcoming > 0) {
+    return {
+      tone: 'clear',
+      meta: 'Nothing due',
+      headline: 'Nothing needs doing today.',
+      detail: `${upcoming === 1 ? 'One audit is' : `${upcoming} audits are`} booked in.`,
+    };
+  }
+
+  return {
+    tone: 'waiting',
+    meta: 'Nothing booked',
+    headline: 'Nothing booked in.',
+    detail:
+      owedMinorUnits > 0
+        ? 'Anything you accept from Offers shows up here.'
+        : 'Have a look at Offers.',
+  };
+}

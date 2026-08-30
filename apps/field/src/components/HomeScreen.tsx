@@ -1,4 +1,10 @@
-import { type AuditStatus, formatMoney, type PaymentState } from '@picksel/core';
+import {
+  type AuditStatus,
+  auditorDayLede,
+  formatDayLong,
+  formatMoney,
+  type PaymentState,
+} from '@picksel/core';
 import { color, radius, space, touchTarget } from '@picksel/tokens';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { surface, text } from '@/theme';
@@ -48,12 +54,26 @@ export function HomeScreen({
   upcoming,
   payments,
   onOpen,
+  today = new Date(),
 }: {
   next: HomeAudit | null;
   upcoming: readonly HomeAudit[];
   payments: readonly HomePayment[];
   onOpen?: (audit: HomeAudit) => void;
+  /** Injectable so the screen is testable without freezing the clock. */
+  today?: Date;
 }) {
+  const owed = payments
+    .filter((payment) => payment.state !== 'paid')
+    .reduce((sum, payment) => sum + payment.amountMinorUnits, 0);
+
+  const day = auditorDayLede({
+    dueAction: next?.action ?? null,
+    upcoming: upcoming.length,
+    owedMinorUnits: owed,
+  });
+  const todayLabel = formatDayLong(today);
+
   return (
     <View style={{ flex: 1, backgroundColor: surface.ground }}>
       <ScrollView
@@ -64,12 +84,23 @@ export function HomeScreen({
           paddingBottom: 40,
         }}
       >
-        <Text
-          accessibilityRole="header"
-          style={{ ...text('display'), fontSize: 24, color: surface.title }}
-        >
-          Today
-        </Text>
+        {/*
+          The answer first. "Today" is a page title, not an answer — and an
+          auditor checks this one-handed on the way somewhere, asking the same
+          question every time: is anything due from me right now.
+        */}
+        <View style={{ gap: 6 }}>
+          <Text style={{ ...text('caption'), color: surface.muted }}>{todayLabel}</Text>
+          <Text
+            accessibilityRole="header"
+            style={{ ...text('display'), fontSize: 24, color: surface.title }}
+          >
+            {day.headline}
+          </Text>
+          {day.detail ? (
+            <Text style={{ ...text('body'), color: surface.body }}>{day.detail}</Text>
+          ) : null}
+        </View>
 
         {/* 1 — the largest thing on the screen, because it is why the app was opened. */}
         {next ? (
@@ -116,11 +147,7 @@ export function HomeScreen({
               </Pressable>
             ) : null}
           </View>
-        ) : (
-          <Text style={{ ...text('body'), color: surface.muted }}>
-            Nothing booked in. Anything you accept from Offers shows up here.
-          </Text>
-        )}
+        ) : null}
 
         {/* 2 — enough per row to plan a week around. */}
         {upcoming.length > 0 ? (
