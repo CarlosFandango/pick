@@ -32,3 +32,19 @@ drop) and delete this section.
 Fonts (Archivo + IBM Plex Mono, OFL) are also not committed: ~1.8 MB of binaries
 for a brand that is mid-rebrand. Mockups fall back to system faces; metrics
 differ slightly, structure — which is what we build from — does not.
+
+## The flow map
+
+`design/flow-map.html` — open it in a browser. Eighteen steps: seven for a
+charity, eleven for an auditor. Each carries what the person is thinking at
+that point, what they can do, how to reproduce it locally, and what still
+needs a decision.
+
+Written to be walked through with Jaz, and usable as a test script — which is
+why it is here rather than only as a hosted page. The hosted version stopped
+resolving; this one is in the repo.
+
+PICK's own day is not in it. Eight admin screens exist (`mockups/OpsHome`,
+`Assignment`, `Review`, `Vetting`, `Triage`, `Payouts`, `Risks`, `Clients`)
+but they are a dispatch loop rather than a journey, so they were never mapped
+the same way.

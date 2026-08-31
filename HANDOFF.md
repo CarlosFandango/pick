@@ -40,6 +40,7 @@ Ranked by what it costs to change your mind.
 |---|---|
 | Why each screen looks like this | the commit messages, then `design/mockups/` |
 | The designs themselves | `design/mockups/*.dc.html` — open in a browser |
+| What it is like to be a charity / an auditor | `design/flow-map.html` — 18 steps, written to walk through with Jaz |
 | What exists and what does not | `docs/FUNCTIONALITY.md`, including a *Deferred* table with reasons |
 | How we do X | `docs/PATTERNS.md` |
 | Why something is behaving impossibly | `docs/PITFALLS.md` |

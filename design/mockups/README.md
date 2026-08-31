@@ -58,6 +58,14 @@ a headline contradicting its own list.
 ## Editing these
 
 They came out of Claude Design via the `/design` skill. To change one, edit the
-file here and re-seed — the skill's helper takes these as input. The hosted
-canvas is at https://claude.ai/code/artifact/ac614918-4288-463d-93f4-2803244b6e6b
-and can be read back with `seed-canvas.mjs --extract` if these ever drift.
+file here and re-seed — the skill's helper takes these as input.
+
+**These files are the source of truth, not a copy of one.** They were seeded
+into a hosted canvas as well, and that canvas has since stopped resolving —
+along with two other artifacts from the same session, so it looks like access
+went rather than anyone deleting them. Which is the argument for this
+directory existing: a design that lives only behind a URL somebody else
+controls is a design you can lose.
+
+If a canvas is ever seeded from these again, treat it as a rendering. Edit
+here.
