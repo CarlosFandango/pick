@@ -44,8 +44,9 @@ Ranked by what it costs to change your mind.
 | How we do X | `docs/PATTERNS.md` |
 | Why something is behaving impossibly | `docs/PITFALLS.md` |
 | Why a decision was taken | `docs/DECISIONS.md` |
-| The overnight decision log | https://claude.ai/code/artifact/016f40e1-bee3-4664-bd5a-ffad80110581 |
-| Tickets raised from it | TND-106 (the work), 107 (notifications), 108 (coverage gap), 109 (copy review), 110 (`packages/ui`) |
+| The overnight decision log | **TND-106** in Linear. There was a rendered version as a Claude artifact; it has since gone, and everything in it is in TND-106 and the commit messages |
+| Tickets raised from it | TND-106 (the work), 107 (notifications), 108 (coverage gap), 109 (the 29 sentences), 110 (`packages/ui`), 111–117 (the unbuilt screens) |
+| What we need from Jaz | **TND-118 "Jaz — start here"** — five tickets, ordered, everything else explicitly ignorable |
 
 ## Running it
 
